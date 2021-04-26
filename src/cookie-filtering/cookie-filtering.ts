@@ -15,6 +15,10 @@ import OnHeadersReceivedDetailsType = WebRequest.OnHeadersReceivedDetailsType;
 import OnCompletedDetailsType = WebRequest.OnCompletedDetailsType;
 import OnErrorOccurredDetailsType = WebRequest.OnErrorOccurredDetailsType;
 
+/**
+ * Filtering cookie rules have higher priority than stealth cookie rules,
+ * so we keep them separated
+ */
 export interface CookieRules {
     stealth?: NetworkRule[];
     filtering?: NetworkRule[];
