@@ -15,6 +15,11 @@ import OnHeadersReceivedDetailsType = WebRequest.OnHeadersReceivedDetailsType;
 import OnCompletedDetailsType = WebRequest.OnCompletedDetailsType;
 import OnErrorOccurredDetailsType = WebRequest.OnErrorOccurredDetailsType;
 
+export interface CookieRules {
+    stealth?: NetworkRule[];
+    filtering?: NetworkRule[];
+}
+
 /**
  * Cookie filtering
  *
@@ -50,7 +55,7 @@ export class CookieFiltering {
     private browserCookieApi: BrowserCookieApi = new BrowserCookieApi();
 
     private requestContextStorage = new Map<string, {
-        rules: NetworkRule[];
+        rules: CookieRules;
         cookies: ParsedCookie[];
         url: string;
         tabId: number;
@@ -70,7 +75,7 @@ export class CookieFiltering {
      * @param details
      * @param rules
      */
-    public onBeforeRequest(details: OnBeforeRequestDetailsType, rules: NetworkRule[]): void {
+    public onBeforeRequest(details: OnBeforeRequestDetailsType, rules: CookieRules): void {
         this.requestContextStorage.set(details.requestId,
             {
                 rules,
@@ -151,11 +156,11 @@ export class CookieFiltering {
      */
     public getBlockingRules(requestId: string): NetworkRule[] {
         const context = this.requestContextStorage.get(requestId);
-        if (!context) {
+        if (!context || !context.rules.filtering) {
             return [];
         }
 
-        return CookieRulesFinder.getBlockingRules(context.url, context.rules);
+        return CookieRulesFinder.getBlockingRules(context.url, context.rules.filtering);
     }
 
     /**
@@ -177,22 +182,18 @@ export class CookieFiltering {
     }
 
     /**
-     * Applies rules to cookie
-     *
+     * Applies blocking cookie rules
      * @param cookie
      * @param cookieRules
      * @param tabId
+     * @private
      */
-    /* istanbul ignore next */
-    private async applyRulesToCookie(
+    private async applyBlockingRulesToCookie(
         cookie: ParsedCookie,
         cookieRules: NetworkRule[],
         tabId: number,
-    ): Promise<void> {
-        const cookieName = cookie.name;
-        const isThirdPartyCookie = cookie.thirdParty;
-
-        const bRule = CookieRulesFinder.lookupNotModifyingRule(cookieName, cookieRules, isThirdPartyCookie);
+    ): Promise<boolean> {
+        const bRule = CookieRulesFinder.lookupNotModifyingRule(cookie.name, cookieRules, cookie.thirdParty);
         if (bRule) {
             if (await this.browserCookieApi.removeCookie(cookie.name, cookie.url)) {
                 this.filteringLog.addCookieEvent(
@@ -203,14 +204,28 @@ export class CookieFiltering {
                     RequestType.Document,
                     bRule,
                     false,
-                    isThirdPartyCookie,
+                    cookie.thirdParty,
                 );
             }
 
-            return;
+            return true;
         }
+        return false;
+    }
 
-        const mRules = CookieRulesFinder.lookupModifyingRules(cookieName, cookieRules, isThirdPartyCookie);
+    /**
+     * Applies modifying cookie rules
+     * @param cookie
+     * @param cookieRules
+     * @param tabId
+     * @private
+     */
+    private async applyModifyingRulesToCookie(
+        cookie: ParsedCookie,
+        cookieRules: NetworkRule[],
+        tabId: number,
+    ): Promise<boolean> {
+        const mRules = CookieRulesFinder.lookupModifyingRules(cookie.name, cookieRules, cookie.thirdParty);
         if (mRules.length > 0) {
             const appliedRules = CookieFiltering.applyRuleToBrowserCookie(cookie, mRules);
             if (appliedRules.length > 0) {
@@ -224,12 +239,48 @@ export class CookieFiltering {
                             RequestType.Document,
                             r,
                             true,
-                            isThirdPartyCookie,
+                            cookie.thirdParty,
                         );
                     });
                 }
             }
+            return true;
         }
+        return false;
+    }
+
+    /**
+     * Applies rules to cookie
+     *
+     * @param cookie
+     * @param cookieRules
+     * @param tabId
+     */
+    /* istanbul ignore next */
+    private async applyRulesToCookie(
+        cookie: ParsedCookie,
+        cookieRules: CookieRules,
+        tabId: number,
+    ): Promise<void> {
+        const filteringRules = cookieRules.filtering || [];
+        const stealthRules = cookieRules.stealth || [];
+        // apply filtering cookie rules
+        const foundBlockingFiltering = await this.applyBlockingRulesToCookie(cookie, filteringRules, tabId);
+        if (foundBlockingFiltering) {
+            return;
+        }
+        const foundModifyingFiltering = await this.applyModifyingRulesToCookie(cookie, filteringRules, tabId);
+        if (foundModifyingFiltering) {
+            return;
+        }
+
+        // apply stealth cookie rules
+        const foundBlockingStealth = await this.applyBlockingRulesToCookie(cookie, stealthRules, tabId);
+        if (foundBlockingStealth) {
+            return;
+        }
+
+        await this.applyModifyingRulesToCookie(cookie, stealthRules, tabId);
     }
 
     /**

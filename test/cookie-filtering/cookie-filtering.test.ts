@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { WebRequest } from 'webextension-polyfill-ts';
-import { CookieFiltering } from '../../src/cookie-filtering/cookie-filtering';
+import { CookieFiltering, CookieRules } from '../../src/cookie-filtering/cookie-filtering';
 import { MockFilteringLog } from '../mock-filtering-log';
 import { NetworkRule } from '../../src';
 import BrowserCookieApi from '../../src/cookie-filtering/browser-cookie/browser-cookie-api';
@@ -43,7 +43,7 @@ describe('Cookie filtering', () => {
         };
     });
 
-    const runCase = async (rules: NetworkRule[], requestHeaders: HttpHeaders, responseHeaders?: HttpHeaders): Promise<void> => {
+    const runCase = async (rules: CookieRules, requestHeaders: HttpHeaders, responseHeaders?: HttpHeaders): Promise<void> => {
         cookieFiltering.onBeforeRequest(details as OnBeforeRequestDetailsType, rules);
 
         cookieFiltering.onBeforeSendHeaders({
@@ -77,7 +77,7 @@ describe('Cookie filtering', () => {
 
         const requestHeaders = createTestHeaders([]);
 
-        await runCase(rules, requestHeaders);
+        await runCase({ filtering: rules }, requestHeaders);
 
         expect(mockFilteringLog.addCookieEvent).not.toHaveBeenCalled();
     });
@@ -93,9 +93,44 @@ describe('Cookie filtering', () => {
             value: 'c_user=test_value',
         }]);
 
-        await runCase(rules, requestHeaders);
+        await runCase({ filtering: rules }, requestHeaders);
 
         expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(0, 'c_user', 'test_value', 'example.org', 1, cookieRule, false, false);
+    });
+
+    it('finds modifying rules in the stealth section', async () => {
+        const cookieRule = new NetworkRule('$cookie=c_user;maxAge=15', 1);
+        const stealthModifyingRule = new NetworkRule('$cookie=/.+/;maxAge=172800', 1);
+        const rules = [
+            cookieRule,
+        ];
+
+        const stealthRules = [stealthModifyingRule];
+
+        const requestHeaders = createTestHeaders([{
+            name: 'Cookie',
+            value: 'test=test_value',
+        }]);
+
+        await runCase({ filtering: rules, stealth: stealthRules }, requestHeaders);
+
+        expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(0, 'test', 'test_value', 'example.org', 1, stealthModifyingRule, true, false);
+    });
+
+    it('finds blocking rules in the stealth section', async () => {
+        const cookieRule = new NetworkRule('$cookie=c_user', 1);
+        const stealthModifyingRule = new NetworkRule('$cookie=/.+/', 1);
+        const rules = [cookieRule];
+        const stealthRules = [stealthModifyingRule];
+
+        const requestHeaders = createTestHeaders([{
+            name: 'Cookie',
+            value: 'test=test_value',
+        }]);
+
+        await runCase({ filtering: rules, stealth: stealthRules }, requestHeaders);
+
+        expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(0, 'test', 'test_value', 'example.org', 1, stealthModifyingRule, false, false);
     });
 
     it('checks modifying rule - max age', async () => {
@@ -109,7 +144,7 @@ describe('Cookie filtering', () => {
             value: 'c_user=test_value',
         }]);
 
-        await runCase(rules, requestHeaders);
+        await runCase({ filtering: rules }, requestHeaders);
 
         expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(0, 'c_user', 'test_value', 'example.org', 1, cookieRule, true, false);
     });
@@ -125,7 +160,7 @@ describe('Cookie filtering', () => {
             value: 'c_user=test_value',
         }]);
 
-        await runCase(rules, requestHeaders);
+        await runCase({ filtering: rules }, requestHeaders);
 
         expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(0, 'c_user', 'test_value', 'example.org', 1, cookieRule, true, false);
     });
@@ -147,7 +182,7 @@ describe('Cookie filtering', () => {
         const setCookieHeader = { name: 'set-cookie', value: 'third_party_user=test;' };
         const responseHeaders = [setCookieHeader];
 
-        await runCase(rules, requestHeaders, responseHeaders);
+        await runCase({ filtering: rules }, requestHeaders, responseHeaders);
 
         expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(0, 'third_party_user', 'test', 'example.org', 1, thirdPartyCookieRule, false, true);
     });
@@ -159,7 +194,7 @@ describe('Cookie filtering', () => {
             new NetworkRule('||example.org^$cookie=m_user;sameSite=lax', 1),
         ];
 
-        cookieFiltering.onBeforeRequest(details as OnBeforeRequestDetailsType, rules);
+        cookieFiltering.onBeforeRequest(details as OnBeforeRequestDetailsType, { filtering: rules });
         let result = cookieFiltering.getBlockingRules(details.requestId);
         expect(result).toHaveLength(2);
 
@@ -170,7 +205,7 @@ describe('Cookie filtering', () => {
     it('checks invalids', async () => {
         const rules: NetworkRule[] = [];
 
-        cookieFiltering.onBeforeRequest(details as OnBeforeRequestDetailsType, rules);
+        cookieFiltering.onBeforeRequest(details as OnBeforeRequestDetailsType, { filtering: rules });
 
         cookieFiltering.onBeforeSendHeaders({
             requestHeaders: undefined,

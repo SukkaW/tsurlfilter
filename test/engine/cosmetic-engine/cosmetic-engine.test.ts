@@ -8,7 +8,7 @@ const createTestRuleStorage = (listId: number, rules: string[]): RuleStorage => 
     return new RuleStorage([list]);
 };
 
-const createRequest = (url: string) => new Request(url, null, RequestType.Document);
+const createRequest = (url: string): Request => new Request(url, null, RequestType.Document);
 
 describe('Test cosmetic engine', () => {
     const specificRuleContent = 'banner_specific';
