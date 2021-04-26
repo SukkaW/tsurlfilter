@@ -156,11 +156,19 @@ export class CookieFiltering {
      */
     public getBlockingRules(requestId: string): NetworkRule[] {
         const context = this.requestContextStorage.get(requestId);
-        if (!context || !context.rules.filtering) {
+        if (!context) {
             return [];
         }
 
-        return CookieRulesFinder.getBlockingRules(context.url, context.rules.filtering);
+        let rules = [] as NetworkRule[];
+        if (context.rules.filtering) {
+            rules = [...rules, ...context.rules.filtering];
+        }
+        if (context.rules.stealth) {
+            rules = [...rules, ...context.rules.stealth];
+        }
+
+        return CookieRulesFinder.getBlockingRules(context.url, rules);
     }
 
     /**
