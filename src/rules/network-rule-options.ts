@@ -27,6 +27,7 @@ export const NETWORK_RULE_OPTIONS = {
     FONT: 'font',
     WEBSOCKET: 'websocket',
     OTHER: 'other',
+    OBJECT_SUBREQUEST: 'object-subrequest',
     PING: 'ping',
     WEBRTC: 'webrtc',
     BADFILTER: 'badfilter',

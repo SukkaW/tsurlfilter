@@ -1154,9 +1154,11 @@ export class NetworkRule implements rule.IRule {
                 this.setRequestType(RequestType.Websocket, false);
                 break;
             case OPTIONS.OTHER:
+            case OPTIONS.OBJECT_SUBREQUEST:
                 this.setRequestType(RequestType.Other, true);
                 break;
             case NOT_MARK + OPTIONS.OTHER:
+            case NOT_MARK + OPTIONS.OBJECT_SUBREQUEST:
                 this.setRequestType(RequestType.Other, false);
                 break;
             case OPTIONS.PING:
