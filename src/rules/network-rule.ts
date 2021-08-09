@@ -235,6 +235,11 @@ export class NetworkRule implements rule.IRule {
      */
     public static readonly OPTIONS = NETWORK_RULE_OPTIONS;
 
+    /**
+     * Max url length for matching
+     */
+    private static readonly MAX_URL_MATCH_LENGTH = 1000;
+
     getText(): string {
         return this.ruleText;
     }
@@ -454,7 +459,12 @@ export class NetworkRule implements rule.IRule {
      * @param request - request to check.
      */
     private matchShortcut(request: Request): boolean {
-        return request.urlLowercase.includes(this.shortcut);
+        let { urlLowercase } = request;
+        if (urlLowercase.length > NetworkRule.MAX_URL_MATCH_LENGTH) {
+            urlLowercase = urlLowercase.substr(0, NetworkRule.MAX_URL_MATCH_LENGTH);
+        }
+
+        return urlLowercase.indexOf(this.shortcut) >= 0;
     }
 
     /**
