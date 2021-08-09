@@ -247,9 +247,9 @@ export function stringArraysHaveIntersection(left: string[] | null, right: strin
 export function countElementsInEnum(value: number, enumerationType: any): number {
     let count = 0;
 
-    // eslint-disable-next-line guard-for-in
-    for (const item in enumerationType) {
-        const mask = enumerationType[item];
+    const keys = Object.keys(enumerationType);
+    for (let i = 0; i < keys.length; i += 1) {
+        const mask = Number.parseInt(keys[i], 10);
         if ((value & mask) === mask) {
             count += 1;
         }
