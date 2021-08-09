@@ -137,7 +137,7 @@ export class SimpleRegex {
             return '';
         }
 
-        const specialCharacter = '...';
+        const specialCharacter = '$$$';
 
         // Prepend specialCharacter for the following replace calls to work properly
         reText = specialCharacter + reText;
@@ -150,10 +150,13 @@ export class SimpleRegex {
         // Strip some special characters
         reText = reText.replace(/[^\\]\\[a-zA-Z]/, specialCharacter);
 
+        // Replace \. with .
+        reText = reText.replace(/\\\./, '.');
+
         // Split by special characters
         // `.` is one of the special characters so our `specialCharacter`
         // will be removed from the resulting array
-        const parts = reText.split(/[\\^$*+?.()|[\]{}]/);
+        const parts = reText.split(/[\\^$*+?()|[\]{}]/);
         let longest = '';
         for (let i = 0; i < parts.length; i += 1) {
             const part = parts[i];

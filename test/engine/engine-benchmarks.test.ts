@@ -1,6 +1,7 @@
 import fs from 'fs';
 import zlib from 'zlib';
 import console from 'console';
+import { performance } from 'perf_hooks';
 import { NetworkEngine } from '../../src/engine/network-engine';
 import { Engine, Request, RequestType } from '../../src';
 import { StringRuleList } from '../../src/filterlist/rule-list';
@@ -114,13 +115,13 @@ function runEngine(requests: Request[], matchFunc: (r: Request) => boolean): num
 
         const req = requests[i];
 
-        const startMatch = Date.now();
+        const startMatch = performance.now();
 
         if (matchFunc(req)) {
             totalMatches += 1;
         }
 
-        const elapsedMatch = Date.now() - startMatch;
+        const elapsedMatch = performance.now() - startMatch;
         totalElapsed += elapsedMatch;
 
         if (elapsedMatch > maxElapsedMatch) {
@@ -131,11 +132,14 @@ function runEngine(requests: Request[], matchFunc: (r: Request) => boolean): num
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    const round = (val: number) => Math.round(val * 1000 * 1000) / 1000;
+
     console.log(`Total matches: ${totalMatches}`);
-    console.log(`Total elapsed: ${totalElapsed}`);
-    console.log(`Average per request: ${totalElapsed / requests.length}`);
-    console.log(`Max per request: ${maxElapsedMatch}`);
-    console.log(`Min per request: ${minElapsedMatch}`);
+    console.log(`Total elapsed: ${round(totalElapsed)} μs`);
+    console.log(`Average per request: ${round(totalElapsed / requests.length)} μs`);
+    console.log(`Max per request: ${round(maxElapsedMatch)} μs`);
+    console.log(`Min per request: ${round(minElapsedMatch)} μs`);
 
     return totalMatches;
 }

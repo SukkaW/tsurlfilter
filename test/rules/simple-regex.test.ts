@@ -50,7 +50,7 @@ describe('SimpleRegex.extractShortcut', () => {
         expect(shortcut).toEqual('/example');
 
         shortcut = SimpleRegex.extractShortcut('/^http:\\/\\/[a-z]+\\.example/');
-        expect(shortcut).toEqual('example');
+        expect(shortcut).toEqual('.example');
     });
 
     it('works if it discards incorrect patterns', () => {

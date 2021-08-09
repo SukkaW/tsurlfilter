@@ -238,7 +238,7 @@ export class NetworkRule implements rule.IRule {
     /**
      * Max url length for matching
      */
-    private static readonly MAX_URL_MATCH_LENGTH = 1000;
+    public static readonly MAX_URL_MATCH_LENGTH = 1000;
 
     getText(): string {
         return this.ruleText;
