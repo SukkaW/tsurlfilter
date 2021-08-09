@@ -37,6 +37,14 @@ export class ShortcutsLookupTable {
      */
     private ruleStorage: RuleStorage;
 
+    /**
+     * Creates a new instance of the ShortcutsLookupTable.
+     *
+     * @param storage rules storage. We store "rule indexes" in the lookup table which
+     * can be used to retrieve the full rules from the storage.
+     * @param shortcutsLength length of the shortcuts that will be used to build the
+     * lookup table.
+     */
     constructor(storage: RuleStorage, shortcutsLength: number) {
         this.shortcutsLength = shortcutsLength;
         this.ruleStorage = storage;

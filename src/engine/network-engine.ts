@@ -44,8 +44,8 @@ export class NetworkEngine {
     /**
      * Builds an instance of the network engine
      *
-     * @param storage
-     * @param skipStorageScan create an instance without storage scanning
+     * @param storage an object for a rules storage.
+     * @param skipStorageScan create an instance without storage scanning.
      */
     constructor(storage: RuleStorage, skipStorageScan = false) {
         this.ruleStorage = storage;
