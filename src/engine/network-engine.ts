@@ -157,12 +157,12 @@ export class NetworkEngine {
             const hash = fastHashBetween(request.urlLowercase, i, i + NetworkEngine.SHORTCUT_LENGTH);
             const rulesIndexes = this.shortcutsLookupTable.get(hash);
             if (rulesIndexes) {
-                rulesIndexes.forEach((ruleIdx) => {
-                    const rule = this.ruleStorage.retrieveNetworkRule(ruleIdx);
+                for (let j = 0; j < rulesIndexes.length; j += 1) {
+                    const rule = this.ruleStorage.retrieveNetworkRule(rulesIndexes[j]);
                     if (rule && rule.match(request)) {
                         result.push(rule);
                     }
-                });
+                }
             }
         }
 
