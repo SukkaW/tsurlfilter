@@ -853,24 +853,7 @@ export class NetworkRule implements rule.IRule {
             return true;
         }
 
-        // More specific rules (i.e. with more modifiers) have higher priority
-        let count = utils.countElementsInEnum(this.enabledOptions, NetworkRuleOption)
-            + utils.countElementsInEnum(this.disabledOptions, NetworkRuleOption)
-            + utils.countElementsInEnum(this.permittedRequestTypes, RequestType)
-            + utils.countElementsInEnum(this.restrictedRequestTypes, RequestType);
-        if (this.hasPermittedDomains() || this.hasRestrictedDomains()) {
-            count += 1;
-        }
-
-        let rCount = utils.countElementsInEnum(r.enabledOptions, NetworkRuleOption)
-            + utils.countElementsInEnum(r.disabledOptions, NetworkRuleOption)
-            + utils.countElementsInEnum(r.permittedRequestTypes, RequestType)
-            + utils.countElementsInEnum(r.restrictedRequestTypes, RequestType);
-        if (r.hasPermittedDomains() || r.hasRestrictedDomains()) {
-            rCount += 1;
-        }
-
-        return count > rCount;
+        return this.getText().length > r.getText().length;
     }
 
     /**
