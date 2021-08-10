@@ -461,7 +461,7 @@ export class NetworkRule implements rule.IRule {
     private matchShortcut(request: Request): boolean {
         let { urlLowercase } = request;
         if (urlLowercase.length > NetworkRule.MAX_URL_MATCH_LENGTH) {
-            urlLowercase = urlLowercase.substr(0, NetworkRule.MAX_URL_MATCH_LENGTH);
+            urlLowercase = urlLowercase.substring(0, NetworkRule.MAX_URL_MATCH_LENGTH);
         }
 
         return urlLowercase.indexOf(this.shortcut) >= 0;
