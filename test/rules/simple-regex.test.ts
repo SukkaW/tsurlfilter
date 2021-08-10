@@ -40,6 +40,9 @@ describe('SimpleRegex.extractShortcut', () => {
 
         shortcut = SimpleRegex.extractShortcut('|https://*examp');
         expect(shortcut).toEqual('https://');
+
+        shortcut = SimpleRegex.extractShortcut('|https://*example.org/path');
+        expect(shortcut).toEqual('example.org/path');
     });
 
     it('works if it is able to extract regex shortcuts', () => {
