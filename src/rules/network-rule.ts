@@ -202,6 +202,12 @@ export class NetworkRule implements rule.IRule {
     private appModifier: IAppModifier | null = null;
 
     /**
+     * Priority weight
+     * Used in rules priority comparision
+     */
+    private readonly priorityWeight: number = 0;
+
+    /**
      * Separates the rule pattern from the list of modifiers.
      *
      * ```
@@ -744,6 +750,7 @@ export class NetworkRule implements rule.IRule {
         }
 
         this.shortcut = SimpleRegex.extractShortcut(this.pattern);
+        this.priorityWeight = this.calculatePriority();
     }
 
     /**
@@ -853,7 +860,7 @@ export class NetworkRule implements rule.IRule {
             return true;
         }
 
-        return this.getText().length > r.getText().length;
+        return this.priorityWeight > r.priorityWeight;
     }
 
     /**
@@ -1334,6 +1341,22 @@ export class NetworkRule implements rule.IRule {
             !== NetworkRuleOption.RemoveHeaderCompatibleOptions) {
             throw new SyntaxError('$removeheader rules are not compatible with some other modifiers');
         }
+    }
+
+    /**
+     * Calculates common rule priority.
+     * More specific rules (i.e. with more modifiers) have higher priority.
+     */
+    private calculatePriority(): number {
+        let count = utils.countElementsInEnum(this.enabledOptions, NetworkRuleOption)
+            + utils.countElementsInEnum(this.disabledOptions, NetworkRuleOption)
+            + utils.countElementsInEnum(this.permittedRequestTypes, RequestType)
+            + utils.countElementsInEnum(this.restrictedRequestTypes, RequestType);
+        if (this.hasPermittedDomains() || this.hasRestrictedDomains()) {
+            count += 1;
+        }
+
+        return count;
     }
 
     /**

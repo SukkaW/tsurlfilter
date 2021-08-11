@@ -889,6 +889,7 @@ describe('NetworkRule.isHigherPriority', () => {
         compareRulesPriority('||example.org$script,stylesheet', '||example.org$script', true);
 
         // domain option count
+        compareRulesPriority('||example.org$domain=~example.org', '||example.org$script,stylesheet', false);
         compareRulesPriority('||example.org$domain=~example.org', '||example.org$script,stylesheet,media', false);
         compareRulesPriority('||example.org$domain=~example.org',
             '||example.org$script,stylesheet,domain=~example.org', false);
