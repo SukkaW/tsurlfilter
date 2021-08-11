@@ -60,7 +60,13 @@ describe('SimpleRegex.extractShortcut', () => {
         let shortcut = SimpleRegex.extractShortcut('//');
         expect(shortcut).toEqual('');
 
-        shortcut = SimpleRegex.extractShortcut('/^http:\\/\\/(?!test.)example.org/');
+        shortcut = SimpleRegex.extractShortcut('/^http:\\/\\/[a-z]?example.org/');
+        expect(shortcut).toEqual('example.org');
+
+        shortcut = SimpleRegex.extractShortcut('/^http:\\/\\/(!?test.)example.org/');
+        expect(shortcut).toEqual('');
+
+        shortcut = SimpleRegex.extractShortcut('/^http:\\/\\/(!?test.)example.org/');
         expect(shortcut).toEqual('');
     });
 });
