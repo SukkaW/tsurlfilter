@@ -151,7 +151,7 @@ export class SimpleRegex {
         reText = reText.replace(/[^\\]\\[a-zA-Z]/, specialCharacter);
 
         // Replace \. with .
-        reText = reText.replace(/\\\./, '.');
+        reText = reText.replace(/\\\./g, '.');
 
         // Split by special characters
         // `.` is one of the special characters so our `specialCharacter`
