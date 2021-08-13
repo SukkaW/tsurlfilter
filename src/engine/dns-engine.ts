@@ -88,12 +88,12 @@ export class DnsEngine {
         const hash = fastHash(hostname);
         const rulesIndexes = this.lookupTable.get(hash);
         if (rulesIndexes) {
-            rulesIndexes.forEach((ruleIdx) => {
-                const rule = this.ruleStorage.retrieveHostRule(ruleIdx);
+            for (let j = 0; j < rulesIndexes.length; j += 1) {
+                const rule = this.ruleStorage.retrieveHostRule(rulesIndexes[j]);
                 if (rule && rule.match(hostname)) {
                     result.hostRules.push(rule);
                 }
-            });
+            }
         }
 
         return result;

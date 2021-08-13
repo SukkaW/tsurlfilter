@@ -101,8 +101,8 @@ export class ShortcutsLookupTable {
         // Max int32
         let minCount = 2147483647;
 
-        shortcuts.forEach((shortcutToCheck) => {
-            const hash = fastHash(shortcutToCheck);
+        for (let i = 0; i < shortcuts.length; i += 1) {
+            const hash = fastHash(shortcuts[i]);
             let count = this.shortcutsHistogram.get(hash);
             if (!count) {
                 count = 0;
@@ -112,7 +112,7 @@ export class ShortcutsLookupTable {
                 minCount = count;
                 shortcutHash = hash;
             }
-        });
+        }
 
         // Increment the histogram
         this.shortcutsHistogram.set(shortcutHash, minCount + 1);

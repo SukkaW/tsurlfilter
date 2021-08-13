@@ -101,11 +101,12 @@ export class NetworkEngine {
         result.push(...this.matchDomainsLookupTable(request));
 
         // Now check other rules
-        this.otherRules.forEach((r) => {
+        for (let i = 0; i < this.otherRules.length; i += 1) {
+            const r = this.otherRules[i];
             if (r.match(request)) {
                 result.push(r);
             }
-        });
+        }
 
         return result;
     }
@@ -156,18 +157,18 @@ export class NetworkEngine {
             domains.push(...request.sourceSubdomains);
         }
 
-        domains.forEach((domain) => {
-            const hash = fastHash(domain);
+        for (let i = 0; i < domains.length; i += 1) {
+            const hash = fastHash(domains[i]);
             const rulesIndexes = this.domainsLookupTable.get(hash);
             if (rulesIndexes) {
-                rulesIndexes.forEach((ruleIdx) => {
-                    const rule = this.ruleStorage.retrieveNetworkRule(ruleIdx);
+                for (let j = 0; j < rulesIndexes.length; j += 1) {
+                    const rule = this.ruleStorage.retrieveNetworkRule(rulesIndexes[j]);
                     if (rule && rule.match(request)) {
                         result.push(rule);
                     }
-                });
+                }
             }
-        });
+        }
 
         return result;
     }
