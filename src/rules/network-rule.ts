@@ -103,14 +103,14 @@ export enum NetworkRuleOption {
 
     /** Whitelist-only modifiers */
     WhitelistOnly = Elemhide
-        | Genericblock
-        | Generichide
-        | Specifichide
-        | Jsinject
-        | Urlblock
-        | Content
-        | Extension
-        | Stealth,
+    | Genericblock
+    | Generichide
+    | Specifichide
+    | Jsinject
+    | Urlblock
+    | Content
+    | Extension
+    | Stealth,
 
     /** Options supported by host-level network rules * */
     OptionHostLevelRulesOnly = Important | Badfilter,
@@ -468,6 +468,10 @@ export class NetworkRule implements rule.IRule {
         let { urlLowercase } = request;
         if (urlLowercase.length > NetworkRule.MAX_URL_MATCH_LENGTH) {
             urlLowercase = urlLowercase.substring(0, NetworkRule.MAX_URL_MATCH_LENGTH);
+        }
+
+        if (!this.shortcut) {
+            return true;
         }
 
         return urlLowercase.indexOf(this.shortcut) >= 0;
@@ -936,7 +940,7 @@ export class NetworkRule implements rule.IRule {
 
         if (this.enabledOptions !== 0) {
             return ((this.enabledOptions
-                    & NetworkRuleOption.OptionHostLevelRulesOnly)
+                & NetworkRuleOption.OptionHostLevelRulesOnly)
                 | (this.enabledOptions
                     ^ NetworkRuleOption.OptionHostLevelRulesOnly)) === NetworkRuleOption.OptionHostLevelRulesOnly;
         }

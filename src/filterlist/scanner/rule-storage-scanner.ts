@@ -89,9 +89,9 @@ export class RuleStorageScanner {
      * @param listId
      * @param ruleIdx
      */
-    private static ruleListIdxToStorageIdx(listId: number, ruleIdx: number): string {
+    private static ruleListIdxToStorageIdx(listId: number, ruleIdx: number): number {
         // eslint-disable-next-line no-mixed-operators
-        return `${listId}-${ruleIdx}`;
+        return listId / 10000 + ruleIdx;
     }
 
     /**
@@ -102,11 +102,10 @@ export class RuleStorageScanner {
      * @param storageIdx
      * @return [listId, ruleIdx]
      */
-    public static storageIdxToRuleListIdx(storageIdx: string): [number, number] {
-        const separatorIndex = storageIdx.indexOf('-');
-        const list = Number(storageIdx.substring(0, separatorIndex));
-        const ruleId = Number(storageIdx.substring(separatorIndex + 1));
+    public static storageIdxToRuleListIdx(storageIdx: number): [number, number] {
+        const listId = Math.round((storageIdx % 1) * 10000);
+        const ruleIdx = Math.trunc(storageIdx);
 
-        return [list, ruleId];
+        return [listId, ruleIdx];
     }
 }

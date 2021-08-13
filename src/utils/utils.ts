@@ -236,6 +236,8 @@ export function stringArraysHaveIntersection(left: string[] | null, right: strin
     return false;
 }
 
+const enumerationTypeCache = new Map<any, string[]>();
+
 /**
  * Count enabled options in specified value of specified enumeration type
  *
@@ -247,7 +249,12 @@ export function stringArraysHaveIntersection(left: string[] | null, right: strin
 export function countElementsInEnum(value: number, enumerationType: any): number {
     let count = 0;
 
-    const keys = Object.keys(enumerationType);
+    let keys = enumerationTypeCache.get(enumerationType);
+    if (!keys) {
+        keys = Object.keys(enumerationType);
+        enumerationTypeCache.set(enumerationType, keys);
+    }
+
     for (let i = 0; i < keys.length; i += 1) {
         const mask = Number.parseInt(keys[i], 10);
         if ((value & mask) === mask) {

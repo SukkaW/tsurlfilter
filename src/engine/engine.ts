@@ -31,6 +31,16 @@ export class Engine {
     private readonly ruleStorage: RuleStorage;
 
     /**
+     * Source results cache
+     */
+    private readonly sourceResultCache: Map<string, NetworkRule[]>;
+
+    /**
+     * Request results cache
+     */
+    private readonly resultCache: Map<string, MatchingResult>;
+
+    /**
      * Creates an instance of an Engine
      * Parses the filtering rules and creates a filtering engine of them
      *
@@ -42,6 +52,8 @@ export class Engine {
         this.ruleStorage = ruleStorage;
         this.networkEngine = new NetworkEngine(ruleStorage, skipStorageScan);
         this.cosmeticEngine = new CosmeticEngine(ruleStorage, skipStorageScan);
+        this.sourceResultCache = new Map<string, NetworkRule[]>();
+        this.resultCache = new Map<string, MatchingResult>();
     }
 
     /**
@@ -91,15 +103,28 @@ export class Engine {
      * @return matching result
      */
     matchRequest(request: Request): MatchingResult {
+        const cacheKey = `${request.url}#${request.sourceHostname}#${request.requestType}`;
+        const res = this.resultCache.get(cacheKey);
+        if (res) {
+            return res;
+        }
+
         const networkRules = this.networkEngine.matchAll(request);
         let sourceRules: NetworkRule[] = [];
 
         if (request.sourceUrl) {
-            const sourceRequest = new Request(request.sourceUrl, '', RequestType.Document);
-            sourceRules = this.networkEngine.matchAll(sourceRequest);
+            let rules = this.sourceResultCache.get(request.sourceUrl);
+            if (!rules) {
+                const sourceRequest = new Request(request.sourceUrl, '', RequestType.Document);
+                rules = this.networkEngine.matchAll(sourceRequest);
+                this.sourceResultCache.set(request.sourceUrl, rules);
+            }
+            sourceRules = rules;
         }
 
-        return new MatchingResult(networkRules, sourceRules);
+        const result = new MatchingResult(networkRules, sourceRules);
+        this.resultCache.set(cacheKey, result);
+        return result;
     }
 
     /**
