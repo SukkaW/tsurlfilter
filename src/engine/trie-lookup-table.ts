@@ -33,8 +33,10 @@ export class TrieLookupTable implements ILookupTable {
     public addRule(rule: NetworkRule, storageIdx: number): boolean {
         const shortcut = rule.getShortcut();
 
-        // TODO: why 4??
-        if (!shortcut || shortcut.length < 4) {
+        if (!shortcut
+            || TrieLookupTable.isAnyURLShortcut(shortcut)
+            // TODO: why 3?
+            || shortcut.length < 3) {
             return false;
         }
 
@@ -57,7 +59,7 @@ export class TrieLookupTable implements ILookupTable {
         for (let j = 0; j < rulesIndexes.length; j += 1) {
             const idx = rulesIndexes[j];
             const rule = this.ruleStorage.retrieveNetworkRule(idx);
-            if (rule && rule.match(request)) {
+            if (rule && rule.match(request, false)) {
                 result.push(rule);
             }
         }
@@ -82,5 +84,29 @@ export class TrieLookupTable implements ILookupTable {
         }
 
         return ruleIndexes;
+    }
+
+    /**
+     * Checks if the rule potentially matches too many URLs.
+     * We'd better use another type of lookup table for this kind of rules.
+     *
+     * @param rule to check
+     * @return check result
+     */
+    private static isAnyURLShortcut(shortcut: string): boolean {
+        // The numbers are basically ("PROTO://".length + 1)
+        if (shortcut.length < 6 && shortcut.indexOf('ws:') === 0) {
+            return true;
+        }
+
+        if (shortcut.length < 7 && shortcut.indexOf('|ws') === 0) {
+            return true;
+        }
+
+        if (shortcut.length < 9 && shortcut.indexOf('http') === 0) {
+            return true;
+        }
+
+        return !!(shortcut.length < 10 && shortcut.indexOf('|http') === 0);
     }
 }
