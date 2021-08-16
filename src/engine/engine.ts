@@ -1,3 +1,6 @@
+import { LRUMap } from 'lru_map';
+// eslint-disable-next-line import/no-named-default
+// import { default as lruMap } from 'lru_map'; // or maybe import * as lru_map? i can never remember which
 import { CosmeticEngine } from './cosmetic-engine/cosmetic-engine';
 import { NetworkEngine } from './network-engine';
 import { Request } from '../request';
@@ -11,10 +14,18 @@ import { IndexedStorageRule } from '../rules/rule';
 import { CosmeticRule } from '../rules/cosmetic-rule';
 import { RequestType } from '../request-type';
 
+// const { LRUMap } = lruMap;
+
 /**
  * Engine represents the filtering engine with all the loaded rules
  */
 export class Engine {
+    /**
+     * Request's cache size
+     * Used for both source rules and others
+     */
+    private static REQUEST_CACHE_SIZE = 100000;
+
     /**
      * Basic filtering rules engine
      */
@@ -31,6 +42,16 @@ export class Engine {
     private readonly ruleStorage: RuleStorage;
 
     /**
+     * Source results cache
+     */
+    private readonly sourceResultCache: LRUMap<string, NetworkRule[]>;
+
+    /**
+     * Request results cache
+     */
+    private readonly resultCache: LRUMap<string, MatchingResult>;
+
+    /**
      * Creates an instance of an Engine
      * Parses the filtering rules and creates a filtering engine of them
      *
@@ -42,6 +63,8 @@ export class Engine {
         this.ruleStorage = ruleStorage;
         this.networkEngine = new NetworkEngine(ruleStorage, skipStorageScan);
         this.cosmeticEngine = new CosmeticEngine(ruleStorage, skipStorageScan);
+        this.sourceResultCache = new LRUMap<string, NetworkRule[]>(Engine.REQUEST_CACHE_SIZE);
+        this.resultCache = new LRUMap<string, MatchingResult>(Engine.REQUEST_CACHE_SIZE);
     }
 
     /**
@@ -91,15 +114,28 @@ export class Engine {
      * @return matching result
      */
     matchRequest(request: Request): MatchingResult {
+        const cacheKey = `${request.url}#${request.sourceHostname}#${request.requestType}`;
+        const res = this.resultCache.get(cacheKey);
+        if (res) {
+            return res;
+        }
+
         const networkRules = this.networkEngine.matchAll(request);
         let sourceRules: NetworkRule[] = [];
 
         if (request.sourceUrl) {
-            const sourceRequest = new Request(request.sourceUrl, '', RequestType.Document);
-            sourceRules = this.networkEngine.matchAll(sourceRequest);
+            let rules = this.sourceResultCache.get(request.sourceUrl);
+            if (!rules) {
+                const sourceRequest = new Request(request.sourceUrl, '', RequestType.Document);
+                rules = this.networkEngine.matchAll(sourceRequest);
+                this.sourceResultCache.set(request.sourceUrl, rules);
+            }
+            sourceRules = rules;
         }
 
-        return new MatchingResult(networkRules, sourceRules);
+        const result = new MatchingResult(networkRules, sourceRules);
+        this.resultCache.set(cacheKey, result);
+        return result;
     }
 
     /**

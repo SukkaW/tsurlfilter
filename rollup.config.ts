@@ -60,7 +60,11 @@ const esmConfig = {
     plugins: [
         json(),
         typescript(),
-        commonjs(),
+        commonjs({
+            namedExports: {
+                lru_map: ['LRUMap'],
+            },
+        }),
         globals(),
         resolve({ preferBuiltins: false }),
         sourceMaps(),
@@ -89,7 +93,11 @@ const browserConfig = {
     plugins: [
         json(),
         typescript(),
-        commonjs(),
+        commonjs({
+            namedExports: {
+                lru_map: ['LRUMap'],
+            },
+        }),
         globals(),
         resolve({ preferBuiltins: false }),
         sourceMaps(),
@@ -123,7 +131,11 @@ export default [
             typescript(),
 
             // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-            commonjs(),
+            commonjs({
+                namedExports: {
+                    lru_map: ['LRUMap'],
+                },
+            }),
             globals(),
 
             // Allow node_modules resolution, so you can use 'external' to control
