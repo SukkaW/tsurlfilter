@@ -4,10 +4,11 @@ import { IndexedStorageRule } from '../../rules/rule';
 /**
  * RuleStorageScanner scans multiple RuleScanner instances
  * The rule index is built from the rule index in the list + the list ID
- * First 4 bytes is the rule index in the list
- * Second 4 bytes is the list ID
+ * In the index number we consider decimal part as listId and integer part as ruleId
 */
 export class RuleStorageScanner {
+    private static MAX_LIST_ID = 10000;
+
     /**
      * Scanners is the list of list scanners backing this combined scanner
      */
@@ -84,13 +85,13 @@ export class RuleStorageScanner {
 
     /**
      * ruleListIdxToStorageIdx converts pair of listID and rule list index
-     * to "storage index" string
+     * to "storage index" number
      *
      * @param listId
      * @param ruleIdx
      */
     private static ruleListIdxToStorageIdx(listId: number, ruleIdx: number): number {
-        return listId / 10000 + ruleIdx;
+        return listId / RuleStorageScanner.MAX_LIST_ID + ruleIdx;
     }
 
     /**
@@ -102,7 +103,7 @@ export class RuleStorageScanner {
      * @return [listId, ruleIdx]
      */
     public static storageIdxToRuleListIdx(storageIdx: number): [number, number] {
-        const listId = Math.round((storageIdx % 1) * 10000);
+        const listId = Math.round((storageIdx % 1) * RuleStorageScanner.MAX_LIST_ID);
         const ruleIdx = Math.trunc(storageIdx);
 
         return [listId, ruleIdx];
