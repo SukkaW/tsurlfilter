@@ -5,7 +5,8 @@ import { fastHash } from '../utils/utils';
 import { RuleStorage } from '../filterlist/rule-storage';
 import { DomainModifier } from '../modifiers/domain-modifier';
 import { ScannerType } from '../filterlist/scanner/scanner-type';
-import { ShortcutsLookupTable } from './shortcuts-lookup-table';
+import { ILookupTable } from './lookup-table';
+import { TrieLookupTable } from './trie-lookup-table';
 
 /**
  * NetworkEngine is the engine that supports quick search over network rules
@@ -34,7 +35,7 @@ export class NetworkEngine {
     /**
      * Lookup table that relies on the rule shortcuts to speed up the search.
      */
-    private readonly shortcutsLookupTable: ShortcutsLookupTable;
+    private readonly shortcutsLookupTable: ILookupTable;
 
     /**
      * Rules for which we could not find a shortcut and could not place it to the shortcuts lookup table.
@@ -51,7 +52,7 @@ export class NetworkEngine {
         this.ruleStorage = storage;
         this.rulesCount = 0;
         this.domainsLookupTable = new Map<number, number[]>();
-        this.shortcutsLookupTable = new ShortcutsLookupTable(storage, NetworkEngine.SHORTCUT_LENGTH);
+        this.shortcutsLookupTable = new TrieLookupTable(storage);
 
         this.otherRules = [];
 

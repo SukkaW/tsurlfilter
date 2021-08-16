@@ -395,8 +395,8 @@ export class NetworkRule implements rule.IRule {
      * Checks if this filtering rule matches the specified request.
      * @param request - request to check.
      */
-    match(request: Request): boolean {
-        if (!this.matchShortcut(request)) {
+    match(request: Request, useShortcut = true): boolean {
+        if (useShortcut && !this.matchShortcut(request)) {
             return false;
         }
 
