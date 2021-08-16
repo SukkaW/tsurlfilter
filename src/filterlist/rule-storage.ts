@@ -6,6 +6,7 @@ import { NetworkRule } from '../rules/network-rule';
 import { HostRule } from '../rules/host-rule';
 import { ScannerType } from './scanner/scanner-type';
 import { RuleFactory } from '../rules/rule-factory';
+import { ListCache } from './list-cache';
 
 /**
  * RuleStorage is an abstraction that combines several rule lists
@@ -35,7 +36,7 @@ export class RuleStorage {
     /**
      * cache with the rules which were retrieved.
      */
-    private readonly cache: Map<number, IRule>;
+    private readonly cache: Map<number, ListCache>;
 
     /**
      * Constructor
@@ -47,7 +48,7 @@ export class RuleStorage {
     constructor(lists: IRuleList[]) {
         this.lists = lists;
         this.listsMap = new Map<number, IRuleList>();
-        this.cache = new Map<number, IRule>();
+        this.cache = new Map<number, ListCache>();
 
         this.lists.forEach((list) => {
             const filterListId = list.getId();
@@ -77,12 +78,12 @@ export class RuleStorage {
      * @param ignoreHost rules could be retrieved as host rules
      */
     retrieveRule(storageIdx: number, ignoreHost = true): IRule | null {
-        const rule = this.cache.get(storageIdx);
+        const [listId, ruleIdx] = RuleStorageScanner.storageIdxToRuleListIdx(storageIdx);
+
+        const rule = this.getFromCache(listId, ruleIdx);
         if (rule) {
             return rule;
         }
-
-        const [listId, ruleIdx] = RuleStorageScanner.storageIdxToRuleListIdx(storageIdx);
 
         const list = this.listsMap.get(listId);
         if (!list) {
@@ -97,7 +98,7 @@ export class RuleStorage {
 
         const result = RuleFactory.createRule(ruleText!, listId, false, false, ignoreHost);
         if (result) {
-            this.cache.set(storageIdx, result);
+            this.saveToCache(listId, ruleIdx, result);
         }
 
         return result;
@@ -139,5 +140,35 @@ export class RuleStorage {
         }
 
         return null;
+    }
+
+    /**
+     * Saves rule to cache
+     *
+     * @param listId
+     * @param ruleIdx
+     * @param rule
+     */
+    private saveToCache(listId: number, ruleIdx: number, rule: IRule): void {
+        let listCache = this.cache.get(listId);
+        if (!listCache) {
+            listCache = new ListCache();
+            this.cache.set(listId, listCache);
+        }
+        listCache.set(ruleIdx, rule);
+    }
+
+    /**
+     * Retrieves rule form cache
+     *
+     * @param listId
+     * @param ruleIdx
+     */
+    private getFromCache(listId: number, ruleIdx: number): IRule | undefined {
+        const listCache = this.cache.get(listId);
+        if (!listCache) {
+            return undefined;
+        }
+        return listCache.get(ruleIdx);
     }
 }
