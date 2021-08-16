@@ -35,7 +35,7 @@ export class RuleStorage {
     /**
      * cache with the rules which were retrieved.
      */
-    private readonly cache: Map<string, IRule>;
+    private readonly cache: Map<number, IRule>;
 
     /**
      * Constructor
@@ -47,7 +47,7 @@ export class RuleStorage {
     constructor(lists: IRuleList[]) {
         this.lists = lists;
         this.listsMap = new Map<number, IRuleList>();
-        this.cache = new Map<string, IRule>();
+        this.cache = new Map<number, IRule>();
 
         this.lists.forEach((list) => {
             const filterListId = list.getId();
@@ -76,7 +76,7 @@ export class RuleStorage {
      * @param storageIdx the lookup index that you can get from the rule storage scanner
      * @param ignoreHost rules could be retrieved as host rules
      */
-    retrieveRule(storageIdx: string, ignoreHost = true): IRule | null {
+    retrieveRule(storageIdx: number, ignoreHost = true): IRule | null {
         const rule = this.cache.get(storageIdx);
         if (rule) {
             return rule;
@@ -109,7 +109,7 @@ export class RuleStorage {
      * @param storageIdx
      * @return the rule or nil in any other case (not found or error)
      */
-    retrieveNetworkRule(storageIdx: string): NetworkRule | null {
+    retrieveNetworkRule(storageIdx: number): NetworkRule | null {
         const rule = this.retrieveRule(storageIdx);
         if (!rule) {
             return null;
@@ -128,7 +128,7 @@ export class RuleStorage {
      * @param storageIdx
      * @return the rule or nil in any other case (not found or error)
      */
-    retrieveHostRule(storageIdx: string): HostRule | null {
+    retrieveHostRule(storageIdx: number): HostRule | null {
         const rule = this.retrieveRule(storageIdx, false);
         if (!rule) {
             return null;

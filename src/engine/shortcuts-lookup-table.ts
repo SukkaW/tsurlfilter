@@ -2,6 +2,7 @@ import { Request } from '../request';
 import { NetworkRule } from '../rules/network-rule';
 import { RuleStorage } from '../filterlist/rule-storage';
 import { fastHash, fastHashBetween } from '../utils/utils';
+import { ILookupTable } from './lookup-table';
 
 /**
  * This class implements a very simple algorithm for speeding up the rules lookup.
@@ -11,7 +12,7 @@ import { fastHash, fastHashBetween } from '../utils/utils';
  * 2. For every request URL it takes all substrings of the same length as the shortcut.
  * 3. For every substring it retrieves rules that have the same shortcut.
  */
-export class ShortcutsLookupTable {
+export class ShortcutsLookupTable implements ILookupTable {
     /**
      * Length of shotcuts that are used to build this table.
      */
@@ -20,7 +21,7 @@ export class ShortcutsLookupTable {
     /**
      * Shortcuts lookup table. Key is the shortcut hash.
      */
-    private readonly shortcutsLookupTable: Map<number, string[]>;
+    private readonly shortcutsLookupTable: Map<number, number[]>;
 
     /**
      * Shortcuts histogram helps us choose the best shortcut for the shortcuts lookup table.
@@ -48,7 +49,7 @@ export class ShortcutsLookupTable {
     constructor(storage: RuleStorage, shortcutsLength: number) {
         this.shortcutsLength = shortcutsLength;
         this.ruleStorage = storage;
-        this.shortcutsLookupTable = new Map<number, string[]>();
+        this.shortcutsLookupTable = new Map<number, number[]>();
         this.shortcutsHistogram = new Map<number, number>();
     }
 
@@ -90,7 +91,7 @@ export class ShortcutsLookupTable {
      * @param storageIdx index
      * @return {boolean} true if the rule been added
      */
-    public addRule(rule: NetworkRule, storageIdx: string): boolean {
+    public addRule(rule: NetworkRule, storageIdx: number): boolean {
         const shortcuts = this.getRuleShortcuts(rule);
         if (!shortcuts || shortcuts.length === 0) {
             return false;

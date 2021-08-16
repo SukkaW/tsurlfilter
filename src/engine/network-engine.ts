@@ -29,7 +29,7 @@ export class NetworkEngine {
     /**
      * Domain lookup table. Key is the domain name hash.
      */
-    private readonly domainsLookupTable: Map<number, string[]>;
+    private readonly domainsLookupTable: Map<number, number[]>;
 
     /**
      * Lookup table that relies on the rule shortcuts to speed up the search.
@@ -50,7 +50,7 @@ export class NetworkEngine {
     constructor(storage: RuleStorage, skipStorageScan = false) {
         this.ruleStorage = storage;
         this.rulesCount = 0;
-        this.domainsLookupTable = new Map<number, string[]>();
+        this.domainsLookupTable = new Map<number, number[]>();
         this.shortcutsLookupTable = new ShortcutsLookupTable(storage, NetworkEngine.SHORTCUT_LENGTH);
 
         this.otherRules = [];
@@ -117,7 +117,7 @@ export class NetworkEngine {
      * @param rule
      * @param storageIdx
      */
-    public addRule(rule: NetworkRule, storageIdx: string): void {
+    public addRule(rule: NetworkRule, storageIdx: number): void {
         if (!this.addRuleToShortcutsTable(rule, storageIdx)) {
             if (!this.addRuleToDomainsTable(rule, storageIdx)) {
                 if (!this.otherRules.includes(rule)) {
@@ -181,7 +181,7 @@ export class NetworkEngine {
      * @param storageIdx index
      * @return {boolean} true if the rule been added
      */
-    private addRuleToShortcutsTable(rule: NetworkRule, storageIdx: string): boolean {
+    private addRuleToShortcutsTable(rule: NetworkRule, storageIdx: number): boolean {
         if (this.shortcutsLookupTable.addRule(rule, storageIdx)) {
             return true;
         }
@@ -197,7 +197,7 @@ export class NetworkEngine {
      * @param storageIdx index
      * @return {boolean} true if the rule been added
      */
-    private addRuleToDomainsTable(rule: NetworkRule, storageIdx: string): boolean {
+    private addRuleToDomainsTable(rule: NetworkRule, storageIdx: number): boolean {
         const permittedDomains = rule.getPermittedDomains();
         if (!permittedDomains || permittedDomains.length === 0) {
             return false;
