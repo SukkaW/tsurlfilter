@@ -1,6 +1,4 @@
 import { LRUMap } from 'lru_map';
-// eslint-disable-next-line import/no-named-default
-// import { default as lruMap } from 'lru_map'; // or maybe import * as lru_map? i can never remember which
 import { CosmeticEngine } from './cosmetic-engine/cosmetic-engine';
 import { NetworkEngine } from './network-engine';
 import { Request } from '../request';
@@ -14,8 +12,6 @@ import { IndexedStorageRule } from '../rules/rule';
 import { CosmeticRule } from '../rules/cosmetic-rule';
 import { RequestType } from '../request-type';
 
-// const { LRUMap } = lruMap;
-
 /**
  * Engine represents the filtering engine with all the loaded rules
  */
@@ -24,7 +20,7 @@ export class Engine {
      * Request's cache size
      * Used for both source rules and others
      */
-    private static REQUEST_CACHE_SIZE = 100000;
+    private static REQUEST_CACHE_SIZE = 5000;
 
     /**
      * Basic filtering rules engine

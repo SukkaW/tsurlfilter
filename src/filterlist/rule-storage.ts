@@ -34,7 +34,9 @@ export class RuleStorage {
     private readonly listsMap: Map<number, IRuleList>;
 
     /**
-     * cache with the rules which were retrieved.
+     * Cache with the rules which were retrieved.
+     * We use double layer map in order to achieve better performance. The reason is a fact that a map with number
+     * keys is much faster than a map with string keys. So we have a structure like Map<number, Map<number, IRule>>.
      */
     private readonly cache: Map<number, ListCache>;
 

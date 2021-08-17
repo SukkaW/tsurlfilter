@@ -394,6 +394,10 @@ export class NetworkRule implements rule.IRule {
     /**
      * Checks if this filtering rule matches the specified request.
      * @param request - request to check.
+     * @param useShortcut - the flag to use this rule shortcut
+     *
+     * In case we use Trie in lookup table, we don't need to use shortcut cause we already check if request's url
+     * includes full rule shortcut.
      */
     match(request: Request, useShortcut = true): boolean {
         if (useShortcut && !this.matchShortcut(request)) {
