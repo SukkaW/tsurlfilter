@@ -4,6 +4,9 @@ import { NetworkRule } from '../rules/network-rule';
 import { TrieNode } from '../utils/trie';
 import { ILookupTable } from './lookup-table';
 
+/**
+ * Look up table with underlying prefix tree
+ */
 export class TrieLookupTable implements ILookupTable {
     /**
      * Count of rules added to this lookup table.
@@ -20,16 +23,36 @@ export class TrieLookupTable implements ILookupTable {
      */
     private readonly trie: TrieNode;
 
+    /**
+     * Creates a new instance of the TrieLookupTable.
+     *
+     * @param storage rules storage. We store "rule indexes" in the lookup table which
+     * can be used to retrieve the full rules from the storage.
+     */
     constructor(storage: RuleStorage) {
         this.ruleStorage = storage;
         this.trie = new TrieNode(0);
     }
 
+    /**
+     * Finds all matching rules from the shortcuts lookup table
+     *
+     * @param request to check
+     * @return array of matching rules
+     */
     public matchAll(request: Request): NetworkRule[] {
         const rulesIndexes = this.traverse(request);
         return this.matchRules(request, rulesIndexes);
     }
 
+    /**
+     * Tries to add the rule to the lookup table.
+     * returns true if it was added
+     *
+     * @param rule to add
+     * @param storageIdx index
+     * @return {boolean} true if the rule been added
+     */
     public addRule(rule: NetworkRule, storageIdx: number): boolean {
         const shortcut = rule.getShortcut();
 
@@ -45,10 +68,19 @@ export class TrieLookupTable implements ILookupTable {
         return true;
     }
 
+    /**
+     * @return total rules count
+     */
     public getRulesCount(): number {
         return this.rulesCount;
     }
 
+    /**
+     * For specified request finds matching rules from rules indexes array
+     *
+     * @param request
+     * @param rulesIndexes
+     */
     private matchRules(request: Request, rulesIndexes: number[] | undefined): NetworkRule[] {
         if (!rulesIndexes) {
             return [];
@@ -67,6 +99,11 @@ export class TrieLookupTable implements ILookupTable {
         return result;
     }
 
+    /**
+     * Traverses trie
+     *
+     * @param request
+     */
     private traverse(request: Request): number[] {
         const ruleIndexes: number[] = [];
 
@@ -90,7 +127,7 @@ export class TrieLookupTable implements ILookupTable {
      * Checks if the rule potentially matches too many URLs.
      * We'd better use another type of lookup table for this kind of rules.
      *
-     * @param rule to check
+     * @param shortcut to check
      * @return check result
      */
     private static isAnyURLShortcut(shortcut: string): boolean {

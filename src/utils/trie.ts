@@ -1,25 +1,39 @@
 /**
- * TODO: Add tests
+ * Prefix tree implementation
  */
 export class TrieNode {
-    // this node's children is a map where key is a character code
-    // and value is it's trie node.
+    /**
+     * This node's children is a map where key is a character code
+     * and value is it's trie node.
+    */
     private children: Map<number, TrieNode>;
 
-    // character code of this TrieNode.
+    /**
+     * Character code of this TrieNode.
+     */
     private code: number;
 
-    // data, attached to this trie node. When trie traversal is being done,
-    // data from all trie nodes is collected.
+    /**
+     * Data, attached to this trie node. When trie traversal is being done,
+     * data from all trie nodes is collected.
+     */
     private data: number[] | undefined;
 
-    // creates an instance of a TrieNode with the specified char code.
+    /**
+     * Creates an instance of a TrieNode with the specified char code.
+     *
+     * @param code
+     */
     constructor(code: number) {
         this.code = code;
         this.children = new Map();
     }
 
-    // attaches data to this TrieNode.
+    /**
+     * Attaches data to this TrieNode.
+     *
+     * @param data
+     */
     attach(data: number): void {
         if (!this.data) {
             this.data = [];

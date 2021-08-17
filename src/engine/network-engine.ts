@@ -13,11 +13,6 @@ import { TrieLookupTable } from './trie-lookup-table';
  */
 export class NetworkEngine {
     /**
-     * Rule shortcut max length
-     */
-    private static SHORTCUT_LENGTH = 5;
-
-    /**
      * Count of rules added to the engine
      */
     public rulesCount: number;
