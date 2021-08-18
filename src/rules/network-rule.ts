@@ -205,7 +205,7 @@ export class NetworkRule implements rule.IRule {
      * Priority weight
      * Used in rules priority comparision
      */
-    private readonly priorityWeight: number = 0;
+    private priorityWeight = 0;
 
     /**
      * Separates the rule pattern from the list of modifiers.
@@ -754,7 +754,6 @@ export class NetworkRule implements rule.IRule {
         }
 
         this.shortcut = SimpleRegex.extractShortcut(this.pattern);
-        this.priorityWeight = this.calculatePriority();
     }
 
     /**
@@ -780,6 +779,9 @@ export class NetworkRule implements rule.IRule {
             }
             this.loadOption(optionName, optionValue);
         }
+
+        // More specified rule has more priority
+        this.priorityWeight = optionParts.length;
 
         // Rules of these types can be applied to documents only
         // $jsinject, $elemhide, $urlblock, $genericblock, $generichide and $content for whitelist rules.
@@ -1345,22 +1347,6 @@ export class NetworkRule implements rule.IRule {
             !== NetworkRuleOption.RemoveHeaderCompatibleOptions) {
             throw new SyntaxError('$removeheader rules are not compatible with some other modifiers');
         }
-    }
-
-    /**
-     * Calculates common rule priority.
-     * More specific rules (i.e. with more modifiers) have higher priority.
-     */
-    private calculatePriority(): number {
-        let count = utils.countElementsInEnum(this.enabledOptions, NetworkRuleOption)
-            + utils.countElementsInEnum(this.disabledOptions, NetworkRuleOption)
-            + utils.countElementsInEnum(this.permittedRequestTypes, RequestType)
-            + utils.countElementsInEnum(this.restrictedRequestTypes, RequestType);
-        if (this.hasPermittedDomains() || this.hasRestrictedDomains()) {
-            count += 1;
-        }
-
-        return count;
     }
 
     /**
