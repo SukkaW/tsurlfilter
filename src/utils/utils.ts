@@ -249,7 +249,7 @@ export function countElementsInEnum(value: number, enumerationType: any): number
 
     const keys = Object.keys(enumerationType);
     for (let i = 0; i < keys.length; i += 1) {
-        const mask = Number.parseInt(keys[i], 10);
+        const mask = Number.parseInt(enumerationType[keys[i]], 10);
         if ((value & mask) === mask) {
             count += 1;
         }
