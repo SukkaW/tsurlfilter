@@ -18,9 +18,10 @@ import { RequestType } from '../request-type';
 export class Engine {
     /**
      * Request's cache size
-     * Used for both source rules and others
+     * Used as both source rules and others limit.
+     * The value is based on benchmark runs.
      */
-    private static REQUEST_CACHE_SIZE = 5000;
+    private static REQUEST_CACHE_SIZE = 90000;
 
     /**
      * Basic filtering rules engine
