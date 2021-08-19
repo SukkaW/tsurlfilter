@@ -7,6 +7,7 @@ import { ILookupTable } from './lookup-tables/lookup-table';
 import { TrieLookupTable } from './lookup-tables/trie-lookup-table';
 import { DomainsLookupTable } from './lookup-tables/domains-lookup-table';
 import { HostnameLookupTable } from './lookup-tables/hostname-lookup-table';
+import { SeqScanLookupTable } from './lookup-tables/seq-scan-lookup-table';
 
 /**
  * NetworkEngine is the engine that supports quick search over network rules
@@ -40,7 +41,7 @@ export class NetworkEngine {
     /**
      * Rules for which we could not find a shortcut and could not place it to the shortcuts lookup table.
      */
-    private otherRules: NetworkRule[];
+    private readonly seqScanLookupTable: ILookupTable;
 
     /**
      * Builds an instance of the network engine
@@ -54,8 +55,7 @@ export class NetworkEngine {
         this.domainsLookupTable = new DomainsLookupTable(storage);
         this.hostnameLookupTable = new HostnameLookupTable(storage);
         this.shortcutsLookupTable = new TrieLookupTable(storage);
-
-        this.otherRules = [];
+        this.seqScanLookupTable = new SeqScanLookupTable();
 
         if (skipStorageScan) {
             return;
@@ -102,14 +102,7 @@ export class NetworkEngine {
         const result = this.hostnameLookupTable.matchAll(request);
         result.push(...(this.shortcutsLookupTable.matchAll(request)));
         result.push(...(this.domainsLookupTable.matchAll(request)));
-
-        // Now check other rules
-        for (let i = 0; i < this.otherRules.length; i += 1) {
-            const r = this.otherRules[i];
-            if (r.match(request)) {
-                result.push(r);
-            }
-        }
+        result.push(...(this.seqScanLookupTable.matchAll(request)));
 
         return result;
     }
@@ -124,9 +117,7 @@ export class NetworkEngine {
         if (!this.hostnameLookupTable.addRule(rule, storageIdx)) {
             if (!this.shortcutsLookupTable.addRule(rule, storageIdx)) {
                 if (!this.domainsLookupTable.addRule(rule, storageIdx)) {
-                    if (!this.otherRules.includes(rule)) {
-                        this.otherRules.push(rule);
-                    }
+                    this.seqScanLookupTable.addRule(rule, storageIdx);
                 }
             }
         }
