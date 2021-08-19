@@ -1,12 +1,11 @@
 import { Request } from '../request';
 import { NetworkRule } from '../rules/network-rule';
 import { MatchingResult } from './matching-result';
-import { fastHash } from '../utils/utils';
 import { RuleStorage } from '../filterlist/rule-storage';
-import { DomainModifier } from '../modifiers/domain-modifier';
 import { ScannerType } from '../filterlist/scanner/scanner-type';
 import { ILookupTable } from './lookup-table';
 import { TrieLookupTable } from './trie-lookup-table';
+import { DomainsLookupTable } from './domains-lookup-table';
 
 /**
  * NetworkEngine is the engine that supports quick search over network rules
@@ -25,7 +24,7 @@ export class NetworkEngine {
     /**
      * Domain lookup table. Key is the domain name hash.
      */
-    private readonly domainsLookupTable: Map<number, number[]>;
+    private readonly domainsLookupTable: ILookupTable;
 
     /**
      * Lookup table that relies on the rule shortcuts to speed up the search.
@@ -46,7 +45,7 @@ export class NetworkEngine {
     constructor(storage: RuleStorage, skipStorageScan = false) {
         this.ruleStorage = storage;
         this.rulesCount = 0;
-        this.domainsLookupTable = new Map<number, number[]>();
+        this.domainsLookupTable = new DomainsLookupTable(storage);
         this.shortcutsLookupTable = new TrieLookupTable(storage);
 
         this.otherRules = [];
@@ -93,8 +92,8 @@ export class NetworkEngine {
      */
     matchAll(request: Request): NetworkRule[] {
         // First check by shortcuts
-        const result = this.matchShortcutsLookupTable(request);
-        result.push(...this.matchDomainsLookupTable(request));
+        const result = this.shortcutsLookupTable.matchAll(request);
+        result.push(...(this.domainsLookupTable.matchAll(request)));
 
         // Now check other rules
         for (let i = 0; i < this.otherRules.length; i += 1) {
@@ -114,8 +113,8 @@ export class NetworkEngine {
      * @param storageIdx
      */
     public addRule(rule: NetworkRule, storageIdx: number): void {
-        if (!this.addRuleToShortcutsTable(rule, storageIdx)) {
-            if (!this.addRuleToDomainsTable(rule, storageIdx)) {
+        if (!this.shortcutsLookupTable.addRule(rule, storageIdx)) {
+            if (!this.domainsLookupTable.addRule(rule, storageIdx)) {
                 if (!this.otherRules.includes(rule)) {
                     this.otherRules.push(rule);
                 }
@@ -123,99 +122,5 @@ export class NetworkEngine {
         }
 
         this.rulesCount += 1;
-    }
-
-    /**
-     * Finds all matching rules from the shortcuts lookup table
-     *
-     * @param request to check
-     * @return array of matching rules
-     */
-    private matchShortcutsLookupTable(request: Request): NetworkRule[] {
-        return this.shortcutsLookupTable.matchAll(request);
-    }
-
-    /**
-     * Finds all matching rules from the domains lookup table
-     *
-     * @param request to check
-     * @return array of matching rules
-     */
-    private matchDomainsLookupTable(request: Request): NetworkRule[] {
-        const result: NetworkRule[] = [];
-
-        if (!request.sourceHostname) {
-            return result;
-        }
-
-        const domains = request.subdomains;
-        if (request.hostname !== request.sourceHostname) {
-            domains.push(...request.sourceSubdomains);
-        }
-
-        for (let i = 0; i < domains.length; i += 1) {
-            const hash = fastHash(domains[i]);
-            const rulesIndexes = this.domainsLookupTable.get(hash);
-            if (rulesIndexes) {
-                for (let j = 0; j < rulesIndexes.length; j += 1) {
-                    const rule = this.ruleStorage.retrieveNetworkRule(rulesIndexes[j]);
-                    if (rule && rule.match(request)) {
-                        result.push(rule);
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Tries to add the rule to the domains lookup table.
-     * returns true if it was added
-     *
-     * @param rule to add
-     * @param storageIdx index
-     * @return {boolean} true if the rule been added
-     */
-    private addRuleToShortcutsTable(rule: NetworkRule, storageIdx: number): boolean {
-        if (this.shortcutsLookupTable.addRule(rule, storageIdx)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Tries to add the rule to the domains table.
-     * returns true if it was added or false if it is not possible
-     *
-     * @param rule to add
-     * @param storageIdx index
-     * @return {boolean} true if the rule been added
-     */
-    private addRuleToDomainsTable(rule: NetworkRule, storageIdx: number): boolean {
-        const permittedDomains = rule.getPermittedDomains();
-        if (!permittedDomains || permittedDomains.length === 0) {
-            return false;
-        }
-
-        const hasWildcardDomain = permittedDomains.some((d) => DomainModifier.isWildcardDomain(d));
-        if (hasWildcardDomain) {
-            return false;
-        }
-
-        permittedDomains.forEach((domain) => {
-            const hash = fastHash(domain);
-
-            // Add the rule to the lookup table
-            let rulesIndexes = this.domainsLookupTable.get(hash);
-            if (!rulesIndexes) {
-                rulesIndexes = [];
-            }
-            rulesIndexes.push(storageIdx);
-            this.domainsLookupTable.set(hash, rulesIndexes);
-        });
-
-        return true;
     }
 }
