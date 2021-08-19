@@ -1,5 +1,5 @@
-import { Request } from '../request';
-import { NetworkRule } from '../rules/network-rule';
+import { Request } from '../../request';
+import { NetworkRule } from '../../rules/network-rule';
 
 /**
  * Lookup table interface

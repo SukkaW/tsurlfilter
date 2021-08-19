@@ -1,7 +1,7 @@
-import { RuleStorage } from '../filterlist/rule-storage';
-import { Request } from '../request';
-import { NetworkRule } from '../rules/network-rule';
-import { TrieNode } from '../utils/trie';
+import { RuleStorage } from '../../filterlist/rule-storage';
+import { Request } from '../../request';
+import { NetworkRule } from '../../rules/network-rule';
+import { TrieNode } from '../../utils/trie';
 import { ILookupTable } from './lookup-table';
 
 /**

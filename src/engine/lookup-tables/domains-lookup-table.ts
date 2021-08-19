@@ -1,9 +1,9 @@
 import { ILookupTable } from './lookup-table';
-import { RuleStorage } from '../filterlist/rule-storage';
-import { Request } from '../request';
-import { DomainModifier } from '../modifiers/domain-modifier';
-import { fastHash } from '../utils/utils';
-import { NetworkRule } from '../rules/network-rule';
+import { RuleStorage } from '../../filterlist/rule-storage';
+import { Request } from '../../request';
+import { DomainModifier } from '../../modifiers/domain-modifier';
+import { fastHash } from '../../utils/utils';
+import { NetworkRule } from '../../rules/network-rule';
 
 /**
  * Domain lookup table. Key is the domain name hash.

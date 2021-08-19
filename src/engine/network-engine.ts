@@ -3,9 +3,9 @@ import { NetworkRule } from '../rules/network-rule';
 import { MatchingResult } from './matching-result';
 import { RuleStorage } from '../filterlist/rule-storage';
 import { ScannerType } from '../filterlist/scanner/scanner-type';
-import { ILookupTable } from './lookup-table';
-import { TrieLookupTable } from './trie-lookup-table';
-import { DomainsLookupTable } from './domains-lookup-table';
+import { ILookupTable } from './lookup-tables/lookup-table';
+import { TrieLookupTable } from './lookup-tables/trie-lookup-table';
+import { DomainsLookupTable } from './lookup-tables/domains-lookup-table';
 
 /**
  * NetworkEngine is the engine that supports quick search over network rules
