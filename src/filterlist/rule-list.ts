@@ -6,8 +6,9 @@ import { ScannerType } from './scanner/scanner-type';
  * List identifier max value.
  * We use number type for storage indexes, so we have some limits for list identifiers,
  * check RuleStorageScanner class for more info.
+ * This max value selected as the max decimal part of storage index.
  */
-export const LIST_ID_MAX_VALUE = 10000;
+export const LIST_ID_MAX_VALUE = 1000000;
 
 /**
  * RuleList represents a set of filtering rules
