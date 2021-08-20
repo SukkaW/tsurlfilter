@@ -108,9 +108,10 @@ export class Engine {
      * Matches the specified request against the filtering engine and returns the matching result.
      *
      * @param request - request to check
+     * @param frameRules - source rules or undefined
      * @return matching result
      */
-    matchRequest(request: Request): MatchingResult {
+    matchRequest(request: Request, frameRules: NetworkRule[] | undefined): MatchingResult {
         const cacheKey = `${request.url}#${request.sourceHostname}#${request.requestType}`;
         const res = this.resultCache.get(cacheKey);
         if (res) {
@@ -118,16 +119,18 @@ export class Engine {
         }
 
         const networkRules = this.networkEngine.matchAll(request);
-        let sourceRules: NetworkRule[] = [];
 
-        if (request.sourceUrl) {
-            let rules = this.sourceResultCache.get(request.sourceUrl);
-            if (!rules) {
+        let sourceRules: NetworkRule[] = [];
+        if (frameRules) {
+            sourceRules = frameRules;
+        } else if (request.sourceUrl) {
+            let matchedRules = this.sourceResultCache.get(request.sourceUrl);
+            if (!matchedRules) {
                 const sourceRequest = new Request(request.sourceUrl, '', RequestType.Document);
-                rules = this.networkEngine.matchAll(sourceRequest);
-                this.sourceResultCache.set(request.sourceUrl, rules);
+                matchedRules = this.networkEngine.matchAll(sourceRequest);
+                this.sourceResultCache.set(request.sourceUrl, matchedRules);
             }
-            sourceRules = rules;
+            sourceRules = matchedRules;
         }
 
         const result = new MatchingResult(networkRules, sourceRules);

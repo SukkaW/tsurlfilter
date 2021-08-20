@@ -70,11 +70,13 @@ Engine is a main class of this library. It represents the filtering functionalit
 ```
     /**
      * Matches the specified request against the filtering engine and returns the matching result.
+     * In case frameRules parameter is not specified, frame rules will be selected matching request.sourceUrl.
      *
      * @param request - request to check
+     * @param frameRules - source rules or undefined
      * @return matching result
      */
-    matchRequest(request: Request): MatchingResult
+    matchRequest(request: Request, frameRules: NetworkRule[] | undefined): MatchingResult
 ```
 
 ##### **getCosmeticResult**
