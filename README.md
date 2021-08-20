@@ -76,7 +76,7 @@ Engine is a main class of this library. It represents the filtering functionalit
      * @param frameRules - source rules or undefined
      * @return matching result
      */
-    matchRequest(request: Request, frameRules: NetworkRule[] | undefined): MatchingResult
+    matchRequest(request: Request, frameRules?: NetworkRule[]): MatchingResult
 ```
 
 ##### **getCosmeticResult**

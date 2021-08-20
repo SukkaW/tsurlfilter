@@ -21,7 +21,7 @@ export class Engine {
      * Used as both source rules and others limit.
      * The value is based on benchmark runs.
      */
-    private static REQUEST_CACHE_SIZE = 50000;
+    private static REQUEST_CACHE_SIZE = 25000;
 
     /**
      * Basic filtering rules engine
@@ -111,7 +111,7 @@ export class Engine {
      * @param frameRules - source rules or undefined
      * @return matching result
      */
-    matchRequest(request: Request, frameRules: NetworkRule[] | undefined): MatchingResult {
+    matchRequest(request: Request, frameRules?: NetworkRule[]): MatchingResult {
         const cacheKey = `${request.url}#${request.sourceHostname}#${request.requestType}`;
         const res = this.resultCache.get(cacheKey);
         if (res) {
