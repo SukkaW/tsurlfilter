@@ -4,11 +4,11 @@ import { ScannerType } from './scanner/scanner-type';
 
 /**
  * List identifier max value.
- * We use number type for storage indexes, so we have some limits for list identifiers,
- * check RuleStorageScanner class for more info.
- * This max value selected as the max decimal part of storage index.
+ * We use "number" type for storage indexes, so we have some limits for list identifiers,
+ * We line number for rule index, so if we save 11 ranks for rules, then we have 6 ranks left for list ids.
+ * Check RuleStorageScanner class for more info.
  */
-export const LIST_ID_MAX_VALUE = 1000000;
+export const LIST_ID_MAX_VALUE = 10 ** 6;
 
 /**
  * RuleList represents a set of filtering rules
@@ -83,7 +83,7 @@ export class StringRuleList implements IRuleList {
         ignoreUnsafe?: boolean,
     ) {
         if (listId >= LIST_ID_MAX_VALUE) {
-            throw new Error('Invalid list identifier');
+            throw new Error(`Invalid list identifier, it must be less than ${LIST_ID_MAX_VALUE}`);
         }
 
         this.id = listId;
