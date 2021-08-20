@@ -6,7 +6,7 @@ export class TrieNode {
      * This node's children is a map where key is a character code
      * and value is it's trie node.
     */
-    private children: Map<number, TrieNode>;
+    private children: TrieNode[];
 
     /**
      * Character code of this TrieNode.
@@ -26,7 +26,7 @@ export class TrieNode {
      */
     constructor(code: number) {
         this.code = code;
-        this.children = new Map();
+        this.children = [];
     }
 
     /**
@@ -53,10 +53,10 @@ export class TrieNode {
         let root: TrieNode = this;
         for (let i = 0; i < str.length; i += 1) {
             const c = str.charCodeAt(i);
-            let next = root.children.get(c);
+            let next = root.children[c];
             if (!next) {
                 next = new TrieNode(c);
-                root.children.set(c, next);
+                root.children[c] = next;
             }
             root = next;
         }
@@ -78,7 +78,7 @@ export class TrieNode {
         let current: TrieNode = this;
         for (let i = start; i < str.length; i += 1) {
             const c = str.charCodeAt(i);
-            const next = current.children.get(c);
+            const next = current.children[c];
             if (!next) {
                 break;
             }
