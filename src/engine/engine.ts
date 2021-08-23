@@ -21,7 +21,7 @@ export class Engine {
      * Used as both source rules and others limit.
      * The value is based on benchmark runs.
      */
-    private static REQUEST_CACHE_SIZE = 25000;
+    private static REQUEST_CACHE_SIZE = 5000;
 
     /**
      * Basic filtering rules engine
