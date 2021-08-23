@@ -104,10 +104,6 @@ export class MatchingResult {
                         this.documentRule = r;
                     }
                 }
-
-                if (r.isOptionEnabled(NetworkRuleOption.Stealth)) {
-                    this.stealthRule = r;
-                }
             });
         }
 
