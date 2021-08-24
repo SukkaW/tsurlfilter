@@ -39,11 +39,6 @@ export class Engine {
     private readonly ruleStorage: RuleStorage;
 
     /**
-     * Source results cache
-     */
-    private readonly sourceResultCache: LRUMap<string, NetworkRule[]>;
-
-    /**
      * Request results cache
      */
     private readonly resultCache: LRUMap<string, MatchingResult>;
@@ -60,7 +55,6 @@ export class Engine {
         this.ruleStorage = ruleStorage;
         this.networkEngine = new NetworkEngine(ruleStorage, skipStorageScan);
         this.cosmeticEngine = new CosmeticEngine(ruleStorage, skipStorageScan);
-        this.sourceResultCache = new LRUMap<string, NetworkRule[]>(Engine.REQUEST_CACHE_SIZE);
         this.resultCache = new LRUMap<string, MatchingResult>(Engine.REQUEST_CACHE_SIZE);
     }
 
@@ -108,10 +102,10 @@ export class Engine {
      * Matches the specified request against the filtering engine and returns the matching result.
      *
      * @param request - request to check
-     * @param frameRules - source rules or undefined
+     * @param frameRule - source document rule or null
      * @return matching result
      */
-    matchRequest(request: Request, frameRules?: NetworkRule[]): MatchingResult {
+    matchRequest(request: Request, frameRule: NetworkRule | null = null): MatchingResult {
         const cacheKey = `${request.url}#${request.sourceHostname}#${request.requestType}`;
         const res = this.resultCache.get(cacheKey);
         if (res) {
@@ -119,22 +113,31 @@ export class Engine {
         }
 
         const networkRules = this.networkEngine.matchAll(request);
-
-        let sourceRules: NetworkRule[] = [];
-        if (frameRules) {
-            sourceRules = frameRules;
-        } else if (request.sourceUrl) {
-            let matchedRules = this.sourceResultCache.get(request.sourceUrl);
-            if (!matchedRules) {
-                const sourceRequest = new Request(request.sourceUrl, '', RequestType.Document);
-                matchedRules = this.networkEngine.matchAll(sourceRequest);
-                this.sourceResultCache.set(request.sourceUrl, matchedRules);
-            }
-            sourceRules = matchedRules;
-        }
-
-        const result = new MatchingResult(networkRules, sourceRules);
+        const result = new MatchingResult(networkRules, frameRule);
         this.resultCache.set(cacheKey, result);
+        return result;
+    }
+
+    /**
+     * Matches current frame and returns document-level allowlist rule if found.
+     *
+     * @param frameUrl
+     */
+    matchFrame(frameUrl: string): NetworkRule | null {
+        const sourceRequest = new Request(frameUrl, '', RequestType.Document);
+        let sourceRules = this.networkEngine.matchAll(sourceRequest);
+
+        sourceRules = MatchingResult.removeBadfilterRules(sourceRules);
+
+        let result: NetworkRule | null = null;
+        sourceRules.forEach((r) => {
+            if (r.isDocumentLevelWhitelistRule()) {
+                if (!result || r.isHigherPriority(result)) {
+                    result = r;
+                }
+            }
+        });
+
         return result;
     }
 
