@@ -68,8 +68,20 @@ describe('Pattern Tests', () => {
             new Request('https://test.org', null, RequestType.Document),
             false,
         )).toBeFalsy();
+    });
 
-        // TODO: add a unit-test for `||exa*mple.org^`
+    it('does not match non hostname cases', () => {
+        const pattern = new Pattern('||*/te/^');
+
+        expect(pattern.matchPattern(
+            new Request('https://test.ru/te/', null, RequestType.Document),
+            false,
+        )).toBeTruthy();
+
+        expect(pattern.matchPattern(
+            new Request('https://test.ru/other/', null, RequestType.Document),
+            false,
+        )).toBeFalsy();
     });
 
     it('matches regexp', () => {

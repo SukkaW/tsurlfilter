@@ -25,6 +25,7 @@ import { ClientModifier } from '../modifiers/dns/client-modifier';
 import { DnsRewriteModifier } from '../modifiers/dns/dnsrewrite-modifier';
 import { DnsTypeModifier } from '../modifiers/dns/dnstype-modifier';
 import { CtagModifier } from '../modifiers/dns/ctag-modifier';
+import { Pattern } from './pattern';
 
 /**
  * NetworkRuleOption is the enumeration of various rule options.
@@ -159,15 +160,7 @@ export class NetworkRule implements rule.IRule {
 
     private readonly whitelist: boolean;
 
-    private readonly pattern: string;
-
-    private readonly shortcut: string;
-
-    /** Regular expression compiled from the pattern. */
-    private regex: RegExp | undefined;
-
-    /** Marks the rule as invalid. Match will always return false in this case. */
-    private invalid = false;
+    private readonly pattern: Pattern;
 
     private permittedDomains: string[] | null = null;
 
@@ -259,7 +252,7 @@ export class NetworkRule implements rule.IRule {
      * which currently is used only in the rule validator module
      */
     getPattern(): string {
-        return this.pattern;
+        return this.pattern.pattern;
     }
 
     /**
@@ -308,7 +301,7 @@ export class NetworkRule implements rule.IRule {
      * It is used to improve the matching performance.
      */
     getShortcut(): string {
-        return this.shortcut;
+        return this.pattern.shortcut;
     }
 
     /**
@@ -379,7 +372,8 @@ export class NetworkRule implements rule.IRule {
      */
     isRegexRule(): boolean {
         return (
-            this.pattern.startsWith(SimpleRegex.MASK_REGEX_RULE) && this.pattern.endsWith(SimpleRegex.MASK_REGEX_RULE)
+            this.getPattern().startsWith(SimpleRegex.MASK_REGEX_RULE)
+            && this.getPattern().endsWith(SimpleRegex.MASK_REGEX_RULE)
         );
     }
 
@@ -430,7 +424,7 @@ export class NetworkRule implements rule.IRule {
              * Skipping patterns with domain specified
              * https://github.com/AdguardTeam/CoreLibs/issues/1354#issuecomment-704226271
              */
-            if (this.isPatternDomainSpecific()) {
+            if (this.pattern.isPatternDomainSpecific()) {
                 return false;
             }
 
@@ -461,7 +455,7 @@ export class NetworkRule implements rule.IRule {
             return false;
         }
 
-        return this.matchPattern(request);
+        return this.pattern.matchPattern(request, true);
     }
 
     /**
@@ -474,7 +468,7 @@ export class NetworkRule implements rule.IRule {
             urlLowercase = urlLowercase.substring(0, NetworkRule.MAX_URL_MATCH_LENGTH);
         }
 
-        return urlLowercase.indexOf(this.shortcut) >= 0;
+        return urlLowercase.indexOf(this.getShortcut()) >= 0;
     }
 
     /**
@@ -641,64 +635,6 @@ export class NetworkRule implements rule.IRule {
     }
 
     /**
-     * matchPattern uses the regex pattern to match the request URL
-     * @param request - request to check.
-     */
-    private matchPattern(request: Request): boolean {
-        if (!this.regex) {
-            if (this.invalid) {
-                return false;
-            }
-
-            const regex = SimpleRegex.patternToRegexp(this.pattern);
-            try {
-                let flags = 'i';
-                if (this.isOptionEnabled(NetworkRuleOption.MatchCase)) {
-                    flags = '';
-                }
-                this.regex = new RegExp(regex, flags);
-            } catch (e) {
-                this.invalid = true;
-            }
-        }
-
-        if (this.regex) {
-            if (this.shouldMatchHostname(request)) {
-                return this.regex.test(request.hostname);
-            }
-
-            return this.regex.test(request.url);
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if we should match hostnames and not the URL
-     * this is important for the cases when we use urlfilter for DNS-level blocking
-     * Note, that even though we may work on a DNS-level, we should still sometimes match full URL instead
-     *
-     * @param request
-     */
-    private shouldMatchHostname(request: Request): boolean {
-        if (!request.isHostnameRequest) {
-            return false;
-        }
-
-        return !this.isPatternDomainSpecific();
-    }
-
-    /**
-     * In case pattern starts with the following it targets some specific domain
-     */
-    private isPatternDomainSpecific(): boolean {
-        return this.pattern.startsWith(SimpleRegex.MASK_START_URL)
-            || this.pattern.startsWith('http://')
-            || this.pattern.startsWith('https:/')
-            || this.pattern.startsWith('://');
-    }
-
-    /**
      * Checks if pattern has spaces
      * Used in order to do not create network rules from host rules
      * @param pattern
@@ -723,10 +659,10 @@ export class NetworkRule implements rule.IRule {
         this.filterListId = filterListId;
 
         const ruleParts = NetworkRule.parseRuleText(ruleText);
-        this.pattern = ruleParts.pattern!;
         this.whitelist = !!ruleParts.whitelist;
 
-        if (this.pattern && NetworkRule.hasSpaces(this.pattern)) {
+        const pattern = ruleParts.pattern!;
+        if (pattern && NetworkRule.hasSpaces(pattern)) {
             throw new SyntaxError('Rule has spaces, seems to be an host rule');
         }
 
@@ -736,10 +672,10 @@ export class NetworkRule implements rule.IRule {
         }
 
         if (
-            this.pattern === SimpleRegex.MASK_START_URL
-            || this.pattern === SimpleRegex.MASK_ANY_CHARACTER
-            || this.pattern === ''
-            || this.pattern.length < 3
+            pattern === SimpleRegex.MASK_START_URL
+            || pattern === SimpleRegex.MASK_ANY_CHARACTER
+            || pattern === ''
+            || pattern.length < 3
         ) {
             // Except cookie and removeparam rules, they have their own atmosphere
             if (!(this.advancedModifier instanceof CookieModifier)
@@ -753,7 +689,7 @@ export class NetworkRule implements rule.IRule {
             }
         }
 
-        this.shortcut = SimpleRegex.extractShortcut(this.pattern);
+        this.pattern = new Pattern(pattern, this.isOptionEnabled(NetworkRuleOption.MatchCase));
     }
 
     /**
@@ -893,7 +829,7 @@ export class NetworkRule implements rule.IRule {
             return false;
         }
 
-        if (this.pattern !== specifiedRule.pattern) {
+        if (this.pattern.pattern !== specifiedRule.pattern.pattern) {
             return false;
         }
 

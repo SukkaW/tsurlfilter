@@ -1,6 +1,5 @@
 import { SimpleRegex } from './simple-regex';
 import { Request } from '../request';
-import { NetworkRule } from './network-rule';
 
 /**
  * Rule pattern class
@@ -11,12 +10,12 @@ export class Pattern {
     /**
      * Original pattern text
      */
-    private readonly pattern: string;
+    public readonly pattern: string;
 
     /**
      * Shortcut string
      */
-    private readonly shortcut: string;
+    public readonly shortcut: string;
 
     /**
      * If this pattern already prepared indicator
@@ -51,12 +50,19 @@ export class Pattern {
     private patternShortcut: boolean | undefined;
 
     /**
+     * If pattern is match-case regex
+     */
+    private readonly matchcase: boolean | undefined;
+
+    /**
      * Constructor
      * @param pattern
+     * @param matchcase
      */
-    constructor(pattern: string) {
+    constructor(pattern: string, matchcase = false) {
         this.pattern = pattern;
         this.shortcut = SimpleRegex.extractShortcut(this.pattern);
+        this.matchcase = matchcase;
     }
 
     /**
@@ -100,11 +106,11 @@ export class Pattern {
      * @param request - request to check.
      */
     private matchShortcut(request: Request): boolean {
-        let { urlLowercase } = request;
+        const { urlLowercase } = request;
         // TODO: consider doing it in the request constructor and not here
-        if (urlLowercase.length > NetworkRule.MAX_URL_MATCH_LENGTH) {
-            urlLowercase = urlLowercase.substring(0, NetworkRule.MAX_URL_MATCH_LENGTH);
-        }
+        // if (urlLowercase.length > NetworkRule.MAX_URL_MATCH_LENGTH) {
+        //     urlLowercase = urlLowercase.substring(0, NetworkRule.MAX_URL_MATCH_LENGTH);
+        // }
 
         return urlLowercase.indexOf(this.shortcut) >= 0;
     }
@@ -135,9 +141,9 @@ export class Pattern {
         }
 
         if (this.pattern.startsWith(SimpleRegex.MASK_START_URL)
-            && this.pattern.endsWith(SimpleRegex.MASK_SEPARATOR)) {
-            // TODO: validate that it does not contain characters that
-            // cannot be in a domain name.
+            && this.pattern.endsWith(SimpleRegex.MASK_SEPARATOR)
+            && this.pattern.indexOf('*') < 0
+            && this.pattern.indexOf('/') < 0) {
             this.hostname = this.pattern.slice(2, this.pattern.length - 1);
             return;
         }
@@ -151,12 +157,11 @@ export class Pattern {
     private compileRegex(): void {
         const regexText = SimpleRegex.patternToRegexp(this.pattern);
         try {
-            // TODO: pass matchcase to the pattern constructor
-            // let flags = 'i';
-            // if (this.isOptionEnabled(NetworkRuleOption.MatchCase)) {
-            //     flags = '';
-            // }
-            this.regex = new RegExp(regexText, 'i');
+            let flags = 'i';
+            if (this.matchcase) {
+                flags = '';
+            }
+            this.regex = new RegExp(regexText, flags);
         } catch (e) {
             this.regexInvalid = true;
         }
@@ -180,7 +185,7 @@ export class Pattern {
     /**
      * In case pattern starts with the following it targets some specific domain
      */
-    private isPatternDomainSpecific(): boolean {
+    public isPatternDomainSpecific(): boolean {
         if (this.patternDomainSpecific === undefined) {
             this.patternDomainSpecific = this.pattern.startsWith(SimpleRegex.MASK_START_URL)
                 || this.pattern.startsWith('http://')
