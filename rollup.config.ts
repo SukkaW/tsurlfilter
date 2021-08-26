@@ -5,6 +5,7 @@ import globals from 'rollup-plugin-node-globals';
 import camelCase from 'lodash/camelCase';
 import typescript from '@rollup/plugin-typescript';
 import json from '@rollup/plugin-json';
+import nodePolyfills from 'rollup-plugin-polyfill-node';
 
 const DEFAULT_OUTPUT_PATH = 'dist';
 
@@ -66,6 +67,7 @@ const esmConfig = {
             },
         }),
         globals(),
+        nodePolyfills(),
         resolve({ preferBuiltins: false }),
         sourceMaps(),
     ],
@@ -99,6 +101,7 @@ const browserConfig = {
             },
         }),
         globals(),
+        nodePolyfills(),
         resolve({ preferBuiltins: false }),
         sourceMaps(),
     ],
@@ -137,6 +140,7 @@ export default [
                 },
             }),
             globals(),
+            nodePolyfills(),
 
             // Allow node_modules resolution, so you can use 'external' to control
             // which external modules to include in the bundle
