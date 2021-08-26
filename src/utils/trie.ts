@@ -71,7 +71,7 @@ export class TrieNode {
      * @param str string to check.
      * @param start index in str where to start traversing from.
      */
-    public traverse(str: string, start: number): number[] {
+    traverse(str: string, start: number): number[] {
         const result: number[] = [];
 
         // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -89,5 +89,23 @@ export class TrieNode {
         }
 
         return result;
+    }
+
+    /**
+     * Traverses this TrieNode and it's children using the specified search string and all substrings.
+     *
+     * @param str string to check
+     * @param len max length to check
+     */
+    public traverseAll(str: string, len: number): number[] {
+        const data: number[] = [];
+        for (let i = 0; i <= len; i += 1) {
+            const result = this.traverse(str, i);
+            if (result) {
+                data.push(...result);
+            }
+        }
+
+        return data;
     }
 }
