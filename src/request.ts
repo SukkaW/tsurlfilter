@@ -8,6 +8,11 @@ import { RequestType } from './request-type';
  */
 export class Request {
     /**
+     * Max url length for matching
+     */
+    public static readonly MAX_URL_MATCH_LENGTH = 2000;
+
+    /**
      * Request type
      */
     public readonly requestType: RequestType;
@@ -45,7 +50,7 @@ export class Request {
     public tabId: number | undefined;
 
     /**
-     * The same request URL, but in lower case.
+     * The same request URL, but in lower case and shortened.
      * It is necessary to use lower-cased URL in several places,
      * that's why we keep it in the object.
      */
@@ -168,9 +173,14 @@ export class Request {
      */
     constructor(url: string, sourceUrl: string | null, requestType: RequestType) {
         this.url = url;
-        this.urlLowercase = url.toLowerCase();
         this.sourceUrl = sourceUrl;
         this.requestType = requestType;
+
+        let urlLowercase = url;
+        if (urlLowercase.length > Request.MAX_URL_MATCH_LENGTH) {
+            urlLowercase = urlLowercase.substring(0, Request.MAX_URL_MATCH_LENGTH);
+        }
+        this.urlLowercase = urlLowercase.toLowerCase();
 
         const tldResult = parse(url);
         this.hostname = tldResult.hostname!;

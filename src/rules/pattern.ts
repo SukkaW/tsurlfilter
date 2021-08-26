@@ -106,13 +106,7 @@ export class Pattern {
      * @param request - request to check.
      */
     private matchShortcut(request: Request): boolean {
-        const { urlLowercase } = request;
-        // TODO: consider doing it in the request constructor and not here
-        // if (urlLowercase.length > NetworkRule.MAX_URL_MATCH_LENGTH) {
-        //     urlLowercase = urlLowercase.substring(0, NetworkRule.MAX_URL_MATCH_LENGTH);
-        // }
-
-        return urlLowercase.indexOf(this.shortcut) >= 0;
+        return request.urlLowercase.indexOf(this.shortcut) >= 0;
     }
 
     /**

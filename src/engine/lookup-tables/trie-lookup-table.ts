@@ -105,13 +105,7 @@ export class TrieLookupTable implements ILookupTable {
      * @param request
      */
     private traverse(request: Request): number[] {
-        const url = request.urlLowercase;
-        let urlLen = url.length;
-        if (urlLen > NetworkRule.MAX_URL_MATCH_LENGTH) {
-            urlLen = NetworkRule.MAX_URL_MATCH_LENGTH;
-        }
-
-        return this.trie.traverseAll(url, urlLen);
+        return this.trie.traverseAll(request.urlLowercase, request.urlLowercase.length);
     }
 
     /**
