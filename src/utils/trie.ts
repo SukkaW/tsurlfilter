@@ -108,4 +108,25 @@ export class TrieNode {
 
         return data;
     }
+
+    /**
+     * Debug only
+     */
+    public stats(): Map<number, number> {
+        const result = new Map<number, number>();
+
+        const childrenSize = this.children.size;
+        const countOfNodes = result.get(childrenSize) ? result.get(childrenSize)! + 1 : 1;
+        result.set(childrenSize, countOfNodes);
+
+        this.children.forEach((child: TrieNode) => {
+            const childStats = child.stats();
+            childStats.forEach((value: number, key: number) => {
+                const count = result.get(key) ? result.get(key)! + value : value;
+                result.set(key, count);
+            });
+        });
+
+        return result;
+    }
 }

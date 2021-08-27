@@ -76,6 +76,13 @@ export class TrieLookupTable implements ILookupTable {
     }
 
     /**
+     * Debug only
+     */
+    public stats(): Map<number,number> {
+        return this.trie.stats();
+    }
+
+    /**
      * For specified request finds matching rules from rules indexes array
      *
      * @param request

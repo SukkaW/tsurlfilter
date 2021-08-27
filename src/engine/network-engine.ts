@@ -70,6 +70,9 @@ export class NetworkEngine {
                 this.addRule(indexedRule.rule, indexedRule.index);
             }
         }
+
+        const map = (this.shortcutsLookupTable as TrieLookupTable).stats();
+        console.log(map);
     }
 
     /**
