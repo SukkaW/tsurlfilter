@@ -173,15 +173,20 @@ export class Request {
      */
     constructor(url: string, sourceUrl: string | null, requestType: RequestType) {
         this.url = url;
-        this.sourceUrl = sourceUrl;
         this.requestType = requestType;
 
-        // We cut this url for performance purposes
+        // We cut these urls in performance purpose
         let urlLowercase = url;
         if (urlLowercase.length > Request.MAX_URL_MATCH_LENGTH) {
             urlLowercase = urlLowercase.substring(0, Request.MAX_URL_MATCH_LENGTH);
         }
         this.urlLowercase = urlLowercase.toLowerCase();
+
+        let shortSourceUrl = sourceUrl;
+        if (shortSourceUrl && shortSourceUrl.length > Request.MAX_URL_MATCH_LENGTH) {
+            shortSourceUrl = shortSourceUrl.substring(0, Request.MAX_URL_MATCH_LENGTH);
+        }
+        this.sourceUrl = shortSourceUrl;
 
         const tldResult = parse(url);
         this.hostname = tldResult.hostname!;
