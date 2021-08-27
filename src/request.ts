@@ -176,6 +176,7 @@ export class Request {
         this.sourceUrl = sourceUrl;
         this.requestType = requestType;
 
+        // We cut this url for performance purposes
         let urlLowercase = url;
         if (urlLowercase.length > Request.MAX_URL_MATCH_LENGTH) {
             urlLowercase = urlLowercase.substring(0, Request.MAX_URL_MATCH_LENGTH);
