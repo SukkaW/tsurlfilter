@@ -84,6 +84,13 @@ const browserConfig = {
             sourcemap: false,
         },
         {
+            file: `${OUTPUT_PATH}/tsurlfilter.browser.min.js`,
+            name: camelCase(libraryName),
+            format: 'umd',
+            sourcemap: false,
+            plugins: [terser()],
+        },
+        {
             file: `${OUTPUT_PATH}/tsurlfilter.iife.js`,
             name: libraryName,
             format: 'iife',
