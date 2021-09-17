@@ -3,6 +3,7 @@ TODO:
 - [ ] check all commands through lerna
 - [ ] check bamboo specks
 - [ ] clean up dev dependencies in packages (lerna link convert)
+- [ ] examples build
 
 ```
 $ lerna bootstrap
