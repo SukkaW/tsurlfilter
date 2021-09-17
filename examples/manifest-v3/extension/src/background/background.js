@@ -10,7 +10,7 @@ export const background = async () => {
      * @return rules text
      */
     const loadRules = async () => {
-        const url = chrome.runtime.getURL('filters/dynamic.txt');
+        const url = chrome.runtime.getURL('filters/injectionTest.txt');
         const response = await fetch(url);
         return response.text();
     };

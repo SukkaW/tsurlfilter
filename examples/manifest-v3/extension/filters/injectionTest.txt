@@ -1,0 +1,4 @@
+example.org#%#console.log('test 1')
+example.org#%#console.log('test 2')
+example.org#$#body { background-color: #333!important; }
+example.org#?#h1:contains(Example Domain)

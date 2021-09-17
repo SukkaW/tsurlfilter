@@ -16,7 +16,8 @@
     "declarativeNetRequestFeedback",
     "scripting",
     "activeTab",
-    "webNavigation"
+    "webNavigation",
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -30,9 +31,19 @@
       "js": [
         "content-script.js"
       ],
+      "run_at": "document_start",
       "matches": [
         "*://*/*"
       ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+        "resources": ["page-script.js"],
+        "matches": [
+            "http://*/*",
+            "https://*/*"
+        ]
     }
   ],
   "background": {

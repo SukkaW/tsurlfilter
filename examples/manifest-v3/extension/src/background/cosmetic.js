@@ -14,25 +14,10 @@ export const applyScripts = (tabId, cosmeticResult) => {
     const scriptsCode = cosmeticRules.map((x) => x.script).join('\r\n');
     console.log(scriptsCode);
 
-    // TODO: Execute via chrome.scripting
-    // const toExecute = `function test(){  ${scriptsCode} }`;
-    // // eslint-disable-next-line no-eval
-    // eval(toExecute);
-    //
-    // chrome.scripting.executeScript(
-    //     {
-    //         target: {
-    //             tabId,
-    //             allFrames: true,
-    //         },
-    //         function: test,
-    //     },
-    //     (injectionResults) => {
-    //         for (const frameResult of injectionResults) {
-    //             console.log(`Frame Title: ${frameResult.result}`);
-    //         }
-    //     },
-    // );
+    chrome.tabs.sendMessage(tabId, {
+        type: 'injectPageScript',
+        payload: scriptsCode,
+    });
 };
 
 /**
@@ -123,36 +108,10 @@ export const applyCss = (tabId, cosmeticResult) => {
 
     const extendedCssStylesheets = [...elemhideExtendedCssStylesheets, ...injectExtendedCssStylesheets].join('\n');
 
-    // TODO: Execute via chrome.scripting
-    // chrome.tabs.executeScript(tabId, {
-    //     code: `
-    //             (() => {
-    //                 // Init css hits counter
-    //                 const { CssHitsCounter } = TSUrlFilterContentScript;
-    //                 const cssHitsCounter = new CssHitsCounter((stats) => {
-    //                     console.debug('Css stats ready');
-    //                     console.debug(stats);
-    //
-    //                     chrome.runtime.sendMessage({type: "saveCssHitStats", stats: JSON.stringify(stats)});
-    //                 });
-    //
-    //                 console.debug('CssHitsCounter initialized');
-    //
-    //                 // Apply extended css stylesheets
-    //                 const { ExtendedCss } = TSUrlFilterContentScript;
-    //                 const extendedCssContent = \`${extendedCssStylesheets}\`;
-    //                 const extendedCss = new ExtendedCss({
-    //                     styleSheet: extendedCssContent,
-    //                     beforeStyleApplied: (el) => {
-    //                         return cssHitsCounter.countAffectedByExtendedCss(el);
-    //                     }
-    //                 });
-    //                 extendedCss.apply();
-    //
-    //                 console.debug('Extended css applied');
-    //             })();
-    //         `,
-    // });
+    chrome.tabs.sendMessage(tabId, {
+        type: 'initCssHitsCounter',
+        payload: extendedCssStylesheets,
+    });
 
     // Apply css
     const styleText = [...elemhideCss, ...injectCss].join('\n');

@@ -4,6 +4,7 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 
 const BACKGROUND_PATH = path.resolve(__dirname, '../../extension/pages/background');
 const CONTENT_SCRIPT = path.resolve(__dirname, '../../extension/pages/content-script');
+const PAGE_SCRIPT = path.resolve(__dirname, '../../extension/pages/page-script');
 const BUILD_PATH = path.resolve(__dirname, '../../build');
 
 export const config = {
@@ -12,6 +13,7 @@ export const config = {
     entry: {
         background: BACKGROUND_PATH,
         'content-script': CONTENT_SCRIPT,
+        'page-script': PAGE_SCRIPT,
     },
     output: {
         path: BUILD_PATH,
