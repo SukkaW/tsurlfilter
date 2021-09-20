@@ -7,7 +7,7 @@
  * 'eval' call or injecting script tag with inline source in this context cause CSP error,
  *  but we can load script from web_accessible_resources and execute script string there
  *
- * Payload is transferring by hiden div data-attribute
+ * Payload is transferring by hidden div data-attribute
  */
 export function syncInjectPageScript(payload) {
     const div = document.createElement('div');
