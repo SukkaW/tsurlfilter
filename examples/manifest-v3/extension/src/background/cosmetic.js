@@ -109,7 +109,7 @@ export const applyCss = (tabId, cosmeticResult) => {
     const extendedCssStylesheets = [...elemhideExtendedCssStylesheets, ...injectExtendedCssStylesheets].join('\n');
 
     chrome.tabs.sendMessage(tabId, {
-        type: 'initCssHitsCounter',
+        type: 'applyExtendedCss',
         payload: extendedCssStylesheets,
     });
 
