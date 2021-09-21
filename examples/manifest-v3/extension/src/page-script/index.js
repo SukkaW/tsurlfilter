@@ -11,7 +11,6 @@ const messageHandler = document.addEventListener(messageType, (event) => {
 
 /* sync load of script src by reading injected div content */
 
-const div = document.getElementById('page-script-payload');
-const data = div.getAttribute('data-page-script-payload');
+const div = document.getElementById('page-script');
+const data = div.getAttribute('data-payload');
 eval(data);
-document.body.removeChild(div);

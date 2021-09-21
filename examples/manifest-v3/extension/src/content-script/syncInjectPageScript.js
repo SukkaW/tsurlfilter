@@ -10,21 +10,16 @@
  * Payload is transferring by hidden div data-attribute
  */
 export function syncInjectPageScript(payload) {
-    const div = document.createElement('div');
-
-    div.setAttribute('hidden', true);
-    div.setAttribute('id', 'page-script-payload');
-    div.setAttribute('data-page-script-payload', payload);
-
     const script = document.createElement('script');
 
     script.setAttribute('type', 'text/javascript');
     script.setAttribute('src', chrome.runtime.getURL('page-script.js'));
+    script.setAttribute('id', 'page-script');
+    script.setAttribute('data-payload', payload);
 
     script.onload = () => {
         document.head.removeChild(script);
     };
 
-    document.body.appendChild(div);
     document.head.appendChild(script);
 }
