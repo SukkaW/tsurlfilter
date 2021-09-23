@@ -1,3 +1,13 @@
+# TSUrlFilter
+
+## Packages:
+
+- tsurlfilter
+- examples/manifest-v2
+- examples/manifest-v3
+
+See packages details in `./packages`
+
 TODO:
 - [ ] write packages description here
 - [ ] check all commands through lerna
