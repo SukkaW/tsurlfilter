@@ -31,12 +31,14 @@ Build:
           - |-
             set -e
             set -x
+
+            cd ./packages/tsurlfilter
             ls -alt
 
             yarn install ${system.YARN_ARGS}
             yarn build
     - inject-variables:
-        file: dist/build.txt
+        file: ./packages/tsurlfilter/dist/build.txt
         scope: RESULT
         namespace: inject
     - any-task:

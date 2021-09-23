@@ -22,6 +22,8 @@ npmjs:
           - |-
             set -e
             set -x
+
+            cd ./packages/tsurlfilter
             ls -alt
 
             export NPM_TOKEN=${bamboo.npmSecretToken}

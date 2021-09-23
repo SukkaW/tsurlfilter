@@ -29,6 +29,8 @@ Increment:
           - |-
             set -e
             set -x
+
+            cd ./packages/tsurlfilter
             ls -alt
 
             yarn increment

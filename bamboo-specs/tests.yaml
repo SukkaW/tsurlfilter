@@ -29,6 +29,8 @@ Test:
           - |-
             set -e
             set -x
+
+            cd ./packages/tsurlfilter
             ls -alt
 
             yarn install ${system.YARN_ARGS}
