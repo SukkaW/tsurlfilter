@@ -36,9 +36,8 @@ Build:
 
             yarn install
 
-            lerna init
-            lerna bootstap
-            lerna run build -- ${system.YARN_ARGS}
+            npx lerna bootstap
+            npx lerna run build -- ${system.YARN_ARGS}
     - inject-variables:
         file: ./packages/tsurlfilter/dist/build.txt
         scope: RESULT

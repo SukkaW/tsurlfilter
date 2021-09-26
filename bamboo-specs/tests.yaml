@@ -34,10 +34,9 @@ Test:
 
             yarn install
 
-            lerna init
-            lerna bootstap
-            lerna run --scope @adguard/tsurlfilter test:prod
-            lerna run --scope @adguard/tsurlfilter build
+            npx lerna bootstap
+            npx lerna run --scope @adguard/tsurlfilter test:prod
+            npx lerna run --scope @adguard/tsurlfilter build
   final-tasks:
     - clean
   requirements:
