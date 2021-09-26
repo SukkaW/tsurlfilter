@@ -32,11 +32,12 @@ Build:
             set -e
             set -x
 
-            cd ./packages/tsurlfilter
             ls -alt
 
-            yarn install ${system.YARN_ARGS}
-            yarn build
+            yarn install
+
+            lerna bootstap
+            lerna run build -- ${system.YARN_ARGS}
     - inject-variables:
         file: ./packages/tsurlfilter/dist/build.txt
         scope: RESULT

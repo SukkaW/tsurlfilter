@@ -30,12 +30,13 @@ Test:
             set -e
             set -x
 
-            cd ./packages/tsurlfilter
             ls -alt
 
-            yarn install ${system.YARN_ARGS}
-            yarn test:prod
-            yarn build
+            yarn install
+
+            lerna bootstap
+            lerna run --scope @adguard/tsurlfilter test:prod
+            lerna run --scope @adguard/tsurlfilter build
   final-tasks:
     - clean
   requirements:

@@ -2,11 +2,6 @@
 
 This repo contains typescript packages implementing AdGuard filtering engine.
 
-TODO:
-- [ ] check all commands through lerna
-- [ ] clean up dev dependencies in packages (lerna link convert)
-- [ ] examples build
-
 ## Packages:
 
 - tsurlfilter
