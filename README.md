@@ -1,19 +1,45 @@
 # TSUrlFilter
 
+This repo contains typescript packages implementing AdGuard filtering engine.
+
+TODO:
+- [ ] check all commands through lerna
+- [ ] clean up dev dependencies in packages (lerna link convert)
+- [ ] examples build
+
 ## Packages:
 
 - tsurlfilter
 - examples/manifest-v2
 - examples/manifest-v3
 
-See packages details in `./packages`
+See packages details in `./packages`.
 
-TODO:
-- [ ] write packages description here
-- [ ] check all commands through lerna
-- [ ] check bamboo specks
-- [ ] clean up dev dependencies in packages (lerna link convert)
-- [ ] examples build
+### TSUrlFilter
+
+TSUrlFilter is a TypeScript library that implements AdGuard's blocking rules logic.
+See details in [`./packages/tsurlfilter`](/packages/tsurlfilter/README.md).
+
+### Sample extensions
+
+Source code of the sample extensions is located in the directory `./packages/examples`.
+
+To build sample extension go to the one of the examples and run:
+```
+yarn && yarn build
+```
+
+After that it's ready to be added to Chrome using "Load unpacked" in developer mode.
+
+To test if this extension works correctly you can use next test pages:
+
+Test pages:
+-   [Simple rules test](http://testcases.adguard.com/Filters/simple-rules/test-simple-rules.html)
+-   [Script rules test](http://testcases.adguard.com/Filters/script-rules/test-script-rules.html)
+-   [CSP rules test](http://testcases.adguard.com/Filters/csp-rules/test-csp-rules.html)
+
+
+## Development
 
 ```
 $ lerna bootstrap

@@ -569,24 +569,6 @@ This class applies cookie rules in page context
     cookieController.apply(rulesData);
 ```
 
-### <a id="sample-extensions"></a> Sample extensions
-
-Source code of the sample extensions is located in the directory `examples`
-
-To build sample extension go to the one of the examples and run
-```
-yarn && yarn build
-```
-
-This command builds tsurlfilter library and extension to `build` directory. After that it's ready to be added to Chrome using "Load unpacked" in developer mode.
-
-To test if this extension works correctly you can use next test pages:
-
-Test pages:
--   [Simple rules test](http://testcases.adguard.com/Filters/simple-rules/test-simple-rules.html)
--   [Script rules test](http://testcases.adguard.com/Filters/script-rules/test-script-rules.html)
--   [CSP rules test](http://testcases.adguard.com/Filters/csp-rules/test-csp-rules.html)
-
 ## Development
 
 ### <a id="npm-scripts"></a> NPM scripts
