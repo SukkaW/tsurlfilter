@@ -24,9 +24,13 @@ See details in [`./packages/tsurlfilter`](/packages/tsurlfilter/README.md).
 
 Source code of the sample extensions is located in the directory `./packages/examples`.
 
-To build sample extension go to the one of the examples and run:
+To build sample manifest-v2 extension go to the one of the examples and run:
 ```
-yarn && yarn build
+lerna bootstrap && lerna run --scope manifest-v2 build
+```
+Reciprocally with manifest-v3:
+```
+lerna bootstrap && lerna run --scope manifest-v3 build
 ```
 
 After that it's ready to be added to Chrome using "Load unpacked" in developer mode.

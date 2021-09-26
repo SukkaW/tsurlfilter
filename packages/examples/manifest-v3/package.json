@@ -5,10 +5,13 @@
   "author": "adguard@adguard.com",
   "license": "GPL-3.0",
   "scripts": {
-    "build": "yarn build:tsurlfilter && yarn build:precompile-rules && yarn build:extension",
+    "build": "yarn build:precompile-rules && yarn build:extension",
     "build:extension": "babel-node ./scripts/build",
-    "build:precompile-rules": "babel-node ./scripts/build/precompile-rules.js",
-    "build:tsurlfilter": "export PACKAGE_OUTPUT_PATH=\"$(pwd)/node_modules/@adguard/tsurlfilter\"; cd ../../ && yarn build:lib"
+    "build:precompile-rules": "babel-node ./scripts/build/precompile-rules.js"
+  },
+  "dependencies": {
+    "@adguard/scriptlets": "^1.4.4",
+    "@adguard/tsurlfilter": "^0.7.7"
   },
   "devDependencies": {
     "@babel/core": "^7.13.14",
