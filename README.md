@@ -26,11 +26,11 @@ Source code of the sample extensions is located in the directory `./packages/exa
 
 To build sample manifest-v2 extension go to the one of the examples and run:
 ```
-lerna bootstrap && lerna run --scope manifest-v2 build
+$ lerna bootstrap && lerna run --scope manifest-v2 build
 ```
 Reciprocally with manifest-v3:
 ```
-lerna bootstrap && lerna run --scope manifest-v3 build
+$ lerna bootstrap && lerna run --scope manifest-v3 build
 ```
 
 After that it's ready to be added to Chrome using "Load unpacked" in developer mode.
