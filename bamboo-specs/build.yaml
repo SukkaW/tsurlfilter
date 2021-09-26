@@ -36,7 +36,7 @@ Build:
 
             yarn install
 
-            npx lerna bootstap
+            npx lerna bootstrap
             npx lerna run build -- ${system.YARN_ARGS}
     - inject-variables:
         file: ./packages/tsurlfilter/dist/build.txt

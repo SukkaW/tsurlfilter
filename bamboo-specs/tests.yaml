@@ -34,7 +34,7 @@ Test:
 
             yarn install
 
-            npx lerna bootstap
+            npx lerna bootstrap
             npx lerna run --scope @adguard/tsurlfilter test:prod
             npx lerna run --scope @adguard/tsurlfilter build
   final-tasks:
