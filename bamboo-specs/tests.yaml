@@ -34,6 +34,7 @@ Test:
 
             yarn install
 
+            lerna init
             lerna bootstap
             lerna run --scope @adguard/tsurlfilter test:prod
             lerna run --scope @adguard/tsurlfilter build

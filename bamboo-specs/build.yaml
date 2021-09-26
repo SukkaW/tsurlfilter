@@ -36,6 +36,7 @@ Build:
 
             yarn install
 
+            lerna init
             lerna bootstap
             lerna run build -- ${system.YARN_ARGS}
     - inject-variables:
