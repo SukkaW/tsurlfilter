@@ -89,6 +89,8 @@
     ]
   },
   "devDependencies": {
+    "@types/jest": "^23.3.14",
+    "jest": "^25.5.4",
     "webextension-polyfill-ts": "^0.24.0"
   },
   "dependencies": {

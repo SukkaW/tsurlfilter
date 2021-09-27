@@ -27,6 +27,9 @@ npmjs:
 
             yarn install
 
+            cd ./packages/tsurlfilter && yarn install
+            cd ../..
+
             npx lerna bootstrap
             npx lerna run build -- ${system.YARN_ARGS}
 
