@@ -33,6 +33,7 @@ interface Configuration {
 // TODO complement with other methods
 type RequestMethod = 'POST' | 'GET' | 'PING'
 
+// TODO complement with required fields
 interface FilteringLogEvent {
     eventId: number,
     requestUrl: string,
@@ -66,7 +67,7 @@ interface ApiInterface {
     /**
      * Returns filtering log events
      */
-    getFilteringLogEvents(): FilteringLogEvent[],
+    onFilteringLogEvent(cb: (filteringLogEvent: FilteringLogEvent) => void): void,
 
     /**
      * Launches assistant in the current tab
@@ -95,67 +96,59 @@ interface ApiInterface {
     onStatsUpdate(callback: (stats: Stats) => void): void,
 
     /**
-     * Opens tab with filtering log
-     */
-    openFilteringLog(): void,
-
-    /**
      * Clears stats
      */
     clearStats(): void,
 }
 
 class Api implements ApiInterface {
-    async start(configuration: Configuration): Promise<void> {
+    public async start(configuration: Configuration): Promise<void> {
         // TODO implement
     }
 
-    stop() {
+    public stop() {
         // TODO implement
     }
 
-    async configure(configuration: Configuration): Promise<void> {
+    public async configure(configuration: Configuration): Promise<void> {
         // TODO implement
     }
 
-    getFilteringLogEvents() {
+    public onFilteringLogEvent(cb: (filteringLogEvent: FilteringLogEvent) => void) {
         // TODO implement
-        return [{
+        cb({
             eventId: 10,
             requestUrl: 'https://example.org',
             timestamp: 1633960896641,
             isThirdParty: false,
             method: 'POST' as RequestMethod,
-        }]
+        });
     }
 
-    async checkFiltersUpdates(): Promise<void> {
+    public async checkFiltersUpdates(): Promise<void> {
         // TODO implement
     }
 
-    openAssistant() {
+    public openAssistant() {
         // TODO implement
     }
 
-    closeAssistant() {
+    public closeAssistant() {
         // TODO implement
     }
 
-    getStats(): Stats {
+    public getStats(): Stats {
         // TODO implement
         return {};
     }
 
-    onStatsUpdate(cb: (stats: Stats) => void): void {
+    public onStatsUpdate(cb: (stats: Stats) => void): void {
         // TODO implement
         return cb({});
     }
 
-    clearStats(): void {
+    public clearStats(): void {
         // TODO implement
-    }
-
-    openFilteringLog(): void {
     }
 }
 
@@ -193,9 +186,12 @@ class Api implements ApiInterface {
     // update configuration
     await api.configure(configuration);
 
-    // get filtering log
-    const filteringLogEvents = api.getFilteringLogEvents();
+    // handle filtering log events
+    api.onFilteringLogEvent((filteringLogEvent: FilteringLogEvent) => {
+        // TODO keep track of filtering log events, and update filtering log page
+    });
 
+    // handle stats events
     api.onStatsUpdate((stats: Stats) => {
         // TODO update popup and/or send stats to server if required
     });
