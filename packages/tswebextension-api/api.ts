@@ -2,10 +2,7 @@
  * Configuration object interface
  */
 interface Configuration {
-    // Methods which will be implemented through this property:
-    //  - addCustomFilter
-    //  - enableFilter
-    //  - disableFilter
+    // available filters
     filters: number[],
     // urls to custom filters
     customFilters: string[],
