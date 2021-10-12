@@ -30,6 +30,7 @@ interface Configuration {
             selfDestructFirstPartyCookiesTime: number,
         },
     },
+    verbose: boolean,
     filtersMetadataUrl: string,
     filterRulesUrl: string,
 }
@@ -213,6 +214,7 @@ class Api implements ApiInterface {
                 selfDestructFirstPartyCookiesTime: 3600,
             },
         },
+        verbose: true,
         filtersMetadataUrl: 'https://filters.adtidy.org/extension/chromium/filters.json',
         filterRulesUrl: 'https://filters.adtidy.org/extension/chromium/filters/{filter_id}.txt',
     };
