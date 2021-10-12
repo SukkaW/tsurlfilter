@@ -18,6 +18,7 @@ interface Configuration {
         allowlistInverted: boolean,
         // enables css hits counter if true
         collectStats: boolean,
+        useOptimizedFilters: boolean,
         stealth: {
             blockChromeClientData: boolean,
             hideReferrer: boolean,
@@ -30,7 +31,11 @@ interface Configuration {
             selfDestructFirstPartyCookiesTime: number,
         },
     },
-    verbose: boolean,
+    localFiltersFolder: string,
+    localFiltersName: string,
+    localFiltersNameOptimized: string,
+    localFiltersTranslations: string,
+    localFiltersMetadata: string,
     filtersMetadataUrl: string,
     filterRulesUrl: string,
 }
@@ -66,8 +71,36 @@ interface FilteringLogEvent {
     requestRule: RequestRule,
 }
 
-interface Stats {
-    // TODO implement required structure
+interface Tag {
+    id: number,
+    title: string,
+}
+
+interface FiltersState {
+    id: number,
+    title: string,
+    description: string,
+    groupId: number,
+    enabled: boolean,
+    version: string,
+    tags: number[],
+    updated: number,
+    homepage: string,
+    order: number,
+    languages: string[],
+}
+
+interface GroupsState {
+    id: number,
+    title: string,
+    description: string,
+    order: number,
+}
+
+interface FiltersMetadata {
+    filters: FiltersState[],
+    groups: GroupsState[],
+    tags: Tag[],
 }
 
 interface ApiInterface {
@@ -109,20 +142,29 @@ interface ApiInterface {
     checkFiltersUpdates(): Promise<void>,
 
     /**
-     * Returns stats of blocked ads
+     * Returns filters state
      */
-    getStats(): Stats,
+    getFiltersMetadata(): FiltersMetadata,
 
     /**
-     * Fires on stats update
-     * @param callback
+     * Enables filter
      */
-    onStatsUpdate(callback: (stats: Stats) => void): void,
+    enableFilter(filterId: number): Promise<void>,
 
     /**
-     * Clears stats
+     * Disables filter
      */
-    clearStats(): void,
+    disableFilter(filterId: number): Promise<void>,
+
+    /**
+     * Enables group
+     */
+    enableGroup(groupId: number): Promise<void>,
+
+    /**
+     * Disables group
+     */
+    disableGroup(groupId: number): Promise<void>,
 }
 
 class Api implements ApiInterface {
@@ -173,17 +215,24 @@ class Api implements ApiInterface {
         // TODO implement
     }
 
-    public getStats(): Stats {
+    public getFiltersMetadata(): FiltersMetadata {
         // TODO implement
-        return {};
+        return {} as FiltersMetadata;
     }
 
-    public onStatsUpdate(cb: (stats: Stats) => void): void {
+    public async enableFilter(filterId: number): Promise<void> {
         // TODO implement
-        cb({});
     }
 
-    public clearStats(): void {
+    public async disableFilter(filterId: number): Promise<void> {
+        // TODO implement
+    }
+
+    public async enableGroup(groupId: number): Promise<void> {
+        // TODO implement
+    }
+
+    public async disableGroup(groupId: number): Promise<void> {
         // TODO implement
     }
 }
@@ -202,6 +251,7 @@ class Api implements ApiInterface {
             activateFiltersAutomatically: true,
             collectStats: true,
             allowlistInverted: false,
+            useOptimizedFilters: false,
             stealth: {
                 blockChromeClientData: true,
                 hideReferrer: true,
@@ -214,7 +264,11 @@ class Api implements ApiInterface {
                 selfDestructFirstPartyCookiesTime: 3600,
             },
         },
-        verbose: true,
+        localFiltersFolder: 'filters',
+        localFiltersName: 'filter_{filterId}.txt',
+        localFiltersNameOptimized: 'filter_mobile_{filterId}.txt',
+        localFiltersTranslations: 'filters_i18n.json',
+        localFiltersMetadata: 'filters.json',
         filtersMetadataUrl: 'https://filters.adtidy.org/extension/chromium/filters.json',
         filterRulesUrl: 'https://filters.adtidy.org/extension/chromium/filters/{filter_id}.txt',
     };
@@ -225,14 +279,10 @@ class Api implements ApiInterface {
     // update configuration
     await api.configure(configuration);
 
-    // handle filtering log events
+    // handle filtering log events and stats
     api.onFilteringLogEvent((filteringLogEvent: FilteringLogEvent) => {
         // TODO keep track of filtering log events, and update filtering log page
-    });
-
-    // handle stats events
-    api.onStatsUpdate((stats: Stats) => {
-        // TODO update popup and/or send stats to server if required
+        console.log(filteringLogEvent);
     });
 
     setTimeout(() => {
