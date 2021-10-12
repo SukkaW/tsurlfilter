@@ -35,16 +35,34 @@ interface Configuration {
 }
 
 // TODO complement with other methods
-type RequestMethod = 'POST' | 'GET' | 'PING'
+type RequestMethod = 'POST' | 'GET'
+
+// TODO complement with other types
+type RequestType = 'DOCUMENT' | 'PING' | 'IMAGE' | 'STYLESHEET' | 'SCRIPT'
+
+interface RequestRule {
+    filterId: number,
+    ruleText: string,
+    allowlistRule: boolean,
+    cspRule: boolean,
+    modifierValue: string | null,
+    cookieRule: boolean
+    cssRule: boolean,
+}
 
 // TODO complement with required fields
 interface FilteringLogEvent {
     tabId: number,
     eventId: number,
-    requestUrl: string,
+    // string representation of blocked dom node
+    element?: string,
+    requestUrl?: string,
+    frameUrl: string,
+    requestType: RequestType,
     timestamp: number,
-    isThirdParty: boolean,
+    statusCode: number,
     method: RequestMethod,
+    requestRule: RequestRule,
 }
 
 interface Stats {
@@ -125,9 +143,20 @@ class Api implements ApiInterface {
             tabId: 10,
             eventId: 10,
             requestUrl: 'https://example.org',
+            frameUrl: 'https://example.org',
+            requestType: 'DOCUMENT' as RequestType,
             timestamp: 1633960896641,
-            isThirdParty: false,
+            statusCode: 200,
             method: 'POST' as RequestMethod,
+            requestRule: {
+                filterId: 1,
+                ruleText: '||ad.mail.ru^$domain=~e.mail.ru|~octavius.mail.ru',
+                allowlistRule: false,
+                cspRule: false,
+                modifierValue: null,
+                cookieRule: false,
+                cssRule: false,
+            },
         });
     }
 
@@ -186,7 +215,7 @@ class Api implements ApiInterface {
         },
         filtersMetadataUrl: 'https://filters.adtidy.org/extension/chromium/filters.json',
         filterRulesUrl: 'https://filters.adtidy.org/extension/chromium/filters/{filter_id}.txt',
-    }
+    };
 
     // start api with required configuration
     await api.start(configuration);
@@ -206,5 +235,5 @@ class Api implements ApiInterface {
 
     setTimeout(() => {
         api.stop();
-    }, 5 * 60 * 1000)
+    }, 5 * 60 * 1000);
 })();
