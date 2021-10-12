@@ -1,5 +1,6 @@
-// API interface
-
+/**
+ * Configuration object interface
+ */
 interface Configuration {
     // Methods which will be implemented through this property:
     //  - addCustomFilter
@@ -14,6 +15,9 @@ interface Configuration {
         // method setFilterUpdateInterval can be implemented through this property
         filtersUpdateInterval: number,
         activateFiltersAutomatically: boolean,
+        allowlistInverted: boolean,
+        // enables css hits counter if true
+        collectStats: boolean,
         stealth: {
             blockChromeClientData: boolean,
             hideReferrer: boolean,
@@ -35,6 +39,7 @@ type RequestMethod = 'POST' | 'GET' | 'PING'
 
 // TODO complement with required fields
 interface FilteringLogEvent {
+    tabId: number,
     eventId: number,
     requestUrl: string,
     timestamp: number,
@@ -43,7 +48,7 @@ interface FilteringLogEvent {
 }
 
 interface Stats {
-    // TODO implement convenient structure
+    // TODO implement required structure
 }
 
 interface ApiInterface {
@@ -65,7 +70,7 @@ interface ApiInterface {
     configure(configuration: Configuration): Promise<void>
 
     /**
-     * Returns filtering log events
+     * Fires on filtering log event
      */
     onFilteringLogEvent(cb: (filteringLogEvent: FilteringLogEvent) => void): void,
 
@@ -90,7 +95,7 @@ interface ApiInterface {
     getStats(): Stats,
 
     /**
-     * Calls callback with current stats object when stats object updates
+     * Fires on stats update
      * @param callback
      */
     onStatsUpdate(callback: (stats: Stats) => void): void,
@@ -117,6 +122,7 @@ class Api implements ApiInterface {
     public onFilteringLogEvent(cb: (filteringLogEvent: FilteringLogEvent) => void) {
         // TODO implement
         cb({
+            tabId: 10,
             eventId: 10,
             requestUrl: 'https://example.org',
             timestamp: 1633960896641,
@@ -144,7 +150,7 @@ class Api implements ApiInterface {
 
     public onStatsUpdate(cb: (stats: Stats) => void): void {
         // TODO implement
-        return cb({});
+        cb({});
     }
 
     public clearStats(): void {
@@ -164,6 +170,8 @@ class Api implements ApiInterface {
         settings: {
             filtersUpdateInterval: 60 * 60 * 1000,
             activateFiltersAutomatically: true,
+            collectStats: true,
+            allowlistInverted: false,
             stealth: {
                 blockChromeClientData: true,
                 hideReferrer: true,
