@@ -2,20 +2,14 @@
  * Configuration object interface
  */
 interface Configuration {
-    // available filters
-    filters: number[],
-    // urls to custom filters
-    customFilters: string[],
+    filters: { filterId: number, content: string }[],
     allowlist: string[],
     userrules: string[],
+    verbose: boolean,
     settings: {
-        // method setFilterUpdateInterval can be implemented through this property
-        filtersUpdateInterval: number,
-        activateFiltersAutomatically: boolean,
         allowlistInverted: boolean,
         // enables css hits counter if true
         collectStats: boolean,
-        useOptimizedFilters: boolean,
         stealth: {
             blockChromeClientData: boolean,
             hideReferrer: boolean,
@@ -28,13 +22,6 @@ interface Configuration {
             selfDestructFirstPartyCookiesTime: number,
         },
     },
-    localFiltersFolder: string,
-    localFiltersName: string,
-    localFiltersNameOptimized: string,
-    localFiltersTranslations: string,
-    localFiltersMetadata: string,
-    filtersMetadataUrl: string,
-    filterRulesUrl: string,
 }
 
 // TODO complement with other methods
@@ -66,38 +53,6 @@ interface FilteringLogEvent {
     statusCode: number,
     method: RequestMethod,
     requestRule: RequestRule,
-}
-
-interface Tag {
-    id: number,
-    title: string,
-}
-
-interface FiltersState {
-    id: number,
-    title: string,
-    description: string,
-    groupId: number,
-    enabled: boolean,
-    version: string,
-    tags: number[],
-    updated: number,
-    homepage: string,
-    order: number,
-    languages: string[],
-}
-
-interface GroupsState {
-    id: number,
-    title: string,
-    description: string,
-    order: number,
-}
-
-interface FiltersMetadata {
-    filters: FiltersState[],
-    groups: GroupsState[],
-    tags: Tag[],
 }
 
 interface ApiInterface {
@@ -132,39 +87,9 @@ interface ApiInterface {
      * Closes assistant
      */
     closeAssistant(): void,
-
-    /**
-     * Checks updates of filters
-     */
-    checkFiltersUpdates(): Promise<void>,
-
-    /**
-     * Returns filters state
-     */
-    getFiltersMetadata(): FiltersMetadata,
-
-    /**
-     * Enables filter
-     */
-    enableFilter(filterId: number): Promise<void>,
-
-    /**
-     * Disables filter
-     */
-    disableFilter(filterId: number): Promise<void>,
-
-    /**
-     * Enables group
-     */
-    enableGroup(groupId: number): Promise<void>,
-
-    /**
-     * Disables group
-     */
-    disableGroup(groupId: number): Promise<void>,
 }
 
-class Api implements ApiInterface {
+class TsWebExtension implements ApiInterface {
     public async start(configuration: Configuration): Promise<void> {
         // TODO implement
     }
@@ -200,10 +125,6 @@ class Api implements ApiInterface {
         });
     }
 
-    public async checkFiltersUpdates(): Promise<void> {
-        // TODO implement
-    }
-
     public openAssistant() {
         // TODO implement
     }
@@ -211,44 +132,23 @@ class Api implements ApiInterface {
     public closeAssistant() {
         // TODO implement
     }
-
-    public getFiltersMetadata(): FiltersMetadata {
-        // TODO implement
-        return {} as FiltersMetadata;
-    }
-
-    public async enableFilter(filterId: number): Promise<void> {
-        // TODO implement
-    }
-
-    public async disableFilter(filterId: number): Promise<void> {
-        // TODO implement
-    }
-
-    public async enableGroup(groupId: number): Promise<void> {
-        // TODO implement
-    }
-
-    public async disableGroup(groupId: number): Promise<void> {
-        // TODO implement
-    }
 }
 
 // Usage example
 (async () => {
-    const api = new Api();
+    const tsWebExtension = new TsWebExtension();
 
     const configuration: Configuration = {
-        filters: [1, 2],
-        customFilters: ['https://example.org/custom_filter_url', 'https://example.org/another_custom_filter_url'],
+        filters: [
+            { filterId: 1, content: '' },
+            { filterId: 2, content: '' },
+        ],
         allowlist: ['example.com'],
         userrules: ['||example.org^', 'example.com##h1'],
+        verbose: false,
         settings: {
-            filtersUpdateInterval: 60 * 60 * 1000,
-            activateFiltersAutomatically: true,
             collectStats: true,
             allowlistInverted: false,
-            useOptimizedFilters: false,
             stealth: {
                 blockChromeClientData: true,
                 hideReferrer: true,
@@ -261,28 +161,21 @@ class Api implements ApiInterface {
                 selfDestructFirstPartyCookiesTime: 3600,
             },
         },
-        localFiltersFolder: 'filters',
-        localFiltersName: 'filter_{filterId}.txt',
-        localFiltersNameOptimized: 'filter_mobile_{filterId}.txt',
-        localFiltersTranslations: 'filters_i18n.json',
-        localFiltersMetadata: 'filters.json',
-        filtersMetadataUrl: 'https://filters.adtidy.org/extension/chromium/filters.json',
-        filterRulesUrl: 'https://filters.adtidy.org/extension/chromium/filters/{filter_id}.txt',
     };
 
-    // start api with required configuration
-    await api.start(configuration);
+    // start tsWebExtension with required configuration
+    await tsWebExtension.start(configuration);
 
     // update configuration
-    await api.configure(configuration);
+    await tsWebExtension.configure(configuration);
 
     // handle filtering log events and stats
-    api.onFilteringLogEvent((filteringLogEvent: FilteringLogEvent) => {
+    tsWebExtension.onFilteringLogEvent((filteringLogEvent: FilteringLogEvent) => {
         // TODO keep track of filtering log events, and update filtering log page
         console.log(filteringLogEvent);
     });
 
     setTimeout(() => {
-        api.stop();
+        tsWebExtension.stop();
     }, 5 * 60 * 1000);
 })();
