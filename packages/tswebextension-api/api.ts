@@ -2,13 +2,40 @@
  * Configuration object interface
  */
 interface Configuration {
+    /**
+     * Specifies filter lists that will be used to filter content.
+     * filterId should uniquely identify the filter so that the API user
+     * may match it with the source lists in the filtering log callbacks.
+     * content is a string with the full filter list content. The API will
+     * parse it into a list of individual rules.
+     */
     filters: { filterId: number, content: string }[],
+
+    /**
+     * List of domain names of sites, which should be excluded from blocking
+     * or which should be included in blocking depending on the value of
+     * allowlistInverted setting value
+     */
     allowlist: string[],
+
+    /**
+     * List of rules added by user
+     */
     userrules: string[],
+
+    /**
+     * Flag responsible for logging
+     */
     verbose: boolean,
+
     settings: {
+        /**
+         * Flag specifying if ads for sites would be blocked or allowed
+         */
         allowlistInverted: boolean,
-        // enables css hits counter if true
+        /**
+         * Enables css hits counter if true
+         */
         collectStats: boolean,
         stealth: {
             blockChromeClientData: boolean,
@@ -30,6 +57,10 @@ type RequestMethod = 'POST' | 'GET'
 // TODO complement with other types
 type RequestType = 'DOCUMENT' | 'PING' | 'IMAGE' | 'STYLESHEET' | 'SCRIPT'
 
+/**
+ * Represents information about rule which blocked ad
+ * can be used in the stats of filtering log
+ */
 interface RequestRule {
     filterId: number,
     ruleText: string,
@@ -40,8 +71,12 @@ interface RequestRule {
     cssRule: boolean,
 }
 
-// TODO complement with required fields
+/**
+ * Represents data of filtering log event, can be used to display events
+ * in the filtering log, or collect stats to display on popup
+ */
 interface FilteringLogEvent {
+    // TODO complement with required fields
     tabId: number,
     eventId: number,
     // string representation of blocked dom node
@@ -55,7 +90,26 @@ interface FilteringLogEvent {
     requestRule: RequestRule,
 }
 
-interface ApiInterface {
+/**
+ * Returns information about state for site
+ */
+enum SiteStatus {
+    /**
+     * AdBlocker can't apply rules on this site
+     */
+    SiteInException = 'SITE_IN_EXCEPTION',
+    /**
+     * Site is in the allowlist
+     */
+    SiteAllowlisted = 'SITE_ALLOWLISTED',
+
+    /**
+     * Filtering on the site is working as expected
+     */
+    FilteringEnabled = 'FILTERING_ENABLED',
+}
+
+interface TsWebExtensionInterface {
     /**
      * Starts api
      * @param configuration
@@ -87,9 +141,14 @@ interface ApiInterface {
      * Closes assistant
      */
     closeAssistant(): void,
+
+    /**
+     * Returns current status for site
+     */
+    getSiteStatus(url: string): SiteStatus,
 }
 
-class TsWebExtension implements ApiInterface {
+class TsWebExtension implements TsWebExtensionInterface {
     public async start(configuration: Configuration): Promise<void> {
         // TODO implement
     }
@@ -131,6 +190,11 @@ class TsWebExtension implements ApiInterface {
 
     public closeAssistant() {
         // TODO implement
+    }
+
+    public getSiteStatus(url: string): SiteStatus {
+        // TODO implement
+        return SiteStatus.FilteringEnabled;
     }
 }
 
