@@ -137,6 +137,29 @@ describe('Cookie Controller Tests', () => {
         }));
     });
 
+    it('checks apply important blocking rule', () => {
+        const rules = [
+            new NetworkRule('@@||example.org^$cookie', 1),
+            new NetworkRule('||example.org^$cookie,important', 1),
+        ];
+
+        const rulesData = rules.map((rule) => ({
+            ruleText: rule.getText()!,
+            match: rule.getAdvancedModifierValue()!,
+            isThirdParty: false,
+            filterId: rule.getFilterListId(),
+            isAllowlist: rule.isAllowlist(),
+        }));
+
+        const controller = new CookieController(onAppliedCallback);
+        document.cookie = 'user_one=test';
+        controller.apply(rulesData);
+
+        expect(onAppliedCallback).toHaveBeenLastCalledWith(expect.objectContaining({
+            cookieRuleText: '||example.org^$cookie,important',
+        }));
+    });
+
     it('check third-party rules are skipped for first-party cookies', () => {
         const rules = [
             new NetworkRule('||example.org^$third-party,cookie=/user/', 1),

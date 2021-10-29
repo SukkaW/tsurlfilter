@@ -141,15 +141,22 @@ export default class CookieController {
                 return regex.test(cookieName);
             });
 
-            const allowlistRules = matchingRules.filter((r) => r.isAllowlist);
-            if (allowlistRules.length > 0) {
-                allowlistRules.forEach((rule) => {
+            const importantRules = matchingRules.filter((r) => r.ruleText.includes('important'));
+            if (importantRules.length > 0) {
+                importantRules.forEach((rule) => {
                     this.applyRule(rule, cookieName, cookieValue);
                 });
             } else {
-                matchingRules.forEach((rule) => {
-                    this.applyRule(rule, cookieName, cookieValue);
-                });
+                const allowlistRules = matchingRules.filter((r) => r.isAllowlist);
+                if (allowlistRules.length > 0) {
+                    allowlistRules.forEach((rule) => {
+                        this.applyRule(rule, cookieName, cookieValue);
+                    });
+                } else {
+                    matchingRules.forEach((rule) => {
+                        this.applyRule(rule, cookieName, cookieValue);
+                    });
+                }
             }
         });
     }
