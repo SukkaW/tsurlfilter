@@ -78,6 +78,8 @@
     "webextension-polyfill-ts": "^0.24.0"
   },
   "dependencies": {
+    "@adguard/tsurlfilter": "file:../tsurlfilter",
+    "webextension-polyfill": "^0.8.0",
     "zod": "^3.9.8"
   }
 }
