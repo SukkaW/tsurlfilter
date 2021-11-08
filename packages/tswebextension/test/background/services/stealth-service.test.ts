@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { WebRequest } from 'webextension-polyfill';
-import { StealthActions, StealthConfig, StealthService } from '../../src/stealth/stealth-service';
-import { RequestType } from '../../src/request-type';
+import { StealthActions, StealthConfig, StealthService } from '../../../src/background/services/stealth-service';
+import { RequestType } from '@adguard/tsurlfilter';
 import HttpHeaders = WebRequest.HttpHeaders;
 
 describe('Stealth service - cookies', () => {
