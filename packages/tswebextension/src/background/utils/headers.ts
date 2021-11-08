@@ -2,8 +2,6 @@ import { WebRequest } from 'webextension-polyfill';
 import HttpHeadersItemType = WebRequest.HttpHeadersItemType;
 import HttpHeaders = WebRequest.HttpHeaders;
 
-// TODO: Move this to tswebextension completely
-
 /**
  * Finds header object by header name (case insensitive)
  *

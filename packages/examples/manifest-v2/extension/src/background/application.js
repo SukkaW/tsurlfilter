@@ -94,6 +94,7 @@ export class Application {
 
         TSUrlFilter.setConfiguration(config);
 
+        // TODO: Use TsWebExtension services
         // get stealth mode before engine start rules
         const STEALTH_MODE_FILTER_ID = -1;
         this.stealthService = new TSUrlFilter.StealthService(this.stealthConfig);

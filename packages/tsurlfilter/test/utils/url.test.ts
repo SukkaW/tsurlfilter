@@ -9,14 +9,6 @@ describe('Url utils', () => {
         expect(utils.isThirdPartyRequest('http://example.org/path', 'http://example.com')).toBeTruthy();
     });
 
-    it('parses url host', () => {
-        expect(utils.getHost('https://example.org')).toBe('example.org');
-        expect(utils.getHost('https://www.example.org')).toBe('www.example.org');
-        expect(utils.getHost('https://www.example.org/path')).toBe('www.example.org');
-        expect(utils.getHost('https://www.example.org/path?query')).toBe('www.example.org');
-        expect(utils.getHost('stun:example.org')).toBe('example.org');
-    });
-
     it('parses url relative part', () => {
         expect(utils.getRelativeUrl('https://example.org')).toBe(null);
         expect(utils.getRelativeUrl('http://example.org/path/sub')).toBe('/path/sub');
