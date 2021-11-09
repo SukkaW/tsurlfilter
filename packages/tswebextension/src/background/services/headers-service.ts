@@ -1,7 +1,6 @@
 import { WebRequest } from 'webextension-polyfill';
 import { FilteringLog } from '../filtering-log';
-import { NetworkRule } from '../rules/network-rule';
-import { RemoveHeaderModifier } from '../modifiers/remove-header-modifier';
+import { NetworkRule, RemoveHeaderModifier } from '@adguard/tsurlfilter';
 import OnBeforeSendHeadersDetailsType = WebRequest.OnBeforeSendHeadersDetailsType;
 import OnHeadersReceivedDetailsType = WebRequest.OnHeadersReceivedDetailsType;
 import HttpHeadersItemType = WebRequest.HttpHeadersItemType;

@@ -73,12 +73,11 @@
     ]
   },
   "devDependencies": {
-    "@types/jest": "^23.3.14",
-    "jest": "^25.5.4",
     "webextension-polyfill-ts": "^0.24.0"
   },
   "dependencies": {
     "@adguard/tsurlfilter": "file:../tsurlfilter",
+    "tldts": "^5.6.45",
     "webextension-polyfill": "^0.8.0",
     "zod": "^3.9.8"
   }

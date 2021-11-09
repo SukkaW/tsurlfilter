@@ -1,5 +1,5 @@
-import CookieUtils from '../../src/cookie-filtering/utils';
-import ParsedCookie from '../../src/cookie-filtering/parsed-cookie';
+import CookieUtils from '../../../../src/background/services/cookie-filtering/utils';
+import ParsedCookie from '../../../../src/background/services/cookie-filtering/parsed-cookie';
 
 const TEST_URL = 'https://test.com/url';
 

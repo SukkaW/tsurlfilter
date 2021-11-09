@@ -1,7 +1,7 @@
 import { WebRequest } from 'webextension-polyfill';
-import { HeadersService } from '../../src/headers-filtering/headers-service';
+import { HeadersService } from '../../../src/background/services/headers-service';
 import { MockFilteringLog } from '../mock-filtering-log';
-import { NetworkRule } from '../../src';
+import { NetworkRule } from '@adguard/tsurlfilter';
 import OnBeforeSendHeadersDetailsType = WebRequest.OnBeforeSendHeadersDetailsType;
 import OnHeadersReceivedDetailsType = WebRequest.OnHeadersReceivedDetailsType;
 

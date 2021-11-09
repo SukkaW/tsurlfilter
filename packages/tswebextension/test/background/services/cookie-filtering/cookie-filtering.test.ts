@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 import { WebRequest } from 'webextension-polyfill';
-import { CookieFiltering } from '../../src/cookie-filtering/cookie-filtering';
-import { MockFilteringLog } from '../mock-filtering-log';
-import { NetworkRule } from '../../src';
-import BrowserCookieApi from '../../src/cookie-filtering/browser-cookie/browser-cookie-api';
+import { CookieFiltering } from '../../../../src/background/services/cookie-filtering/cookie-filtering';
+import { MockFilteringLog } from '../../mock-filtering-log';
+import { NetworkRule } from '@adguard/tsurlfilter';
+import BrowserCookieApi from '../../../../src/background/services/cookie-filtering/browser-cookie/browser-cookie-api';
 import OnBeforeRequestDetailsType = WebRequest.OnBeforeRequestDetailsType;
 import OnBeforeSendHeadersDetailsType = WebRequest.OnBeforeSendHeadersDetailsType;
 import OnHeadersReceivedDetailsType = WebRequest.OnHeadersReceivedDetailsType;
@@ -11,7 +11,7 @@ import OnCompletedDetailsType = WebRequest.OnCompletedDetailsType;
 import OnErrorOccurredDetailsType = WebRequest.OnErrorOccurredDetailsType;
 import HttpHeaders = WebRequest.HttpHeaders;
 
-jest.mock('../../src/cookie-filtering/browser-cookie/browser-cookie-api');
+jest.mock('../../../../src/background/services/cookie-filtering/browser-cookie/browser-cookie-api');
 BrowserCookieApi.prototype.removeCookie = jest.fn().mockImplementation(() => true);
 BrowserCookieApi.prototype.modifyCookie = jest.fn().mockImplementation(() => true);
 

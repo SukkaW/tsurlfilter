@@ -1,5 +1,5 @@
-import CookieRulesFinder from '../../src/cookie-filtering/cookie-rules-finder';
-import { NetworkRule } from '../../src/rules/network-rule';
+import CookieRulesFinder from '../../../../src/background/services/cookie-filtering/cookie-rules-finder';
+import { NetworkRule } from '@adguard/tsurlfilter';
 
 describe('Cookie rules - content script rules', () => {
     it('looks up rules', () => {

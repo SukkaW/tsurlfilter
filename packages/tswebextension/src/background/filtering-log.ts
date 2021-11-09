@@ -1,4 +1,4 @@
-import { NetworkRule } from './rules/network-rule';
+import { NetworkRule } from '@adguard/tsurlfilter';
 
 /**
  * Filtering log interface

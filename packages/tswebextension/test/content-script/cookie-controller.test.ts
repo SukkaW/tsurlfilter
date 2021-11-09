@@ -3,7 +3,7 @@
  */
 
 import CookieController from '../../src/content-script/cookie-controller';
-import { NetworkRule, NetworkRuleOption } from '../../src/rules/network-rule';
+import { NetworkRule, NetworkRuleOption } from '@adguard/tsurlfilter';
 
 describe('Cookie Controller Tests', () => {
     const onAppliedCallback = jest.fn(() => {});

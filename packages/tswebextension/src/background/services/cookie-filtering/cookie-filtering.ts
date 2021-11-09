@@ -1,13 +1,11 @@
 import { WebRequest } from 'webextension-polyfill';
-import { NetworkRule } from '../rules/network-rule';
-import { FilteringLog } from '../filtering-log';
+import { NetworkRule, CookieModifier, logger } from '@adguard/tsurlfilter';
+import { FilteringLog } from '../../filtering-log';
 import CookieRulesFinder from './cookie-rules-finder';
 import ParsedCookie from './parsed-cookie';
 import CookieUtils from './utils';
 import BrowserCookieApi from './browser-cookie/browser-cookie-api';
-import { CookieModifier } from '../modifiers/cookie-modifier';
-import { findHeaderByName } from '../utils/headers';
-import { logger } from '../utils/logger';
+import { findHeaderByName } from '../../utils/headers';
 import OnBeforeRequestDetailsType = WebRequest.OnBeforeRequestDetailsType;
 import OnBeforeSendHeadersDetailsType = WebRequest.OnBeforeSendHeadersDetailsType;
 import OnHeadersReceivedDetailsType = WebRequest.OnHeadersReceivedDetailsType;

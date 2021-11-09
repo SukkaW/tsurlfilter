@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import browser, { Cookies } from 'webextension-polyfill';
 import ParsedCookie from '../parsed-cookie';
-import { logger } from '../../utils/logger';
+import { logger } from '@adguard/tsurlfilter';
 import SetDetailsType = Cookies.SetDetailsType;
 import SameSiteStatus = Cookies.SameSiteStatus;
 

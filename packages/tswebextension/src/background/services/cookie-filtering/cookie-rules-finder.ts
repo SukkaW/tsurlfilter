@@ -1,5 +1,4 @@
-import { NetworkRule, NetworkRuleOption } from '../rules/network-rule';
-import { CookieModifier } from '../modifiers/cookie-modifier';
+import { NetworkRule, NetworkRuleOption, CookieModifier } from '@adguard/tsurlfilter';
 
 /**
  * Cookie rules manager class

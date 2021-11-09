@@ -1,4 +1,4 @@
-import { FilteringLog } from '../src/filtering-log';
+import { FilteringLog } from '../../src/background/filtering-log';
 
 export class MockFilteringLog implements FilteringLog {
     addCookieEvent = jest.fn(() => {
