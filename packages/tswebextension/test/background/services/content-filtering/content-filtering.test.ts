@@ -4,13 +4,11 @@
 
 import { TextDecoder, TextEncoder } from 'text-encoding';
 import { MockStreamFilter } from './mock-stream-filter';
-import {
-    ContentFiltering, IRule, NetworkRule, Request, RequestType,
-} from '@adguard/tsurlfilter';
-import { CosmeticRule } from '@adguard/tsurlfilter';
+import { IRule, CosmeticRule, NetworkRule, Request, RequestType } from '@adguard/tsurlfilter';
 // eslint-disable-next-line max-len
 import { DEFAULT_CHARSET, parseCharsetFromHeader, WIN_1251 } from '../../../../src/background/services/content-filtering/charsets';
 import { ModificationsListener } from '../../../../src/background/services/content-filtering/modifications-listener';
+import { ContentFiltering } from '../../../../src/background/services/content-filtering/content-filtering';
 
 class MockFilteringLog implements ModificationsListener {
     onHtmlRuleApplied = jest.fn(

@@ -1,7 +1,8 @@
 import { WebRequest } from 'webextension-polyfill';
 import { findHeaderByName, removeHeader } from '../utils/headers';
 import { getHost } from '../utils/url';
-import { RequestType, isThirdPartyRequest } from '@adguard/tsurlfilter';
+import { RequestType } from '@adguard/tsurlfilter';
+import { isThirdPartyRequest } from '../utils/url';
 import HttpHeaders = WebRequest.HttpHeaders;
 
 /**
