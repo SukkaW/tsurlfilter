@@ -1,4 +1,4 @@
-import { replaceAll, indexOfAny } from '../../utils/utils';
+import { replaceAll, indexOfAny } from '@adguard/tsurlfilter';
 
 /**
  * Html rule wildcard

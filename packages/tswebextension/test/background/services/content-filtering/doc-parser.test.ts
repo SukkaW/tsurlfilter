@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { DocumentParser } from '../../src/content-filtering/doc-parser';
+import { DocumentParser } from '../../../../src/background/services/content-filtering/doc-parser';
 
 describe('Document parser wrapper', () => {
     it('checks document parser', () => {

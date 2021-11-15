@@ -1,5 +1,4 @@
-import { CosmeticRule } from '../rules/cosmetic-rule';
-import { NetworkRule } from '../rules/network-rule';
+import { CosmeticRule, NetworkRule } from '@adguard/tsurlfilter';
 
 /**
  * Content modifications listener

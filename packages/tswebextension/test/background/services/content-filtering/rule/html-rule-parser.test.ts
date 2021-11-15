@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import { CosmeticRule } from '../../../src/rules/cosmetic-rule';
-import { HtmlRuleParser } from '../../../src/content-filtering/rule/html-rule-parser';
+import { CosmeticRule } from '@adguard/tsurlfilter';
+import { HtmlRuleParser } from '../../../../../src/background/services/content-filtering/rule/html-rule-parser';
 
 describe('Html rule attributes parser', () => {
     it('checks simple attributes parsing', () => {

@@ -1,10 +1,9 @@
 import { TextEncoder, TextDecoder } from 'text-encoding';
 import { StreamFilter } from './stream-filter';
-import { RequestType } from '../request-type';
+import { RequestType, logger } from '@adguard/tsurlfilter';
 import {
     DEFAULT_CHARSET, LATIN_1, SUPPORTED_CHARSETS, WIN_1252,
 } from './charsets';
-import { logger } from '../utils/logger';
 
 /**
  * Content Filter class

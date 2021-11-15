@@ -1,5 +1,4 @@
 export * from './configuration';
-export * from './content-filtering/content-filtering';
 export * from './engine/cosmetic-engine/cosmetic-result';
 export * from './engine/cosmetic-option';
 export * from './engine/dns-engine';
@@ -20,9 +19,11 @@ export * from './rules/simple-regex';
 export * from './rules/declarative-converter/declarative-converter';
 export * from './modifiers/remove-header-modifier';
 export * from './modifiers/cookie-modifier';
+export * from './modifiers/replace-modifier';
 export * from './utils/logger';
 export * from './utils/rule-validator';
 export * from './utils/url';
+export * from './utils/utils';
 export { CosmeticRuleMarker } from './rules/cosmetic-rule-marker';
 export { CosmeticRuleParser } from './rules/cosmetic-rule-parser';
 export { RuleSyntaxUtils } from './utils/rule-syntax-utils';

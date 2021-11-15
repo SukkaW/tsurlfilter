@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import { HtmlRuleSelector } from '../../../src/content-filtering/rule/html-rule-selector';
-import { CosmeticRule } from '../../../src/rules/cosmetic-rule';
-import { HtmlRuleParser } from '../../../src/content-filtering/rule/html-rule-parser';
+import { HtmlRuleSelector } from '../../../../../src/background/services/content-filtering/rule/html-rule-selector';
+import { CosmeticRule } from '@adguard/tsurlfilter';
+import { HtmlRuleParser } from '../../../../../src/background/services/content-filtering/rule/html-rule-parser';
 
 describe('Html rule selector', () => {
     it('checks simple cases', () => {

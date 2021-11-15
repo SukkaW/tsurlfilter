@@ -1,7 +1,7 @@
 import { TextEncoder, TextDecoder } from 'text-encoding';
-import { ContentFilter } from '../../src/content-filtering/content-filter';
-import { RequestType } from '../../src';
-import { DEFAULT_CHARSET, WIN_1251, WIN_1252 } from '../../src/content-filtering/charsets';
+import { ContentFilter } from '../../../../src/background/services/content-filtering/content-filter';
+import { RequestType } from '@adguard/tsurlfilter';
+import { DEFAULT_CHARSET, WIN_1251, WIN_1252 } from '../../../../src/background/services/content-filtering/charsets';
 import { MockStreamFilter } from './mock-stream-filter';
 
 describe('Content filter', () => {

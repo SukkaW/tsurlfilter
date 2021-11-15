@@ -6,10 +6,11 @@ import { TextDecoder, TextEncoder } from 'text-encoding';
 import { MockStreamFilter } from './mock-stream-filter';
 import {
     ContentFiltering, IRule, NetworkRule, Request, RequestType,
-} from '../../src';
-import { CosmeticRule } from '../../src/rules/cosmetic-rule';
-import { DEFAULT_CHARSET, parseCharsetFromHeader, WIN_1251 } from '../../src/content-filtering/charsets';
-import { ModificationsListener } from '../../src/content-filtering/modifications-listener';
+} from '@adguard/tsurlfilter';
+import { CosmeticRule } from '@adguard/tsurlfilter';
+// eslint-disable-next-line max-len
+import { DEFAULT_CHARSET, parseCharsetFromHeader, WIN_1251 } from '../../../../src/background/services/content-filtering/charsets';
+import { ModificationsListener } from '../../../../src/background/services/content-filtering/modifications-listener';
 
 class MockFilteringLog implements ModificationsListener {
     onHtmlRuleApplied = jest.fn(

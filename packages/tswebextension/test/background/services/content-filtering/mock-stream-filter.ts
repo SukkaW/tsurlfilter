@@ -1,4 +1,4 @@
-import { StreamFilter } from '../../src/content-filtering/stream-filter';
+import { StreamFilter } from '../../../../src/background/services/content-filtering/stream-filter';
 
 /**
  * Mock filter implementation

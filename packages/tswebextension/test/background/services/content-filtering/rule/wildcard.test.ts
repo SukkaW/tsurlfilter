@@ -1,4 +1,4 @@
-import { Wildcard } from '../../../src/content-filtering/rule/wildcard';
+import { Wildcard } from '../../../../../src/background/services/content-filtering/rule/wildcard';
 
 describe('Wildcard', () => {
     it('checks matches with simple wildcard', () => {
