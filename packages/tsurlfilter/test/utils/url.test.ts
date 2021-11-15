@@ -2,13 +2,6 @@
 import * as utils from '../../src/utils/url';
 
 describe('Url utils', () => {
-    it('checks third party requests detect', () => {
-        expect(utils.isThirdPartyRequest('http://example.org', 'http://example.org')).toBeFalsy();
-        expect(utils.isThirdPartyRequest('http://example.org/path', 'http://example.org')).toBeFalsy();
-        expect(utils.isThirdPartyRequest('http://example.org', 'http://example.com')).toBeTruthy();
-        expect(utils.isThirdPartyRequest('http://example.org/path', 'http://example.com')).toBeTruthy();
-    });
-
     it('parses url relative part', () => {
         expect(utils.getRelativeUrl('https://example.org')).toBe(null);
         expect(utils.getRelativeUrl('http://example.org/path/sub')).toBe('/path/sub');

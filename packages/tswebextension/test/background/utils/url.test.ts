@@ -9,4 +9,11 @@ describe('Url utils', () => {
         expect(utils.getHost('https://www.example.org/path?query')).toBe('www.example.org');
         expect(utils.getHost('stun:example.org')).toBe('example.org');
     });
+
+    it('checks third party requests detect', () => {
+        expect(utils.isThirdPartyRequest('http://example.org', 'http://example.org')).toBeFalsy();
+        expect(utils.isThirdPartyRequest('http://example.org/path', 'http://example.org')).toBeFalsy();
+        expect(utils.isThirdPartyRequest('http://example.org', 'http://example.com')).toBeTruthy();
+        expect(utils.isThirdPartyRequest('http://example.org/path', 'http://example.com')).toBeTruthy();
+    });
 });

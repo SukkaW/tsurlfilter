@@ -1,5 +1,3 @@
-import { parse } from 'tldts';
-
 /**
  * Splits url into parts
  *
@@ -97,30 +95,6 @@ export function cleanUrlParamByRegExp(url: string, regExp: RegExp, invert = fals
 
     return result + split.hash;
 }
-
-/**
- * Checks third party relation
- *
- * @param requestUrl
- * @param referrer
- */
-export function isThirdPartyRequest(requestUrl: string, referrer: string): boolean {
-    const tldResult = parse(requestUrl);
-    const sourceTldResult = parse(referrer);
-
-    return tldResult.domain !== sourceTldResult.domain;
-}
-
-/**
- * Removes leading www. from domain
- * @param domain
- */
-export const getCroppedDomain = (domain: string): string => {
-    if (domain.startsWith('www.')) {
-        return domain.substring(4);
-    }
-    return domain;
-};
 
 const DOMAIN_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
 

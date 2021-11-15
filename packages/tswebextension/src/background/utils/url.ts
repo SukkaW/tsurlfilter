@@ -1,3 +1,4 @@
+import { parse } from 'tldts';
 import browser from 'webextension-polyfill';
 
 /**
@@ -80,3 +81,16 @@ export const getDomain = (url: string): string | undefined => {
 
     return lastIdx !== -1 ? url.slice(0, lastIdx) : url;
 };
+
+/**
+ * Checks third party relation
+ *
+ * @param requestUrl
+ * @param referrer
+ */
+export function isThirdPartyRequest(requestUrl: string, referrer: string): boolean {
+    const tldResult = parse(requestUrl);
+    const sourceTldResult = parse(referrer);
+
+    return tldResult.domain !== sourceTldResult.domain;
+}
