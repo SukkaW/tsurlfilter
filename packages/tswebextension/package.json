@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/AdguardTeam/tsurlfilter#readme",
   "scripts": {
-    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
+    "lint": "eslint --fix 'src/**/*.ts' 'test/**/*.ts'",
     "prebuild": "rimraf dist",
     "build": "yarn build:types && rollup -c rollup.config.ts",
     "build:types": "tsc --declaration --emitDeclarationOnly --outdir dist/types",
@@ -57,10 +57,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 90,
-        "functions": 95,
-        "lines": 95,
-        "statements": 95
+        "branches": 0,
+        "functions": 0,
+        "lines": 0,
+        "statements": 0
       }
     },
     "collectCoverageFrom": [
@@ -77,10 +77,11 @@
   },
   "dependencies": {
     "@adguard/tsurlfilter": "file:../tsurlfilter",
+    "@adguard/tsurlfilter": "^0.7.33",
     "extended-css": "git+https://github.com/AdguardTeam/ExtendedCss.git#v1.3.13",
     "text-encoding": "git+https://github.com/AdguardTeam/text-encoding.git#v0.7.1",
     "tldts": "^5.6.45",
     "webextension-polyfill": "^0.8.0",
-    "zod": "^3.9.8"
+    "zod": "^3.11.6"
   }
 }
