@@ -3,7 +3,7 @@ import browser, { WebRequest, WebNavigation } from 'webextension-polyfill';
 import {
     CosmeticOption,
     RequestType,
-    NetworkRuleOption
+    NetworkRuleOption,
 } from '@adguard/tsurlfilter';
 
 import { engineApi } from './engine-api';
@@ -11,7 +11,11 @@ import { tabsApi } from './tabs';
 import { isOwnUrl, isHttpOrWsRequest, getDomain } from './utils';
 import { cosmeticApi } from './cosmetic-api';
 import { redirectsApi } from './redirects-api';
-import { preprocessRequestDetails, hideRequestInitiatorElement } from './request';
+import {
+    preprocessRequestDetails,
+    hideRequestInitiatorElement,
+    requestContextStorage, 
+} from './request';
 
 export type WebRequestEventResponse = WebRequest.BlockingResponseOrPromise | void;
 
@@ -29,16 +33,23 @@ export class WebRequestApi implements WebRequestApiInterface {
         this.handleCspReportRequests = this.handleCspReportRequests.bind(this);
         this.onResponseStarted = this.onResponseStarted.bind(this);
         this.onErrorOccurred = this.onErrorOccurred.bind(this);
+        this.onCompleted = this.onCompleted.bind(this);
+
         this.onCommitted = this.onCommitted.bind(this);
     }
 
     public start(): void {
+        // browser.webRequest Events
         this.initBeforeRequestEventListener();
         this.initCspReportRequestsEventListener();
+
         this.initBeforeSendHeadersEventListener();
         this.initHeadersReceivedEventListener();
-        this.initOnResponseStarted();
-        this.initOnErrorOccurred();
+        this.initOnResponseStartedEventListener();
+        this.initOnErrorOccurredEventListener();
+        this.initOnCompletedEventListener();
+
+        // browser.webNavigation Events
         this.initCommittedEventListener();
     }
 
@@ -49,6 +60,7 @@ export class WebRequestApi implements WebRequestApiInterface {
         browser.webRequest.onHeadersReceived.removeListener(this.onHeadersReceived);
         browser.webRequest.onErrorOccurred.removeListener(this.onErrorOccurred);
         browser.webRequest.onResponseStarted.removeListener(this.onResponseStarted);
+        browser.webRequest.onCompleted.removeListener(this.onCompleted);
         browser.webNavigation.onCommitted.removeListener(this.onCommitted);
     }
 
@@ -57,13 +69,15 @@ export class WebRequestApi implements WebRequestApiInterface {
 
         const {
             url,
+            requestId,
             referrerUrl,
             requestType,
             tabId,
             frameId,
             thirdParty,
-            requestFrameId
+            requestFrameId,
         } = requestDetails;
+
 
         if (isOwnUrl(referrerUrl)
             || !isHttpOrWsRequest(url)) {
@@ -86,6 +100,15 @@ export class WebRequestApi implements WebRequestApiInterface {
             frameRule: tabsApi.getTabFrameRule(tabId),
         });
 
+        requestContextStorage.record(requestId, {
+            requestUrl: url,
+            referrerUrl,
+            requestType,
+            tabId,
+            frameId,
+            timestamp: Date.now(),
+            matchingResult: result,
+        });
 
         if (!result) {
             return;
@@ -115,55 +138,51 @@ export class WebRequestApi implements WebRequestApiInterface {
     }
 
     private onHeadersReceived(details: WebRequest.OnHeadersReceivedDetailsType): WebRequestEventResponse {
-        const requestDetails = preprocessRequestDetails(details);
+        const { requestId } = details;
+
+        const request = requestContextStorage.get(requestId);
+
+        if (!request?.matchingResult){
+            return;
+        }
 
         const {
-            url,
-            referrerUrl,
+            matchingResult,
             requestType,
+            referrerUrl,
             tabId,
             frameId,
-        } = requestDetails;
-
-        if (isOwnUrl(referrerUrl)
-            || !isHttpOrWsRequest(url)) {
-            return;
-        }
-
-        const result = engineApi.matchRequest({
-            requestUrl: url,
-            frameUrl: referrerUrl,
-            requestType,
-            frameRule: tabsApi.getTabFrameRule(tabId),
-        });
-
-
-        if (!result) {
-            return;
-        }
+        } = request;
 
         if (this.isFrameRequest(requestType)){
-            const cosmeticOption = result.getCosmeticOption();
+            const cosmeticOption = matchingResult.getCosmeticOption();
             this.recordFrameInjection(referrerUrl, tabId, frameId, cosmeticOption);
         }
     }
 
     private onResponseStarted(details: WebRequest.OnResponseStartedDetailsType): WebRequestEventResponse {
-        const { requestType, tabId, frameId } = preprocessRequestDetails(details);
+        const { requestId } = details;
+        const request = requestContextStorage.get(requestId);
 
-        if (requestType === RequestType.Document){
-            this.injectJsScript(tabId, frameId);
+        if (request?.requestType === RequestType.Document){
+            this.injectJsScript(request.tabId, request.frameId);
         }
     }
 
+    private onCompleted(details: WebRequest.OnCompletedDetailsType): WebRequestEventResponse {
+        requestContextStorage.delete(details.requestId);
+    }
+
     private onErrorOccurred(details: WebRequest.OnErrorOccurredDetailsType): WebRequestEventResponse {
-        const { tabId, frameId } = details;
+        const { requestId, tabId, frameId } = details;
 
         const frame = tabsApi.getTabFrame(tabId, frameId);
 
         if (frame?.injection){
             delete frame.injection;
         }
+
+        requestContextStorage.delete(requestId);
     }
 
     private handleCspReportRequests(details: WebRequest.OnBeforeRequestDetailsType): WebRequestEventResponse {
@@ -234,7 +253,7 @@ export class WebRequestApi implements WebRequestApiInterface {
         );
     }
 
-    private initOnResponseStarted(): void {
+    private initOnResponseStartedEventListener(): void {
         const filter: WebRequest.RequestFilter = {
             urls: ['<all_urls>'],
         };
@@ -242,12 +261,26 @@ export class WebRequestApi implements WebRequestApiInterface {
         browser.webRequest.onResponseStarted.addListener(this.onResponseStarted, filter);
     }
 
-    private initOnErrorOccurred(): void {
+    private initOnErrorOccurredEventListener(): void {
         const filter: WebRequest.RequestFilter = {
             urls: ['<all_urls>'],
         };
 
         browser.webRequest.onErrorOccurred.addListener(this.onErrorOccurred, filter);
+    }
+
+    private initOnCompletedEventListener(): void {
+        const filter: WebRequest.RequestFilter = {
+            urls: ['<all_urls>'],
+        };
+
+        const extraInfoSpec: WebRequest.OnCompletedOptions[] = ['responseHeaders'];
+
+        browser.webRequest.onCompleted.addListener(
+            this.onCompleted, 
+            filter,
+            extraInfoSpec,
+        )
     }
 
     private initCommittedEventListener(): void {
