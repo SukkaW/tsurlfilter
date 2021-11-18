@@ -23,6 +23,7 @@ export class ContentFiltering {
      */
     private readonly modificationsListener: ModificationsListener;
 
+    // TODO: Use RequestContextStorage
     private readonly requestDetailsCallback: (requestId: number) => RequestDetails | null;
 
     /**

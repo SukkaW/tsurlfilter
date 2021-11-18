@@ -46,6 +46,7 @@ export class CookieFiltering {
 
     private browserCookieApi: BrowserCookieApi = new BrowserCookieApi();
 
+    // TODO: Use RequestContext storage
     private requestContextStorage = new Map<string, {
         rules: NetworkRule[];
         cookies: ParsedCookie[];

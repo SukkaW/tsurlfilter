@@ -2,6 +2,7 @@ import { CosmeticRule, NetworkRule } from '@adguard/tsurlfilter';
 
 /**
  * Content modifications listener
+ * TODO: Use filtering log via -api instance
  */
 export interface ModificationsListener {
     /**
