@@ -46,3 +46,5 @@ export class MockFilteringLog implements FilteringLog {
     addRemoveHeaderEvent(tabId: number, frameUrl: string, headerName: string, rule: NetworkRule): void {
     }
 }
+
+export const filteringLog = new MockFilteringLog();

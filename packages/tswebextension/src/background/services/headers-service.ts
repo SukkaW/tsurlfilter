@@ -1,6 +1,6 @@
 import { WebRequest } from 'webextension-polyfill';
 import { NetworkRule, RemoveHeaderModifier } from '@adguard/tsurlfilter';
-import { FilteringLog, MockFilteringLog } from '../filtering-log';
+import { FilteringLog, filteringLog } from '../filtering-log';
 import { removeHeader } from '../utils/headers';
 import { RequestData } from '../request/events';
 
@@ -112,4 +112,4 @@ export class HeadersService {
 }
 
 // TODO: Use filtering log instance
-export const headersService = new HeadersService(new MockFilteringLog());
+export const headersService = new HeadersService(filteringLog);
