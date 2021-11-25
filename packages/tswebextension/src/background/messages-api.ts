@@ -1,8 +1,9 @@
 import browser, { Runtime } from 'webextension-polyfill';
-import { RequestType } from '@adguard/tsurlfilter';
+import { RequestType, CookieModifier, NetworkRuleOption } from '@adguard/tsurlfilter';
 
 import { requestBlockingApi } from './request';
 import {
+    getCookieRulesPayloadValidator,
     getExtendedCssPayloadValidator,
     Message,
     MessageType,
@@ -50,7 +51,7 @@ export class MessagesApi {
         switch (type) {
             case MessageType.PROCESS_SHOULD_COLLAPSE: {
                 return this.handleProcessShouldCollapseMessage(
-                    sender, 
+                    sender,
                     message.payload,
                 );
             }
@@ -58,7 +59,28 @@ export class MessagesApi {
                 return this.handleGetExtendedCssMessage(
                     sender,
                     message.payload,
-                )
+                );
+            }
+            case MessageType.GET_COOKIE_RULES: {
+                return this.handleGetCookieRulesMessage(
+                    sender,
+                    message.payload,
+                );
+            }
+            case MessageType.SAVE_COOKIE_LOG_EVENT: {
+                // TODO: add filtering log event
+                // const data = message.payload;
+                // filteringLog.addCookieEvent({
+                //     tabId: sender.tab.tabId,
+                //     cookieName: data.cookieName,
+                //     cookieDomain: data.cookieDomain,
+                //     cookieValue: data.cookieValue,
+                //     cookieRule: new NetworkRule(data.ruleText, data.filterId),
+                //     isModifyingCookieRule: false,
+                //     thirdParty: data.thirdParty,
+                //     timestamp: Date.now(),
+                // });
+                break;
             }
             default:
                 return;
@@ -123,6 +145,57 @@ export class MessagesApi {
         const extCssText = cosmeticApi.getExtCssText(cosmeticResult);
 
         return extCssText;
+    }
+
+    /**
+     * Handles messages
+     * Returns cookie rules data for content script
+     *
+     * @param sender
+     * @param payload
+     */
+    private handleGetCookieRulesMessage(
+        sender: Runtime.MessageSender,
+        payload?: unknown,
+    ) {
+        if (!payload || !sender?.tab?.id) {
+            return false;
+        }
+
+        const res = getCookieRulesPayloadValidator.safeParse(payload);
+        if (!res.success){
+            return false;
+        }
+
+        const tabId = sender.tab.id;
+        const { documentUrl } = res.data;
+
+        // TODO: Is it possible to find corresponding request context?
+        const matchingResult = engineApi.matchRequest({
+            requestUrl: documentUrl,
+            frameUrl: documentUrl,
+            requestType: RequestType.Document,
+            frameRule: tabsApi.getTabFrameRule(tabId),
+        });
+
+        if (!matchingResult) {
+            return;
+        }
+
+        const blockingRules = matchingResult.getCookieRules().filter((rule) => {
+            const cookieModifier = rule.getAdvancedModifier() as CookieModifier;
+            return !cookieModifier.getSameSite() && !cookieModifier.getMaxAge();
+        });
+
+        return blockingRules.map((rule) => {
+            return {
+                ruleText: rule.getText(),
+                match: rule.getAdvancedModifierValue(),
+                isThirdParty: rule.isOptionEnabled(NetworkRuleOption.ThirdParty),
+                filterId: rule.getFilterListId(),
+                isAllowlist: rule.isAllowlist(),
+            };
+        });
     }
 }
 

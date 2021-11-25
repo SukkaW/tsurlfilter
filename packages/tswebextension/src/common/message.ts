@@ -4,6 +4,8 @@ import { RequestType } from '@adguard/tsurlfilter';
 export enum MessageType {
     PROCESS_SHOULD_COLLAPSE = 'PROCESS_SHOULD_COLLAPSE',
     GET_EXTENDED_CSS = 'GET_EXTENDED_CSS',
+    GET_COOKIE_RULES = 'GET_COOKIE_RULES',
+    SAVE_COOKIE_LOG_EVENT = 'SAVE_COOKIE_LOG_EVENT',
 }
 
 
@@ -29,3 +31,9 @@ export const  getExtendedCssPayloadValidator = z.object({
 }).strict();
 
 export type GetExtendedCssPayloadValidator = z.infer<typeof getExtendedCssPayloadValidator>;
+
+export const  getCookieRulesPayloadValidator = z.object({
+    documentUrl: z.string(),
+}).strict();
+
+export type GetCookieRulesPayloadValidator = z.infer<typeof getCookieRulesPayloadValidator>;
