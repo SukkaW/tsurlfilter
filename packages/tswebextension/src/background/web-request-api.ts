@@ -11,6 +11,7 @@ import { tabsApi } from './tabs';
 import { isOwnUrl, isHttpOrWsRequest, getDomain } from './utils';
 import { cosmeticApi } from './cosmetic-api';
 import { redirectsService } from './services/redirects-service';
+import { headersService } from './services/headers-service';
 import {
     hideRequestInitiatorElement,
     onBeforeRequest,
@@ -20,7 +21,7 @@ import {
     onErrorOccurred,
     onResponseStarted,
     onCompleted,
-    requestContextStorage, 
+    requestContextStorage,
 } from './request';
 
 export type WebRequestEventResponse = WebRequest.BlockingResponseOrPromise | void;
@@ -102,12 +103,22 @@ export class WebRequestApi implements WebRequestApiInterface {
     }
 
     private onBeforeSendHeaders(data: RequestData<WebRequest.OnBeforeSendHeadersDetailsType>): WebRequestEventResponse {
-        // TODO: implement
-        return;
+        if (!data.context?.matchingResult){
+            return;
+        }
+
+        let requestHeadersModified = false;
+        if (headersService.onBeforeSendHeaders(data)) {
+            requestHeadersModified = true;
+        }
+
+        if (requestHeadersModified) {
+            return { requestHeaders: data.details.requestHeaders };
+        }
     }
 
-    private onHeadersReceived({ context }: RequestData<WebRequest.OnHeadersReceivedDetailsType>): WebRequestEventResponse {
-        if (!context?.matchingResult){
+    private onHeadersReceived(data: RequestData<WebRequest.OnHeadersReceivedDetailsType>): WebRequestEventResponse {
+        if (!data.context?.matchingResult){
             return;
         }
 
@@ -117,11 +128,20 @@ export class WebRequestApi implements WebRequestApiInterface {
             referrerUrl,
             tabId,
             frameId,
-        } = context;
+        } = data.context;
 
         if (requestType === RequestType.Document || requestType === RequestType.Subdocument){
             const cosmeticOption = matchingResult.getCosmeticOption();
             this.recordFrameInjection(referrerUrl, tabId, frameId, cosmeticOption);
+        }
+
+        let responseHeadersModified = false;
+        if (headersService.onHeadersReceived(data)) {
+            responseHeadersModified = true;
+        }
+
+        if (responseHeadersModified) {
+            return { responseHeaders: data.details.responseHeaders };
         }
     }
 
@@ -249,7 +269,7 @@ export class WebRequestApi implements WebRequestApiInterface {
         const extraInfoSpec: WebRequest.OnCompletedOptions[] = ['responseHeaders'];
 
         onCompleted.addListener(
-            this.onCompleted, 
+            this.onCompleted,
             filter,
             extraInfoSpec,
         );
@@ -303,26 +323,26 @@ export class WebRequestApi implements WebRequestApiInterface {
         }
 
         if (frame?.injection){
-            const { 
+            const {
                 cssText,
                 extCssText,
                 jsScriptText,
             } = frame.injection;
-    
+
             if (cssText){
                 cosmeticApi.injectCss(cssText, tabId, frameId);
             }
-    
+
             /*
             if (extCssText){
                 cosmeticApi.injectExtCss(extCssText, tabId, frameId);
             }
             */
-            
+
             if (jsScriptText){
                 cosmeticApi.injectScript(jsScriptText, tabId, frameId);
             }
-    
+
             delete frame.injection;
         }
     }
