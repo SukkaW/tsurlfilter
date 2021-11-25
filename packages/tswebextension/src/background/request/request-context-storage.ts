@@ -1,5 +1,6 @@
 import { MatchingResult, RequestType } from '@adguard/tsurlfilter';
 import { ContentType } from './request-type';
+import ParsedCookie from '../services/cookie-filtering/parsed-cookie';
 
 export interface RequestContext {
     requestUrl: string
@@ -12,6 +13,7 @@ export interface RequestContext {
     timestamp: number // in ms
     thirdParty: boolean
     matchingResult: MatchingResult | null
+    cookies: ParsedCookie[] | undefined,
 }
 
 export interface RequestContextStorageInterface {

@@ -12,6 +12,7 @@ import { isOwnUrl, isHttpOrWsRequest, getDomain } from './utils';
 import { cosmeticApi } from './cosmetic-api';
 import { redirectsService } from './services/redirects-service';
 import { headersService } from './services/headers-service';
+import { cookieFiltering } from './services/cookie-filtering/cookie-filtering';
 import {
     hideRequestInitiatorElement,
     onBeforeRequest,
@@ -107,6 +108,8 @@ export class WebRequestApi implements WebRequestApiInterface {
             return;
         }
 
+        cookieFiltering.onBeforeSendHeaders(data.details);
+
         let requestHeadersModified = false;
         if (headersService.onBeforeSendHeaders(data)) {
             requestHeadersModified = true;
@@ -134,6 +137,8 @@ export class WebRequestApi implements WebRequestApiInterface {
             const cosmeticOption = matchingResult.getCosmeticOption();
             this.recordFrameInjection(referrerUrl, tabId, frameId, cosmeticOption);
         }
+
+        cookieFiltering.onHeadersReceived(data.details);
 
         let responseHeadersModified = false;
         if (headersService.onHeadersReceived(data)) {
