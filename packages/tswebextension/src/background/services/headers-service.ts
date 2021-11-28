@@ -111,5 +111,4 @@ export class HeadersService {
     }
 }
 
-// TODO: Use filtering log instance
 export const headersService = new HeadersService(filteringLog);

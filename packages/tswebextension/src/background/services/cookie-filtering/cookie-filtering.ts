@@ -237,5 +237,4 @@ export class CookieFiltering {
     }
 }
 
-// TODO: Use filtering log instance
 export const cookieFiltering = new CookieFiltering(filteringLog);

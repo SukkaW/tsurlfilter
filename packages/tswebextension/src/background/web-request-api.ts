@@ -1,28 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import browser, { WebRequest, WebNavigation } from 'webextension-polyfill';
-import {
-    CosmeticOption,
-    RequestType,
-    NetworkRuleOption,
-} from '@adguard/tsurlfilter';
+import browser, {WebNavigation, WebRequest} from 'webextension-polyfill';
+import {CosmeticOption, NetworkRuleOption, RequestType,} from '@adguard/tsurlfilter';
 
-import { engineApi } from './engine-api';
-import { tabsApi } from './tabs';
-import { isOwnUrl, isHttpOrWsRequest, getDomain } from './utils';
-import { cosmeticApi } from './cosmetic-api';
-import { redirectsService } from './services/redirects-service';
-import { headersService } from './services/headers-service';
-import { cookieFiltering } from './services/cookie-filtering/cookie-filtering';
+import {engineApi} from './engine-api';
+import {tabsApi} from './tabs';
+import {getDomain, isHttpOrWsRequest, isOwnUrl} from './utils';
+import {cosmeticApi} from './cosmetic-api';
+import {redirectsService} from './services/redirects-service';
+import {headersService} from './services/headers-service';
+import {cookieFiltering} from './services/cookie-filtering/cookie-filtering';
+import {contentFilteringService} from './services/content-filtering/content-filtering';
 import {
     hideRequestInitiatorElement,
     onBeforeRequest,
     onBeforeSendHeaders,
-    RequestData,
-    onHeadersReceived,
-    onErrorOccurred,
-    onResponseStarted,
     onCompleted,
+    onErrorOccurred,
+    onHeadersReceived,
+    onResponseStarted,
     requestContextStorage,
+    RequestData,
 } from './request';
 
 export type WebRequestEventResponse = WebRequest.BlockingResponseOrPromise | void;
@@ -72,12 +69,12 @@ export class WebRequestApi implements WebRequestApiInterface {
         browser.webNavigation.onCommitted.removeListener(this.onCommitted);
     }
 
-    private onBeforeRequest({ context }: RequestData<WebRequest.OnBeforeRequestDetailsType>): WebRequestEventResponse {
-        if (!context?.matchingResult) {
+    private onBeforeRequest(data: RequestData<WebRequest.OnBeforeRequestDetailsType>): WebRequestEventResponse {
+        if (!data.context?.matchingResult) {
             return;
         }
 
-        const basicResult = context.matchingResult.getBasicResult();
+        const basicResult = data.context.matchingResult.getBasicResult();
 
         if (basicResult && !basicResult.isAllowlist()) {
             if (basicResult.isOptionEnabled(NetworkRuleOption.Redirect)) {
@@ -93,11 +90,24 @@ export class WebRequestApi implements WebRequestApiInterface {
                 requestUrl,
                 requestType,
                 thirdParty,
-            } = context;
+            } = data.context;
 
             hideRequestInitiatorElement(tabId, requestFrameId, requestUrl, requestType, thirdParty);
 
             return { cancel: true };
+        }
+
+        // TODO: Check if content filtering is available (is FF)
+        if (browser.webRequest.filterResponseData) {
+            const cosmeticResult = engineApi.getCosmeticResult(
+                data.context.referrerUrl, CosmeticOption.CosmeticOptionHtml,
+            );
+            data.context.htmlRules = cosmeticResult.Html.getRules();
+
+            contentFilteringService.onBeforeRequest(
+                browser.webRequest.filterResponseData(data.context.requestId),
+                data.details,
+            );
         }
 
         return;

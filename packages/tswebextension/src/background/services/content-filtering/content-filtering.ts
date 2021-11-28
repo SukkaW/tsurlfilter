@@ -7,7 +7,7 @@ import { HtmlRuleParser } from './rule/html-rule-parser';
 import { HtmlRuleSelector } from './rule/html-rule-selector';
 import { StreamFilter } from './stream-filter';
 import { RequestContext, requestContextStorage } from '../../request/request-context-storage';
-import { FilteringLog } from '../../filtering-log';
+import { filteringLog, FilteringLog } from '../../filtering-log';
 
 /**
  * Content filtering module
@@ -318,3 +318,5 @@ export class ContentFiltering {
         this.setupContentFilter(requestId, streamFilter);
     }
 }
+
+export const contentFilteringService = new ContentFiltering(filteringLog);
