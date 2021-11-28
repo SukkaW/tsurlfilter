@@ -6,7 +6,6 @@ import { MatchingResult, NetworkRule, RequestType } from '@adguard/tsurlfilter';
 import BrowserCookieApi from '../../../../src/background/services/cookie-filtering/browser-cookie/browser-cookie-api';
 import { RequestContext, requestContextStorage } from '../../../../src/background/request/request-context-storage';
 import { ContentType } from '../../../../src/background/request/request-type';
-import OnBeforeRequestDetailsType = WebRequest.OnBeforeRequestDetailsType;
 import OnBeforeSendHeadersDetailsType = WebRequest.OnBeforeSendHeadersDetailsType;
 import OnHeadersReceivedDetailsType = WebRequest.OnHeadersReceivedDetailsType;
 import HttpHeaders = WebRequest.HttpHeaders;
@@ -32,10 +31,12 @@ describe('Cookie filtering', () => {
         cookieFiltering = new CookieFiltering(mockFilteringLog);
 
         context = {
+            requestId: '1',
             requestUrl: 'https://example.org',
             referrerUrl: 'https://example.org',
             requestType: RequestType.Document,
             contentType: ContentType.DOCUMENT,
+            statusCode: 200,
             tabId: 0,
             frameId: 0,
             requestFrameId: 0,
@@ -43,6 +44,8 @@ describe('Cookie filtering', () => {
             thirdParty: false,
             matchingResult: new MatchingResult([], null),
             cookies: undefined,
+            htmlRules: undefined,
+            contentTypeHeader: undefined,
         };
 
         details = {

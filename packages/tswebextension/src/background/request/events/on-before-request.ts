@@ -87,16 +87,21 @@ export const onBeforeRequest = new RequestEvent(
         });
 
         const context = requestContextStorage.record(requestId, {
+            requestId: requestId,
             requestUrl: url,
             referrerUrl,
             requestType,
+            contentType,
+            statusCode: undefined,
             tabId,
             frameId,
             requestFrameId,
             timestamp: Date.now(),
             matchingResult: result,
             thirdParty,
-            contentType,
+            contentTypeHeader: undefined,
+            cookies: undefined,
+            htmlRules: undefined,
         });
 
         return callback({ details, context });

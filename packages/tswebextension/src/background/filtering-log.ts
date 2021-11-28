@@ -1,4 +1,4 @@
-import { NetworkRule } from '@adguard/tsurlfilter';
+import { NetworkRule, CosmeticRule } from '@adguard/tsurlfilter';
 
 /**
  * Filtering log interface
@@ -34,6 +34,45 @@ export interface FilteringLog {
         headerName: string,
         rule: NetworkRule,
     ): void;
+
+    /**
+     * On html rule applied
+     *
+     * @param tabId - tab id
+     * @param requestId - request id
+     * @param elementString - element string presentation
+     * @param frameUrl - Frame url
+     * @param rule - rule
+     */
+    onHtmlRuleApplied(
+        tabId: number, requestId: string, elementString: string, frameUrl: string, rule: CosmeticRule,
+    ): void;
+
+    /**
+     * On replace rules applied
+     *
+     * @param tabId - tab id
+     * @param requestId - request id
+     * @param frameUrl - Frame url
+     * @param rules - replace rules
+     */
+    onReplaceRulesApplied(
+        tabId: number, requestId: string, frameUrl: string, rules: NetworkRule[],
+    ): void;
+
+    /**
+     * On modification started
+     *
+     * @param requestId
+     */
+    onModificationStarted(requestId: string): void;
+
+    /**
+     * On modification completed
+     *
+     * @param requestId
+     */
+    onModificationFinished(requestId: string): void;
 }
 
 /**
@@ -44,6 +83,18 @@ export class MockFilteringLog implements FilteringLog {
     }
 
     addRemoveHeaderEvent(tabId: number, frameUrl: string, headerName: string, rule: NetworkRule): void {
+    }
+
+    onHtmlRuleApplied(tabId: number, requestId: string, elementString: string, frameUrl: string, rule: CosmeticRule): void {
+    }
+
+    onModificationFinished(requestId: string): void {
+    }
+
+    onModificationStarted(requestId: string): void {
+    }
+
+    onReplaceRulesApplied(tabId: number, requestId: string, frameUrl: string, rules: NetworkRule[]): void {
     }
 }
 

@@ -1,8 +1,9 @@
-import { MatchingResult, RequestType } from '@adguard/tsurlfilter';
+import { CosmeticRule, MatchingResult, RequestType } from '@adguard/tsurlfilter';
 import { ContentType } from './request-type';
 import ParsedCookie from '../services/cookie-filtering/parsed-cookie';
 
 export interface RequestContext {
+    requestId: string
     requestUrl: string
     referrerUrl: string
     requestType: RequestType
@@ -10,10 +11,13 @@ export interface RequestContext {
     tabId: number
     frameId: number
     requestFrameId: number
+    statusCode: number | undefined,
     timestamp: number // in ms
     thirdParty: boolean
     matchingResult: MatchingResult | null
-    cookies: ParsedCookie[] | undefined,
+    cookies: ParsedCookie[] | undefined
+    htmlRules: CosmeticRule[] | undefined
+    contentTypeHeader: string | undefined
 }
 
 export interface RequestContextStorageInterface {
