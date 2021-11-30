@@ -4,17 +4,19 @@ import ParsedCookie from '../services/cookie-filtering/parsed-cookie';
 
 export interface RequestContext {
     requestId: string
-    requestUrl: string
-    referrerUrl: string
-    requestType: RequestType
-    contentType: ContentType
-    tabId: number
-    frameId: number
-    requestFrameId: number
-    statusCode: number | undefined,
+
+    tabId: number,
+    frameId: number,
     timestamp: number // in ms
-    thirdParty: boolean
-    matchingResult: MatchingResult | null
+
+    requestUrl?: string
+    referrerUrl?: string
+    requestType?: RequestType
+    contentType?: ContentType
+    requestFrameId?: number
+    thirdParty?: boolean
+    matchingResult?: MatchingResult | null,
+    statusCode: number | undefined
     cookies: ParsedCookie[] | undefined
     htmlRules: CosmeticRule[] | undefined
     contentTypeHeader: string | undefined
