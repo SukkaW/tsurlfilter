@@ -66,7 +66,7 @@ export class CookieFiltering {
             return;
         }
 
-        const cookies = CookieUtils.parseCookies(cookieHeader.value, context.requestUrl);
+        const cookies = CookieUtils.parseCookies(cookieHeader.value, context.requestUrl!);
         if (cookies.length === 0) {
             return;
         }
@@ -87,7 +87,7 @@ export class CookieFiltering {
         }
 
         if (details.responseHeaders) {
-            const cookies = CookieUtils.parseSetCookieHeaders(details.responseHeaders, context.requestUrl);
+            const cookies = CookieUtils.parseSetCookieHeaders(details.responseHeaders, context.requestUrl!);
             const newCookies = cookies.filter((c) => !context.cookies?.includes(c));
             for (const cookie of newCookies) {
                 cookie.thirdParty = details.thirdParty;
@@ -115,7 +115,7 @@ export class CookieFiltering {
         }
 
         const cookieRules = context.matchingResult.getCookieRules();
-        return CookieRulesFinder.getBlockingRules(context.requestUrl, cookieRules);
+        return CookieRulesFinder.getBlockingRules(context.requestUrl!, cookieRules);
     }
 
     /**

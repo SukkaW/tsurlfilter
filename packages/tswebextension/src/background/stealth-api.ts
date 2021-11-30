@@ -68,7 +68,7 @@ export class StealthApi implements StealthApiInterface {
 
         const rulesTexts = this.engine.getCookieRulesTexts().join('\n');
         return new StringRuleList(StealthApi.STEALTH_MODE_FILTER_ID, rulesTexts, false, false);
-    };
+    }
 
     /**
      * Handler
@@ -94,8 +94,8 @@ export class StealthApi implements StealthApiInterface {
         }
 
         const stealthActions = this.engine.processRequestHeaders(
-            context.requestUrl,
-            context.requestType,
+            context.requestUrl!,
+            context.requestType!,
             details.requestHeaders,
         );
 

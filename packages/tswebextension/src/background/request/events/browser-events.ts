@@ -18,11 +18,11 @@ export namespace BrowserEvents {
 
     /**
      * Callback function passed as {@link RequestEvent} methods argument
-     * 
+     *
      * This function passed to {@link RequestEvent.addListener},
      * {@link RequestEventListener} is dynamicly created by {@link CreateRequestEventListener} function
      * and registetered in the browser.WebRequest event
-     * 
+     *
      */
     export type RequestEventCallback<Details> = (
         requestData: RequestData<Details>
@@ -30,10 +30,10 @@ export namespace BrowserEvents {
 
     /**
      * Function registered as listener of the browser.WebRequest event
-     * 
+     *
      * 1. Handles request details from original event
      * 2. modifies data in {@link RequestContext})
-     * 3. Executes the {@link RequestEventCallback} passed 
+     * 3. Executes the {@link RequestEventCallback} passed
      *    to {@link RequestEvent.addListener} with {@link RequestData}
      * 4. Returns callback result
      */
@@ -87,7 +87,7 @@ export namespace BrowserEvents {
             this.createListener = createListener;
         }
 
-        public addListener({ 
+        public addListener({
             filter,
             extraInfoSpec,
             callback,
@@ -121,6 +121,7 @@ export namespace BrowserEvents {
 
 
             const context = requestContextStorage.record(requestId, {
+                requestId,
                 frameId,
                 tabId,
                 timestamp: Date.now(),

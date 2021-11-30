@@ -173,16 +173,16 @@ export class WebRequestApi implements WebRequestApiInterface {
         }
 
         // TODO: Check if content filtering is available (is FF)
-        if (browser.webRequest.filterResponseData) {
+        if (context && browser.webRequest.filterResponseData) {
             const cosmeticResult = engineApi.getCosmeticResult(
-                data.context.referrerUrl, CosmeticOption.CosmeticOptionHtml,
+                context.referrerUrl!, CosmeticOption.CosmeticOptionHtml,
             );
-            data.context.htmlRules = cosmeticResult.Html.getRules();
+            context.htmlRules = cosmeticResult.Html.getRules();
 
-            contentFilteringService.onBeforeRequest(
-                browser.webRequest.filterResponseData(data.context.requestId),
-                data.details,
-            );
+            // contentFilteringService.onBeforeRequest(
+            //     browser.webRequest.filterResponseData(context.requestId),
+            //     details,
+            // );
         }
 
         return;
@@ -212,7 +212,7 @@ export class WebRequestApi implements WebRequestApiInterface {
     private onHeadersReceived(data: BrowserEvents.RequestData<
         WebRequest.OnHeadersReceivedDetailsType
     >): WebRequestEventResponse {
-        if (!context?.matchingResult){
+        if (!data.context?.matchingResult){
             return;
         }
 

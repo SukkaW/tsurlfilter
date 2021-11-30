@@ -69,7 +69,7 @@ export class ContentFiltering {
         streamFilter: StreamFilter,
     ): void {
         const context = requestContextStorage.get(requestId);
-        if (!context) {
+        if (!context || !context.requestType) {
             return;
         }
 
@@ -146,7 +146,7 @@ export class ContentFiltering {
                         element.parentNode.removeChild(element);
 
                         this.modificationsListener.onHtmlRuleApplied(
-                            context.tabId!, context.requestId, element.innerHTML, context.requestUrl, rule,
+                            context.tabId!, context.requestId, element.innerHTML, context.requestUrl!, rule,
                         );
                         deleted.push(element);
                     }
@@ -205,7 +205,7 @@ export class ContentFiltering {
 
         if (appliedRules.length > 0) {
             this.modificationsListener.onReplaceRulesApplied(
-                context.tabId!, context.requestId, context.requestUrl, appliedRules,
+                context.tabId!, context.requestId, context.requestUrl!, appliedRules,
             );
         }
 
@@ -254,13 +254,13 @@ export class ContentFiltering {
         content: string,
     ): string {
         let htmlRulesToApply: CosmeticRule[] | undefined = undefined;
-        if (ContentFiltering.shouldApplyHtmlRules(context.requestType)) {
+        if (ContentFiltering.shouldApplyHtmlRules(context.requestType!)) {
             htmlRulesToApply = context.htmlRules;
         }
 
         let replaceRulesToApply: NetworkRule[] | null = null;
         if (context.matchingResult) {
-            if (ContentFiltering.shouldApplyReplaceRule(context.requestType, context.contentTypeHeader!)) {
+            if (ContentFiltering.shouldApplyReplaceRule(context.requestType!, context.contentTypeHeader!)) {
                 replaceRulesToApply = context.matchingResult.getReplaceRules();
             }
         }

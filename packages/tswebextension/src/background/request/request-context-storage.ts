@@ -15,11 +15,11 @@ export interface RequestContext {
     contentType?: ContentType
     requestFrameId?: number
     thirdParty?: boolean
-    matchingResult?: MatchingResult | null,
-    statusCode: number | undefined
-    cookies: ParsedCookie[] | undefined
-    htmlRules: CosmeticRule[] | undefined
-    contentTypeHeader: string | undefined
+    matchingResult?: MatchingResult | null
+    statusCode?: number
+    cookies?: ParsedCookie[]
+    htmlRules?: CosmeticRule[]
+    contentTypeHeader?: string
 }
 
 export interface RequestContextStorageInterface {
