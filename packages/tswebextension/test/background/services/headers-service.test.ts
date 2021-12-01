@@ -2,9 +2,8 @@ import { WebRequest } from 'webextension-polyfill';
 import { HeadersService } from '../../../src/background/services/headers-service';
 import { MockFilteringLog } from '../mock-filtering-log';
 import { MatchingResult, NetworkRule, RequestType } from '@adguard/tsurlfilter';
-import { BrowserEvents } from '../../../src/background/request/events';
+import { RequestData } from '../../../src/background/request/events/request-events';
 import { ContentType } from '../../../src/background/request';
-import RequestData = BrowserEvents.RequestData;
 import OnBeforeSendHeadersDetailsType = WebRequest.OnBeforeSendHeadersDetailsType;
 import OnHeadersReceivedDetailsType = WebRequest.OnHeadersReceivedDetailsType;
 

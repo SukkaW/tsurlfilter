@@ -2,8 +2,7 @@ import { WebRequest } from 'webextension-polyfill';
 import { NetworkRule, RemoveHeaderModifier } from '@adguard/tsurlfilter';
 import { FilteringLog, filteringLog } from '../filtering-log';
 import { removeHeader } from '../utils/headers';
-import { BrowserEvents } from '../request/events/browser-events';
-import RequestData = BrowserEvents.RequestData;
+import { RequestData } from '../request/events/request-events';
 
 /**
  * Headers filtering service module

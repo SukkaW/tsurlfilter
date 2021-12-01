@@ -17,7 +17,7 @@ export type DetailsHandler<Details> = (
 
 /**
  * Callback function passed as {@link RequestEvent} methods argument
- * 
+ *
  */
 export type EventCallback<Details> = (
     requestData: RequestData<Details>
@@ -103,6 +103,7 @@ export const onBeforeRequest = new RequestEvent(
 
 
         const context = requestContextStorage.record(requestId, {
+            requestId,
             frameId,
             tabId,
             timestamp: Date.now(),

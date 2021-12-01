@@ -34,6 +34,7 @@ const MAX_URL_LENGTH = 1024 * 16;
 export class WebRequestApi implements WebRequestApiInterface {
     constructor() {
         this.onBeforeRequest = this.onBeforeRequest.bind(this);
+        this.onBeforeSendHeaders = this.onBeforeSendHeaders.bind(this);
         this.onHeadersReceived = this.onHeadersReceived.bind(this);
         this.onResponseStarted = this.onResponseStarted.bind(this);
         this.onErrorOccurred = this.onErrorOccurred.bind(this);
@@ -45,6 +46,7 @@ export class WebRequestApi implements WebRequestApiInterface {
     public start(): void {
         // browser.webRequest Events
         RequestEvents.onBeforeRequest.addListener(this.onBeforeRequest);
+        RequestEvents.onBeforeSendHeaders.addListener(this.onBeforeSendHeaders);
         RequestEvents.onHeadersReceived.addListener(this.onHeadersReceived);
         RequestEvents.onResponseStarted.addListener(this.onResponseStarted);
         RequestEvents.onErrorOccurred.addListener(this.onErrorOccurred);
@@ -56,6 +58,7 @@ export class WebRequestApi implements WebRequestApiInterface {
 
     public stop(): void {
         RequestEvents.onBeforeRequest.removeListener(this.onBeforeRequest);
+        RequestEvents.onBeforeSendHeaders.removeListener(this.onBeforeSendHeaders);
         RequestEvents.onHeadersReceived.removeListener(this.onHeadersReceived);
         RequestEvents.onResponseStarted.removeListener(this.onResponseStarted);
         RequestEvents.onErrorOccurred.removeListener(this.onErrorOccurred);
@@ -64,7 +67,7 @@ export class WebRequestApi implements WebRequestApiInterface {
         browser.webNavigation.onCommitted.removeListener(this.onCommitted);
     }
 
-    private onBeforeRequest({ details }: RequestEvents.RequestData<
+    private onBeforeRequest({ context, details }: RequestEvents.RequestData<
     WebRequest.OnBeforeRequestDetailsType
     >): WebRequestEventResponse {
         const {
@@ -185,9 +188,9 @@ export class WebRequestApi implements WebRequestApiInterface {
         return;
     }
 
-    private onBeforeSendHeaders(data: BrowserEvents.RequestData<
-        WebRequest.OnBeforeSendHeadersDetailsType
-    >): WebRequestEventResponse {
+    private onBeforeSendHeaders(
+        data: RequestEvents.RequestData<WebRequest.OnBeforeSendHeadersDetailsType>,
+    ): WebRequestEventResponse {
         if (!data.context?.matchingResult){
             return;
         }
@@ -202,13 +205,11 @@ export class WebRequestApi implements WebRequestApiInterface {
         if (requestHeadersModified) {
             return { requestHeaders: data.details.requestHeaders };
         }
-
-        return;
     }
 
-    private onHeadersReceived(data: BrowserEvents.RequestData<
-        WebRequest.OnHeadersReceivedDetailsType
-    >): WebRequestEventResponse {
+    private onHeadersReceived(
+        data: RequestEvents.RequestData<WebRequest.OnHeadersReceivedDetailsType>,
+    ): WebRequestEventResponse {
         if (!data.context?.matchingResult){
             return;
         }
