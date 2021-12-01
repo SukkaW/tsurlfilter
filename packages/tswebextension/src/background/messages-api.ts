@@ -135,8 +135,8 @@ export class MessagesApi {
             frameRule: tabsApi.getTabFrameRule(tabId),
         });
 
-        if(!matchingResult){
-            return
+        if (!matchingResult){
+            return;
         }
 
         const cosmeticOption = matchingResult.getCosmeticOption();

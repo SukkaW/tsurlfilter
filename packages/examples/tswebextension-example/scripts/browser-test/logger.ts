@@ -1,9 +1,25 @@
-const { colorizeStatusText } = require("./text-color"); 
+import { colorizeStatusText, colorizeTitleText } from "./text-color"; 
 
-exports.logTestResult = (details) => {
+export interface LogDetails {
+    name: string,
+    tests: {
+        name: string,
+        status: string,
+    }[],
+    status: string,
+    testCounts: {
+      passed: number,
+      failed: number,
+      skipped: number,
+      total: number
+    },
+    runtime: number
+  }
+
+export const logTestResult = (details: LogDetails) => {
     const counts = details.testCounts;
 
-    console.log('Name:', details.name)
+    console.log(colorizeTitleText(details.name));
 
     console.log('Status:', colorizeStatusText(details.status));
     console.log('Total %d tests: %d passed, %d failed, %d skipped',
