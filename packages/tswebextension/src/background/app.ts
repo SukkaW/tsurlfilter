@@ -136,7 +136,7 @@ export class TsWebExtension implements TsWebExtensionInterface {
         await engineApi.startEngine(configuration);
         webRequestApi.start();
         messagesApi.start();
-        stealthApi.start(configuration);
+        await stealthApi.start(configuration);
 
         this.isStarted = true;
         this.configuration = configuration;
