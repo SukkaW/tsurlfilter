@@ -60,6 +60,11 @@ export interface StealthConfig {
      * Adding Do-Not-Track (DNT) header
      */
     sendDoNotTrack: boolean;
+
+    /**
+     * Is WebRTC blocking enabled
+     */
+    blockWebRTC: boolean;
 }
 
 /**
