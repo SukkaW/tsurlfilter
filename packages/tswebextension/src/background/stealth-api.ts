@@ -3,6 +3,7 @@ import { StringRuleList, logger } from '@adguard/tsurlfilter';
 import { Configuration } from './configuration';
 import { StealthConfig, StealthService } from './services/stealth-service';
 import { RequestContext, requestContextStorage } from './request/request-context-storage';
+import { filteringLog } from './filtering-log';
 
 /**
  * Stealth api
@@ -119,9 +120,9 @@ export class StealthApi implements StealthApiInterface {
             details.requestHeaders,
         );
 
-        // if (stealthActions > 0) {
-        //     requestContextStorage.update(details.requestId, { stealthActions });
-        // }
+        if (stealthActions > 0) {
+            filteringLog.bindStealthActionsToHttpRequestEvent(context.tabId, context.requestId, stealthActions);
+        }
     }
 
     private canApplyStealthActionsToContext(context: RequestContext): boolean {

@@ -24,4 +24,8 @@ export class MockFilteringLog implements FilteringLog {
     onReplaceRulesApplied = jest.fn(() => {
         // Do nothing
     });
+
+    bindStealthActionsToHttpRequestEvent = jest.fn(() => {
+        // Do nothing
+    });
 }

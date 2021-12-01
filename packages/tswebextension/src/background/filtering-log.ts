@@ -73,6 +73,17 @@ export interface FilteringLog {
      * @param requestId
      */
     onModificationFinished(requestId: string): void;
+
+    /**
+     * Binds applied stealth actions to HTTP request
+     *
+     * @param tabId Request tab id
+     * @param requestId
+     * @param actions Applied actions mask
+     */
+    bindStealthActionsToHttpRequestEvent(
+        tabId: number, requestId:string, actions: number,
+    ): void;
 }
 
 /**
@@ -95,6 +106,9 @@ export class MockFilteringLog implements FilteringLog {
     }
 
     onReplaceRulesApplied(tabId: number, requestId: string, frameUrl: string, rules: NetworkRule[]): void {
+    }
+
+    bindStealthActionsToHttpRequestEvent(tabId: number, requestId: string, actions: number): void {
     }
 }
 
