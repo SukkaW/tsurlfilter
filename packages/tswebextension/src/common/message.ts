@@ -37,3 +37,14 @@ export const  getCookieRulesPayloadValidator = z.object({
 }).strict();
 
 export type GetCookieRulesPayloadValidator = z.infer<typeof getCookieRulesPayloadValidator>;
+
+export const  getSaveCookieLogEventPayloadValidator = z.object({
+    cookieName: z.string(),
+    cookieDomain: z.string(),
+    cookieValue: z.string(),
+    ruleText: z.string(),
+    filterId: z.number(),
+    thirdParty: z.boolean(),
+}).strict();
+
+export type GetSaveCookieLogEventPayloadValidator = z.infer<typeof getSaveCookieLogEventPayloadValidator>;

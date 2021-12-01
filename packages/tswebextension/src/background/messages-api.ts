@@ -1,10 +1,11 @@
 import browser, { Runtime } from 'webextension-polyfill';
-import { RequestType, CookieModifier, NetworkRuleOption } from '@adguard/tsurlfilter';
+import { RequestType, CookieModifier, NetworkRuleOption, NetworkRule } from '@adguard/tsurlfilter';
 
 import { requestBlockingApi } from './request';
 import {
     getCookieRulesPayloadValidator,
     getExtendedCssPayloadValidator,
+    getSaveCookieLogEventPayloadValidator,
     Message,
     MessageType,
     messageValidator,
@@ -13,6 +14,7 @@ import {
 import { tabsApi } from './tabs';
 import { engineApi } from './engine-api';
 import { cosmeticApi } from './cosmetic-api';
+import { filteringLog } from './filtering-log';
 
 export interface MessagesApiInterface {
     start: () => void;
@@ -68,19 +70,10 @@ export class MessagesApi {
                 );
             }
             case MessageType.SAVE_COOKIE_LOG_EVENT: {
-                // TODO: add filtering log event
-                // const data = message.payload;
-                // filteringLog.addCookieEvent({
-                //     tabId: sender.tab.tabId,
-                //     cookieName: data.cookieName,
-                //     cookieDomain: data.cookieDomain,
-                //     cookieValue: data.cookieValue,
-                //     cookieRule: new NetworkRule(data.ruleText, data.filterId),
-                //     isModifyingCookieRule: false,
-                //     thirdParty: data.thirdParty,
-                //     timestamp: Date.now(),
-                // });
-                break;
+                return this.handleSaveCookieLogEvent(
+                    sender,
+                    message.payload,
+                );
             }
             default:
                 return;
@@ -197,6 +190,40 @@ export class MessagesApi {
             };
         });
     }
+
+    /**
+     * Calls filtering to add an event from cookie-controller content-script
+     *
+     * @param sender
+     * @param payload
+     */
+    private handleSaveCookieLogEvent(
+        sender: Runtime.MessageSender,
+        payload?: unknown,
+    ) {
+        if (!payload || !sender?.tab?.id) {
+            return false;
+        }
+
+        const res = getSaveCookieLogEventPayloadValidator.safeParse(payload);
+        if (!res.success){
+            return false;
+        }
+
+        const data = res.data;
+
+        filteringLog.addCookieEvent({
+            tabId: sender.tab.id,
+            cookieName: data.cookieName,
+            cookieDomain: data.cookieDomain,
+            cookieValue: data.cookieValue,
+            cookieRule: new NetworkRule(data.ruleText, data.filterId),
+            isModifyingCookieRule: false,
+            thirdParty: data.thirdParty,
+            timestamp: Date.now(),
+        });
+    }
+
 }
 
 export const messagesApi = new MessagesApi();
