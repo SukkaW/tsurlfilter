@@ -253,7 +253,7 @@ export class ContentFiltering {
         context: RequestContext,
         content: string,
     ): string {
-        let htmlRulesToApply: CosmeticRule[] | undefined = undefined;
+        let htmlRulesToApply: CosmeticRule[] | undefined;
         if (ContentFiltering.shouldApplyHtmlRules(context.requestType!)) {
             htmlRulesToApply = context.htmlRules;
         }

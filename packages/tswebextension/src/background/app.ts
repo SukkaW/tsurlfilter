@@ -155,13 +155,14 @@ export class TsWebExtension implements TsWebExtensionInterface {
         configurationValidator.parse(configuration);
 
         if (!this.isStarted) {
-            throw new Error('App is not strated!');
+            throw new Error('App is not started!');
         }
 
         await engineApi.startEngine(configuration);
         this.configuration = configuration;
 
-        // TODO: Restart stealth api
+        stealthApi.stop();
+        await stealthApi.start(configuration);
     }
 
     public openAssistant(tabId: number): void {
