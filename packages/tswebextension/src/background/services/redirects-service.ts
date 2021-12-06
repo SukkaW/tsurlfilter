@@ -2,6 +2,7 @@ import { redirects, Redirect } from '@adguard/scriptlets';
 import { resourcesService } from './resources-service';
 
 // TODO: Update Redirect export
+// TODO: Store files in tswebextension?
 const { Redirects } = redirects as any;
 export interface RedirectsServiceInterface {
     start: () => void;
@@ -15,7 +16,7 @@ export class RedirectsService implements RedirectsServiceInterface {
 
     public async start() {
         try {
-            const rawYaml = await resourcesService.loadResource('/war/redirects.yml');
+            const rawYaml = await resourcesService.loadResource('redirects.yml');
             this.redirects = new Redirects(rawYaml);
         } catch (e){
             throw new Error((e as Error).message);
@@ -40,7 +41,7 @@ export class RedirectsService implements RedirectsServiceInterface {
             return null;
         }
 
-        return resourcesService.createResourceUrl(`/war/redirects/${redirectSource.file}`);
+        return resourcesService.createResourceUrl(`redirects/${redirectSource.file}`);
     }
 }
 
