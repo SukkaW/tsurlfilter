@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Request } from '../src/request';
 import { RequestType } from '../src/request-type';
 
@@ -72,5 +73,10 @@ describe('Creating request', () => {
         const request = new Request('http://localhost', 'http://localhost.test', RequestType.Other);
         expect(request.subdomains.sort()).toEqual(['localhost'].sort());
         expect(request.sourceSubdomains.sort()).toEqual(['localhost.test', 'test'].sort());
+    });
+
+    it('parses subdomains for _', () => {
+        const request = new Request('https://_.rocks/iqadcontroller.js', 'http://example.org', RequestType.XmlHttpRequest);
+        expect(request.subdomains.sort()).toEqual(['_.rocks', 'rocks'].sort());
     });
 });

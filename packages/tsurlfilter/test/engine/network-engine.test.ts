@@ -177,6 +177,22 @@ describe('Test match simple domain rules', () => {
         expect(result).toBeTruthy();
         expect(result && result.getText()).toEqual(rule);
     });
+
+    it('works if it finds rule with _ domain', () => {
+        const engine = new NetworkEngine(createTestRuleStorage(1, [
+            '/iqadcontroller.',
+            '@@||_.rocks/iqadcontroller.js',
+        ]));
+
+        const url = 'https://_.rocks/iqadcontroller.js';
+        const sourceURL = 'https://np-coburg.de';
+
+        const request = new Request(url, sourceURL, RequestType.XmlHttpRequest);
+        const result = engine.match(request);
+
+        expect(result).toBeTruthy();
+        expect(result!.getText()).toBe('@@||_.rocks/iqadcontroller.js');
+    });
 });
 
 describe('Test Match Wildcard domain', () => {

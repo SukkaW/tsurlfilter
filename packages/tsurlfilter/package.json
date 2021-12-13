@@ -92,7 +92,7 @@
     "netmask": "^2.0.2",
     "punycode": "^2.1.1",
     "text-encoding": "git+https://github.com/AdguardTeam/text-encoding.git#v0.7.1",
-    "tldts": "^5.6.45",
+    "tldts": "^5.7.56",
     "webextension-polyfill": "^0.8.0"
   }
 }
