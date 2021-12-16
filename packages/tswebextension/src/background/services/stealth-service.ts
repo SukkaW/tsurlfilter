@@ -19,6 +19,7 @@ export enum StealthActions {
 
 /**
  * Stealth service configuration
+ * TODO: Take stealth-service from browser-extension repo
  */
 export interface StealthConfig {
     /**

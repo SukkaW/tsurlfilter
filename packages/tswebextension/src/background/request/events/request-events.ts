@@ -1,89 +1,7 @@
-import browser, { WebRequest, Events } from 'webextension-polyfill';
+import browser, { WebRequest } from 'webextension-polyfill';
 
-import { RequestContext } from '../request-context-storage';
 import { requestContextStorage } from '../request-context-storage';
-
-/**
- * Extended {@link EventCallback} argument data
- */
-export interface RequestData<Details> {
-    details: Details,
-    context?: RequestContext;
-}
-
-export type DetailsHandler<Details> = (
-    details: Details
-) => RequestData<Details>;
-
-/**
- * Callback function passed as {@link RequestEvent} methods argument
- *
- */
-export type EventCallback<Details> = (
-    requestData: RequestData<Details>
-) => WebRequest.BlockingResponseOrPromise | void;
-
-/**
- * Function registered as listener of the browser.WebRequest event
- */
-export type BrowserEventListener<Details> = (
-    details: Details
-) => WebRequest.BlockingResponseOrPromise | void;
-
-/**
- * More flexible variants for {@link Events.Event} interfaces
- */
-export interface BrowserRequstEvent<Details, Options>
-    extends Events.Event<BrowserEventListener<Details>> {
-    addListener(
-        callback: BrowserEventListener<Details>,
-        filter: WebRequest.RequestFilter,
-        extraInfoSpec?: Options[]
-    ): void;
-}
-
-/**
- * browser.webRequest generic wrapper with custom event implementation
- */
-export class RequestEvent<Details, Options> {
-    private listeners: EventCallback<Details>[] = [];
-
-    constructor(
-        event: BrowserRequstEvent<Details, Options>,
-        handler: DetailsHandler<Details>,
-        filter: WebRequest.RequestFilter,
-        extraInfoSpec?: Options[],
-    ) {
-        const handleBrowserEvent = (details: Details) => {
-            const data = handler(details);
-
-            /**
-             * Execute all registered listeners one by one until a non-empty value is returned
-             */
-            for (let i = 0; i < this.listeners.length; i++) {
-                const res = this.listeners[i](data);
-                if (res) {
-                    return res;
-                }
-            }
-        };
-
-        event.addListener(handleBrowserEvent, filter, extraInfoSpec);
-    }
-
-    public addListener(listener: EventCallback<Details>) {
-        this.listeners.push(listener);
-    }
-
-    public removeListener(listener: EventCallback<Details>) {
-        const index = this.listeners.indexOf(listener);
-
-        if (index !== -1) {
-            this.listeners.splice(index, 1);
-        }
-    }
-}
-
+import { RequestEvent, BrowserRequstEvent } from './request-event';
 
 
 export type OnBeforeRequest = BrowserRequstEvent<
@@ -117,9 +35,9 @@ export const onBeforeRequest = new RequestEvent(
 
 
 
-const getContext = <T extends { requestId: string }>(details: T) => {
-    const { requestId } = details;
-    const context = requestContextStorage.get(requestId);
+const handleDetails = <T extends { requestId: string, timeStamp: number }>(details: T) => {
+    const { requestId, timeStamp } = details;
+    const context = requestContextStorage.update(requestId, { timestamp: timeStamp });
     return { details, context };
 };
 
@@ -131,7 +49,7 @@ WebRequest.OnBeforeSendHeadersOptions
 
 export const onBeforeSendHeaders = new RequestEvent(
     browser.webRequest.onBeforeSendHeaders as OnBeforeSendHeaders,
-    (details) => ({ details }),
+    handleDetails,
     { urls: ['<all_urls>'] },
 );
 
@@ -142,7 +60,7 @@ WebRequest.OnSendHeadersOptions
 
 export const onSendHeaders = new RequestEvent(
     browser.webRequest.onSendHeaders as OnSendHeaders,
-    getContext,
+    handleDetails,
     { urls: ['<all_urls>'] },
 );
 
@@ -153,7 +71,7 @@ WebRequest.OnHeadersReceivedOptions
 
 export const onHeadersReceived = new RequestEvent(
     browser.webRequest.onHeadersReceived as OnHeadersReceived,
-    getContext,
+    handleDetails,
     { urls: ['<all_urls>'] },
     ['responseHeaders', 'blocking'],
 );
@@ -165,7 +83,7 @@ WebRequest.OnAuthRequiredOptions
 
 export const onAuthRequired = new RequestEvent(
     browser.webRequest.onAuthRequired as OnAuthRequired,
-    getContext,
+    handleDetails,
     { urls: ['<all_urls>'] },
 );
 
@@ -176,7 +94,7 @@ WebRequest.OnBeforeRedirectOptions
 
 export const onBeforeRedirect = new RequestEvent(
     browser.webRequest.onBeforeRedirect as OnBeforeRedirect,
-    getContext,
+    handleDetails,
     { urls: ['<all_urls>'] },
 );
 
@@ -187,7 +105,7 @@ WebRequest.OnResponseStartedOptions
 
 export const onResponseStarted = new RequestEvent(
     browser.webRequest.onResponseStarted as OnResponseStarted,
-    getContext,
+    handleDetails,
     { urls: ['<all_urls>'] },
 );
 
@@ -198,7 +116,7 @@ WebRequest.OnCompletedOptions
 
 export const onCompleted = new RequestEvent(
     browser.webRequest.onCompleted as OnCompleted,
-    getContext,
+    handleDetails,
     { urls: ['<all_urls>'] },
     ['responseHeaders'],
 );
@@ -210,6 +128,6 @@ WebRequest.OnErrorOccurredOptions
 
 export const onErrorOccurred = new RequestEvent(
     browser.webRequest.onErrorOccurred as OnErrorOccurred,
-    getContext,
+    handleDetails,
     { urls: ['<all_urls>'] },
 );

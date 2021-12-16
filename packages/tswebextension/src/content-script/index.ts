@@ -1,6 +1,7 @@
 import browser from 'webextension-polyfill';
 import ExtendedCss, { IAffectedElement } from 'extended-css';
 export * from './stealth-helper';
+export * from './cookie-controller';
 import { CssHitsCounter } from './css-hits-counter';
 
 import { elementCollapser } from './element-collapser';

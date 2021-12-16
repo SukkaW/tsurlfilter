@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import browser, { WebNavigation, WebRequest } from 'webextension-polyfill';
+import browser, { WebRequest, WebNavigation } from 'webextension-polyfill';
 import {
     CosmeticOption,
     RequestType,
@@ -17,6 +17,7 @@ import { contentFilteringService } from './services/content-filtering/content-fi
 import {
     hideRequestInitiatorElement,
     RequestEvents,
+    RequestData,
     requestContextStorage,
     getRequestType,
 } from './request';
@@ -67,9 +68,7 @@ export class WebRequestApi implements WebRequestApiInterface {
         browser.webNavigation.onCommitted.removeListener(this.onCommitted);
     }
 
-    private onBeforeRequest({ context, details }: RequestEvents.RequestData<
-    WebRequest.OnBeforeRequestDetailsType
-    >): WebRequestEventResponse {
+    private onBeforeRequest({ context, details }: RequestData<WebRequest.OnBeforeRequestDetailsType>): WebRequestEventResponse {
         const {
             requestId,
             type,
@@ -189,7 +188,7 @@ export class WebRequestApi implements WebRequestApiInterface {
     }
 
     private onBeforeSendHeaders(
-        data: RequestEvents.RequestData<WebRequest.OnBeforeSendHeadersDetailsType>,
+        data: RequestData<WebRequest.OnBeforeSendHeadersDetailsType>,
     ): WebRequestEventResponse {
         if (!data.context?.matchingResult){
             return;
@@ -208,7 +207,7 @@ export class WebRequestApi implements WebRequestApiInterface {
     }
 
     private onHeadersReceived(
-        data: RequestEvents.RequestData<WebRequest.OnHeadersReceivedDetailsType>,
+        data: RequestData<WebRequest.OnHeadersReceivedDetailsType>,
     ): WebRequestEventResponse {
         if (!data.context?.matchingResult){
             return;
@@ -239,7 +238,7 @@ export class WebRequestApi implements WebRequestApiInterface {
         }
     }
 
-    private onResponseStarted({ context }: RequestEvents.RequestData<
+    private onResponseStarted({ context }: RequestData<
     WebRequest.OnResponseStartedDetailsType
     >): WebRequestEventResponse {
         if (!context?.matchingResult){
@@ -257,13 +256,13 @@ export class WebRequestApi implements WebRequestApiInterface {
         }
     }
 
-    private onCompleted({ details }: RequestEvents.RequestData<
+    private onCompleted({ details }: RequestData<
     WebRequest.OnCompletedDetailsType
     >): WebRequestEventResponse {
         requestContextStorage.delete(details.requestId);
     }
 
-    private onErrorOccurred({ details }: RequestEvents.RequestData<
+    private onErrorOccurred({ details }: RequestData<
     WebRequest.OnErrorOccurredDetailsType
     >): WebRequestEventResponse {
         const { requestId, tabId, frameId } = details;
