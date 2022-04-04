@@ -2,9 +2,17 @@ import { TextEncoder, TextDecoder } from 'text-encoding';
 import { StreamFilter } from './stream-filter';
 import { RequestType } from '../request-type';
 import {
-    DEFAULT_CHARSET, LATIN_1, SUPPORTED_CHARSETS, WIN_1252,
+    DEFAULT_CHARSET,
+    LATIN_1,
+    SUPPORTED_CHARSETS,
+    WIN_1252,
+    parseCharsetFromHtml,
+    parseCharsetFromCss,
 } from './charsets';
 import { logger } from '../utils/logger';
+import { RequestContext } from './request-context';
+import { NetworkRule } from '../rules/network-rule';
+import { CosmeticRule } from '../rules/cosmetic-rule';
 
 /**
  * Content Filter class
@@ -14,14 +22,45 @@ import { logger } from '../utils/logger';
  */
 export class ContentFilter {
     /**
+     * Contains collection of accepted content types
+     */
+    private static supportedContentTypes = [
+        'text/',
+        'application/json',
+        'application/xml',
+        'application/xhtml+xml',
+        'application/javascript',
+        'application/x-javascript',
+    ];
+
+    /**
+     * Contains collection of accepted request types for replace rules
+     */
+    private static replaceRulesRequestTypes = [
+        RequestType.Document,
+        RequestType.Subdocument,
+        RequestType.Script,
+        RequestType.Stylesheet,
+        RequestType.XmlHttpRequest,
+    ];
+
+    /**
+     * Contains collection of accepted request types for html rules
+     */
+    private static htmlRulesRequestTypes = [
+        RequestType.Document,
+        RequestType.Subdocument,
+    ];
+
+    /**
      * Web request filter
      */
     filter: StreamFilter;
 
     /**
-     * Request type
+     * Request context
      */
-    requestType: RequestType;
+    context: RequestContext;
 
     /**
      * Request charset
@@ -44,26 +83,40 @@ export class ContentFilter {
     encoder: TextEncoder | undefined;
 
     /**
+     * Replace rules for request
+     */
+    replaceRules: NetworkRule[];
+
+    /**
+     * Html rules for request
+     */
+    htmlRules: CosmeticRule[];
+
+    /**
      * Result callback
      */
-    onContentCallback: (data: string) => void;
+    onContentCallback: (content: string, context: RequestContext) => void;
 
     /**
      * Constructor
      *
      * @param filter implementation
-     * @param requestId Request identifier
-     * @param requestType Request type
+     * @param context request context
+     * @param htmlRules
+     * @param replaceRules
      * @param onContentCallback
      */
     constructor(
         filter: StreamFilter,
-        requestId: number,
-        requestType: RequestType,
-        onContentCallback: (data: string) => void,
+        context: RequestContext,
+        htmlRules: CosmeticRule[],
+        replaceRules: NetworkRule[],
+        onContentCallback: (data: string, context: RequestContext) => void,
     ) {
         this.filter = filter;
-        this.requestType = requestType;
+        this.context = context;
+        this.htmlRules = htmlRules;
+        this.replaceRules = replaceRules;
 
         this.content = '';
         this.onContentCallback = onContentCallback;
@@ -96,6 +149,30 @@ export class ContentFilter {
      */
     private initFilter(): void {
         this.filter.ondata = (event): void => {
+            // check if app should apply decoding/encoding,
+            // applications is checking ondata event,
+            // because disconnecting onstart event is crashing loading of some requests
+            let htmlRulesToApply: CosmeticRule[] | null = null;
+            if (this.htmlRules.length > 0
+                && ContentFilter.shouldApplyHtmlRules(this.context.engineRequestType)
+            ) {
+                htmlRulesToApply = this.htmlRules;
+            }
+
+            let replaceRulesToApply: NetworkRule[] | null = null;
+            if (this.replaceRules.length > 0
+                && ContentFilter.shouldApplyReplaceRule(this.context.engineRequestType, this.context.contentType!)
+            ) {
+                replaceRulesToApply = this.replaceRules;
+            }
+
+            if (!htmlRulesToApply && !replaceRulesToApply) {
+                // disconnect on data
+                this.filter.write(event.data);
+                this.filter.disconnect();
+                return;
+            }
+
             if (!this.charset) {
                 try {
                     let charset;
@@ -103,17 +180,21 @@ export class ContentFilter {
                      * If this.charset is undefined and requestType is DOCUMENT or SUBDOCUMENT, we try
                      * to detect charset from page <meta> tags
                      */
-                    if (this.requestType === RequestType.Subdocument
-                        || this.requestType === RequestType.Document) {
-                        charset = ContentFilter.parseCharset(event.data);
+                    if (this.context.engineRequestType === RequestType.Subdocument
+                        || this.context.engineRequestType  === RequestType.Document) {
+                        charset = ContentFilter.parseHtmlCharset(event.data);
                     }
 
                     /**
-                     * If we fail to find charset from meta tags we set charset to 'iso-8859-1',
-                     * because this charset allows to decode and encode data without errors
+                     * If this.charset is undefined and requestType is Stylesheet, we try
+                     * to detect charset from '@charset' directive
                      */
+                    if (this.context.engineRequestType === RequestType.Stylesheet) {
+                        charset = ContentFilter.parseCssCharset(event.data);
+                    }
+
                     if (!charset) {
-                        charset = LATIN_1;
+                        charset = DEFAULT_CHARSET;
                     }
 
                     if (charset && SUPPORTED_CHARSETS.indexOf(charset) >= 0) {
@@ -136,11 +217,14 @@ export class ContentFilter {
 
         this.filter.onstop = (): void => {
             this.content += this.decoder!.decode(); // finish stream
-            this.onContentCallback(this.content);
+            this.onContentCallback(this.content, this.context);
         };
 
         this.filter.onerror = (): void => {
-            throw this.filter.error as Error;
+            if (this.filter.error) {
+                // eslint-disable-next-line max-len
+                logger.debug(`An error in the content filtering occurred: ${this.filter.error}, request id: ${this.context.requestId}`);
+            }
         };
     }
 
@@ -171,39 +255,54 @@ export class ContentFilter {
      *
      * @param data
      */
-    private disconnect(data: BufferSource): void {
+    private disconnect(data: ArrayBuffer): void {
         this.filter.write(data);
         this.filter.disconnect();
     }
 
     /**
-     * Parses charset from data, looking for:
-     * <meta charset="utf-8" />
-     * <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-     * <meta content="text/html; charset=utf-8" http-equiv="Content-type" />
-     *
-     * @param data
-     * @returns {*}
+     * Parses charset from html
      */
-    private static parseCharset(data: BufferSource): string | null {
+    private static parseHtmlCharset(data: BufferSource): string | null {
         const decoded = new TextDecoder('utf-8').decode(data).toLowerCase();
-        let match = /<meta\s*charset\s*=\s*['"](.*?)['"]/.exec(decoded);
-        if (match && match.length > 1) {
-            return match[1].trim().toLowerCase();
+        return parseCharsetFromHtml(decoded);
+    }
+
+    /**
+     * Parses charset from css
+     */
+    private static parseCssCharset(data: BufferSource): string | null {
+        const decoded = new TextDecoder('utf-8').decode(data).toLowerCase();
+        return parseCharsetFromCss(decoded);
+    }
+
+    /**
+     * Checks if $replace rule should be applied to this request
+     *
+     * @returns {boolean}
+     */
+    private static shouldApplyReplaceRule(requestType: RequestType, contentType: string): boolean {
+        if (ContentFilter.replaceRulesRequestTypes.indexOf(requestType) >= 0) {
+            return true;
         }
 
-        // eslint-disable-next-line max-len
-        match = /<meta\s*http-equiv\s*=\s*['"]?content-type['"]?\s*content\s*=\s*[\\]?['"]text\/html;\s*charset=(.*?)[\\]?['"]/.exec(decoded);
-        if (match && match.length > 1) {
-            return match[1].trim().toLowerCase();
+        if (requestType === RequestType.Other && contentType) {
+            for (let i = 0; i < ContentFilter.supportedContentTypes.length; i += 1) {
+                if (contentType.indexOf(ContentFilter.supportedContentTypes[i]) === 0) {
+                    return true;
+                }
+            }
         }
 
-        // eslint-disable-next-line max-len
-        match = /<meta\s*content\s*=\s*[\\]?['"]text\/html;\s*charset=(.*?)[\\]?['"]\s*http-equiv\s*=\s*['"]?content-type['"]?/.exec(decoded);
-        if (match && match.length > 1) {
-            return match[1].trim().toLowerCase();
-        }
+        return false;
+    }
 
-        return null;
+    /**
+     * Checks if content filtration rules should by applied to this request
+     * @param requestType Request type
+     */
+    private static shouldApplyHtmlRules(requestType: RequestType): boolean {
+        return requestType === RequestType.Document
+            || requestType === RequestType.Subdocument;
     }
 }

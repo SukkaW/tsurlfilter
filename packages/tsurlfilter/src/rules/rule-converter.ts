@@ -1,4 +1,4 @@
-import Scriptlets from '@adguard/scriptlets';
+import scriptlets from '@adguard/scriptlets';
 import { logger } from '../utils/logger';
 import { EXT_CSS_PSEUDO_INDICATORS } from './cosmetic-rule';
 import { findCosmeticRuleMarker } from './cosmetic-rule-marker';
@@ -149,14 +149,14 @@ export class RuleConverter {
             return [removeHeaderRule];
         }
 
-        const scriptletRules = Scriptlets.convertScriptletToAdg(converted);
+        const scriptletRules = scriptlets.convertScriptletToAdg(converted);
         if (scriptletRules && scriptletRules.every((x) => RuleConverter.isValidScriptletRule(x))) {
             return scriptletRules;
         }
 
-        const abpRedirectRule = RuleConverter.convertUboAndAbpRedirectsToAdg(converted);
-        if (abpRedirectRule) {
-            return [abpRedirectRule];
+        const adgRedirectRule = RuleConverter.convertUboAndAbpRedirectsToAdg(converted);
+        if (adgRedirectRule) {
+            return [adgRedirectRule];
         }
 
         const ruleWithConvertedOptions = RuleConverter.convertOptions(converted, conversionOptions);
@@ -174,7 +174,7 @@ export class RuleConverter {
      */
     private static isValidScriptletRule(ruleText: string): boolean {
         try {
-            return Scriptlets.isValidScriptletRule(ruleText);
+            return scriptlets.isValidScriptletRule(ruleText);
         } catch (e) {
             return false;
         }
@@ -203,7 +203,7 @@ export class RuleConverter {
      * @return {string} convertedRule
      */
     private static convertUboAndAbpRedirectsToAdg(rule: string): string | null {
-        const { redirects } = Scriptlets;
+        const { redirects } = scriptlets;
         if (redirects.isUboRedirectCompatibleWithAdg(rule) || redirects.isAbpRedirectCompatibleWithAdg(rule)) {
             return redirects.convertRedirectToAdg(rule);
         }

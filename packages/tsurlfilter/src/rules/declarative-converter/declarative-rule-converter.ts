@@ -1,27 +1,35 @@
-import * as punycode from 'punycode';
+import punycode from 'punycode/';
+import { ERROR_STATUS_CODES } from './../../common/constants';
 import { NetworkRule, NetworkRuleOption } from '../network-rule';
+import { CookieModifier } from '../../modifiers/cookie-modifier';
 import { RequestType } from '../../request-type';
+import { logger } from '../../utils/logger';
 import {
-    ResourceType, DeclarativeRule, RuleAction, RuleActionType, RuleCondition, DomainType,
+    ResourceType,
+    DeclarativeRule,
+    RuleAction,
+    RuleActionType,
+    RuleCondition,
+    DomainType,
 } from './declarative-rule';
 
 /**
  * Map request types to declarative types
  */
 const DECLARATIVE_RESOURCE_TYPES_MAP = {
-    [ResourceType.main_frame]: RequestType.Document,
-    [ResourceType.sub_frame]: RequestType.Subdocument,
-    [ResourceType.stylesheet]: RequestType.Stylesheet,
-    [ResourceType.script]: RequestType.Script,
-    [ResourceType.image]: RequestType.Image,
-    [ResourceType.font]: RequestType.Font,
-    [ResourceType.object]: RequestType.Object,
-    [ResourceType.xmlhttprequest]: RequestType.XmlHttpRequest,
-    [ResourceType.ping]: RequestType.Ping,
-    // [ResourceType.csp_report]: RequestType.Document, // TODO what should match this resource type?
-    [ResourceType.media]: RequestType.Media,
-    [ResourceType.websocket]: RequestType.Websocket,
-    [ResourceType.other]: RequestType.Other,
+    [ResourceType.MAIN_FRAME]: RequestType.Document,
+    [ResourceType.SUB_FRAME]: RequestType.Subdocument,
+    [ResourceType.STYLESHEET]: RequestType.Stylesheet,
+    [ResourceType.SCRIPT]: RequestType.Script,
+    [ResourceType.IMAGE]: RequestType.Image,
+    [ResourceType.FONT]: RequestType.Font,
+    [ResourceType.OBJECT]: RequestType.Object,
+    [ResourceType.XMLHTTPREQUEST]: RequestType.XmlHttpRequest,
+    [ResourceType.PING]: RequestType.Ping,
+    // [ResourceType.CSP_REPORT]: RequestType.Document, // TODO what should match this resource type?
+    [ResourceType.MEDIA]: RequestType.Media,
+    [ResourceType.WEBSOCKET]: RequestType.Websocket,
+    [ResourceType.OTHER]: RequestType.Other,
 };
 
 /**
@@ -50,7 +58,24 @@ export class DeclarativeRuleConverter {
         return Object.entries(DECLARATIVE_RESOURCE_TYPES_MAP)
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             .filter(([, requestType]) => (requestTypes & requestType) === requestType)
-            .map(([resourceTypeKey]) => ResourceType[resourceTypeKey as ResourceType]);
+            .map(([resourceTypeKey]) => resourceTypeKey) as ResourceType[];
+    }
+
+    private static isASCII(str: string) {
+        // eslint-disable-next-line no-control-regex
+        return /^[\x00-\x7F]+$/.test(str);
+    }
+
+    /**
+     * Converts to punycode non if string contains non ASCII characters
+     * @param str
+     * @private
+     */
+    private static prepareASCII(str: string) {
+        if (DeclarativeRuleConverter.isASCII(str)) {
+            return str;
+        }
+        return punycode.toASCII(str);
     }
 
     /**
@@ -60,11 +85,7 @@ export class DeclarativeRuleConverter {
      */
     private static prepareDomains(domains: string[]): string[] {
         return domains.map((domain) => {
-            // eslint-disable-next-line no-control-regex
-            if (/^[\x00-\x7F]+$/.test(domain)) {
-                return domain;
-            }
-            return punycode.toASCII(domain);
+            return DeclarativeRuleConverter.prepareASCII(domain);
         });
     }
 
@@ -114,9 +135,9 @@ export class DeclarativeRuleConverter {
         //  - 'allowAllRequests' = 'allowAllRequests',
 
         if (rule.isAllowlist()) {
-            action.type = RuleActionType.allow;
+            action.type = RuleActionType.ALLOW;
         } else {
-            action.type = RuleActionType.block;
+            action.type = RuleActionType.BLOCK;
         }
 
         return action;
@@ -137,18 +158,19 @@ export class DeclarativeRuleConverter {
                 // TODO consider MAX_NUMBER_OF_REGEX_RULES
                 // eslint-disable-next-line max-len
                 //  https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#property-MAX_NUMBER_OF_REGEX_RULES
-                condition.regexFilter = pattern;
+                condition.regexFilter = DeclarativeRuleConverter.prepareASCII(pattern);
             } else {
                 // A pattern beginning with ||* is not allowed. Use * instead.
-                condition.urlFilter = pattern.startsWith('||*') ? pattern.substring(2) : pattern;
+                const patternWithoutVerticals = pattern.startsWith('||*') ? pattern.substring(2) : pattern;
+                condition.urlFilter = DeclarativeRuleConverter.prepareASCII(patternWithoutVerticals);
             }
         }
 
         // set domainType
         if (rule.isOptionEnabled(NetworkRuleOption.ThirdParty)) {
-            condition.domainType = DomainType.thirdParty;
+            condition.domainType = DomainType.THIRD_PARTY;
         } else if (rule.isOptionDisabled(NetworkRuleOption.ThirdParty)) {
-            condition.domainType = DomainType.firstParty;
+            condition.domainType = DomainType.FIRST_PARTY;
         }
 
         // set domains
@@ -190,6 +212,11 @@ export class DeclarativeRuleConverter {
      * @param id - rule identifier
      */
     static convert(rule: NetworkRule, id: number): DeclarativeRule | null {
+        if (rule.getAdvancedModifier() instanceof CookieModifier) {
+            logger.info(`Error: cookies rules are not supported: "${rule.getText()}"`);
+            return null;
+        }
+
         const declarativeRule = {} as DeclarativeRule;
 
         const priority = this.getPriority(rule);
@@ -199,6 +226,34 @@ export class DeclarativeRuleConverter {
         declarativeRule.id = id;
         declarativeRule.action = this.getAction(rule);
         declarativeRule.condition = this.getCondition(rule);
+
+        const { regexFilter, resourceTypes } = declarativeRule.condition;
+
+        // https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+        if (resourceTypes?.length === 0) {
+            logger.info(`Error: resourceTypes cannot be empty: "${rule.getText()}"`);
+            return null;
+        }
+
+        // More complex regex than allowed as part of the "regexFilter" key.
+        if (regexFilter?.match(/\|/g)) {
+            const regexArr = regexFilter.split('|');
+            // TODO Find how exactly the complexity of a rule is calculated.
+            // The values maxGroups & maxGroupLength are obtained by testing.
+            const maxGroups = 15;
+            const maxGroupLength = 31;
+            if (regexArr.length > maxGroups || regexArr.some(i => i.length > maxGroupLength)) {
+                // eslint-disable-next-line max-len
+                throw new Error(`Status: ${ERROR_STATUS_CODES.COMPLEX_REGEX} Message: More complex regex than allowed: "${rule.getText()}"`);
+            }
+        }
+
+        // backreference; possessive; negative lookahead not supported;
+        // https://github.com/google/re2/wiki/Syntax
+        if (regexFilter?.match(/\\[1-9]|(?<!\\)\?|{\S+}/g)) {
+            logger.info(`Error: invalid regex in the: "${rule.getText()}"`);
+            return null;
+        }
 
         return declarativeRule;
     }

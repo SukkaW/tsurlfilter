@@ -264,20 +264,83 @@ describe('DeclarativeRuleConverter', () => {
         });
     });
 
-    it('converts cyrillic domain rules', () => {
-        const declarativeRule = DeclarativeRuleConverter.convert(new NetworkRule('path$domain=меил.рф', -1), 2);
-        expect(declarativeRule).toEqual({
-            id: 2,
-            action: {
-                type: 'block',
-            },
-            condition: {
-                urlFilter: 'path',
-                isUrlFilterCaseSensitive: false,
-                domains: [
-                    'xn--e1agjb.xn--p1ai',
-                ],
-            },
+    // backreference; negative lookahead not supported;
+    // https://github.com/google/re2/wiki/Syntax
+    it('converts regex backslash before 1-9', () => {
+        // eslint-disable-next-line max-len
+        const ruleText = '/\\.vidzi\\.tv\\/([a-f0-9]{2})\\/([a-f0-9]{2})\\/([a-f0-9]{2})\\/\\1\\2\\3([a-f0-9]{26})\\.js/$domain=vidzi.tv';
+        const ruleId = 1;
+        const declarativeRule = DeclarativeRuleConverter.convert(new NetworkRule(ruleText, -1), ruleId);
+        expect(declarativeRule).toEqual(null);
+    });
+
+    // TODO Find how exactly the complexity of a rule is calculated
+    it('More complex regex than allowed', () => {
+        // eslint-disable-next-line max-len
+        const ruleText = '/www\\.oka\\.fm\\/.+\\/(yuzhnyj4.gif|cel.gif|tehnoplyus.jpg|na_chb_foto_250_250.jpg|ugzemli.gif|istorii.gif|advokat.jpg|odejda-shkola.gif|russkij-svet.jpg|dveri.gif|Festival_shlyapok_2.jpg)/';
+        const ruleId = 1;
+        expect(() => {
+            DeclarativeRuleConverter.convert(new NetworkRule(ruleText, -1), ruleId);
+        }).toThrowError();
+    });
+
+    it('converts regex negative lookahead', () => {
+        const ruleText = '/rustorka.\\w+\\/forum\\/(?!login.php)/$removeheader=location';
+        const ruleId = 1;
+        const declarativeRule = DeclarativeRuleConverter.convert(new NetworkRule(ruleText, -1), ruleId);
+        expect(declarativeRule).toEqual(null);
+    });
+
+    // WebRTC resource type is not supported in Manifest V3
+    it('converts WebRTC connections rules', () => {
+        const ruleText = '@@$webrtc,domain=walla.co.il';
+        const ruleId = 1;
+        const declarativeRule = DeclarativeRuleConverter.convert(new NetworkRule(ruleText, -1), ruleId);
+        expect(declarativeRule).toEqual(null);
+    });
+
+    // Cookies rules are not supported
+    it('converts cookies rules', () => {
+        const ruleText = '$cookie=bf_lead';
+        const ruleId = 1;
+        const declarativeRule = DeclarativeRuleConverter.convert(new NetworkRule(ruleText, -1), ruleId);
+        expect(declarativeRule).toEqual(null);
+    });
+
+    describe('converts cyrillic domain rules', () => {
+        it('converts domains section', () => {
+            const declarativeRule = DeclarativeRuleConverter.convert(new NetworkRule('path$domain=меил.рф', -1), 2);
+            expect(declarativeRule).toEqual({
+                id: 2,
+                action: {
+                    type: 'block',
+                },
+                condition: {
+                    urlFilter: 'path',
+                    isUrlFilterCaseSensitive: false,
+                    domains: [
+                        'xn--e1agjb.xn--p1ai',
+                    ],
+                },
+            });
+        });
+
+        it('converts urlFilterSection', () => {
+            const declarativeRule = DeclarativeRuleConverter.convert(
+                new NetworkRule('||банрек.рус^$third-party', -1),
+                1,
+            );
+            expect(declarativeRule).toEqual({
+                'id': 1,
+                'action': {
+                    'type': 'block',
+                },
+                'condition': {
+                    'urlFilter': 'xn--||-8kcdv4aty.xn--^-4tbdh',
+                    'domainType': 'thirdParty',
+                    'isUrlFilterCaseSensitive': false,
+                },
+            });
         });
     });
 });

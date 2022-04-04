@@ -15,6 +15,14 @@ jest.mock('../../src/cookie-filtering/browser-cookie/browser-cookie-api');
 BrowserCookieApi.prototype.removeCookie = jest.fn().mockImplementation(() => true);
 BrowserCookieApi.prototype.modifyCookie = jest.fn().mockImplementation(() => true);
 
+const sleep = (timeout: number) => {
+    return new Promise<void>((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, timeout);
+    });
+};
+
 const createTestHeaders = (headers: { name: string;value: string }[]): { name: string;value: string }[] => [
     { name: 'Header One', value: 'Header Value One' },
     ...headers,
@@ -51,7 +59,7 @@ describe('Cookie filtering', () => {
             ...details,
         } as OnBeforeSendHeadersDetailsType);
 
-        await cookieFiltering.onHeadersReceived({
+        cookieFiltering.onHeadersReceived({
             statusCode: 200,
             statusLine: 'OK',
             responseHeaders,
@@ -67,6 +75,9 @@ describe('Cookie filtering', () => {
             urlClassification: { firstParty: ['fingerprinting'], thirdParty: ['fingerprinting'] },
             ...details,
         } as OnCompletedDetailsType);
+
+        // this sleep added here because cookies are deleted with browser.cookies api asynchronously
+        await sleep(10);
     };
 
     it('checks empty', async () => {
@@ -94,6 +105,7 @@ describe('Cookie filtering', () => {
         }]);
 
         await runCase(rules, requestHeaders);
+
         expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(expect.objectContaining({
             cookieDomain: 'example.org',
             cookieName: 'c_user',
@@ -108,6 +120,27 @@ describe('Cookie filtering', () => {
         const allowlistRule = new NetworkRule('@@||example.org^$cookie=pick', 1);
         const rules = [
             cookieRule,
+            allowlistRule,
+        ];
+
+        const requestHeaders = createTestHeaders([{
+            name: 'Cookie',
+            value: 'pick=test_value',
+        }]);
+
+        await runCase(rules, requestHeaders);
+        expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(expect.objectContaining({
+            cookieDomain: 'example.org',
+            cookieName: 'pick',
+            cookieRule: allowlistRule,
+            isModifyingCookieRule: false,
+            thirdParty: false,
+        }));
+    });
+
+    it('checks cookie lonely allowlist rule', async () => {
+        const allowlistRule = new NetworkRule('@@||example.org^$cookie=pick', 1);
+        const rules = [
             allowlistRule,
         ];
 
@@ -214,6 +247,8 @@ describe('Cookie filtering', () => {
 
         await runCase(rules, requestHeaders, responseHeaders);
 
+        expect(responseHeaders).toEqual([]);
+
         expect(mockFilteringLog.addCookieEvent).toHaveBeenLastCalledWith(expect.objectContaining({
             cookieDomain: 'example.org',
             cookieName: 'third_party_user',
@@ -248,7 +283,7 @@ describe('Cookie filtering', () => {
             ...details,
         } as OnBeforeSendHeadersDetailsType);
 
-        await cookieFiltering.onHeadersReceived({
+        cookieFiltering.onHeadersReceived({
             statusCode: 200,
             statusLine: 'OK',
             ...details,
@@ -283,7 +318,7 @@ describe('Cookie filtering', () => {
             ...details,
         } as OnBeforeSendHeadersDetailsType);
 
-        await cookieFiltering.onHeadersReceived({
+        cookieFiltering.onHeadersReceived({
             statusCode: 200,
             statusLine: 'OK',
             ...details,
