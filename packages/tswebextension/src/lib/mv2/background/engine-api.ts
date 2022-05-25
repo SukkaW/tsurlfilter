@@ -61,14 +61,15 @@ export class EngineApi implements EngineApiInterface {
 
     public async startEngine(configuration: Configuration): Promise<void> {
         const {
-            filters, userrules, allowlist, verbose, settings,
+            filters, getRules, userrules, allowlist, verbose, settings,
         } = configuration;
 
         const lists: StringRuleList[] = [];
 
         for (let i = 0; i < filters.length; i += 1) {
-            const { filterId, content } = filters[i];
-            const convertedContent = RuleConverter.convertRules(content);
+            const filterId = filters[i];
+            // eslint-disable-next-line no-await-in-loop
+            const convertedContent = RuleConverter.convertRules(await getRules(filterId));
             lists.push(new StringRuleList(filterId, convertedContent));
         }
 

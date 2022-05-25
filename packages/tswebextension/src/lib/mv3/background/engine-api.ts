@@ -21,7 +21,7 @@ import { CosmeticApi } from './cosmetic-api';
 const ASYNC_LOAD_CHINK_SIZE = 5000;
 const USER_FILTER_ID = 0;
 
-type FilterConfig = Pick<Configuration, 'filters' | 'userrules' | 'verbose'>;
+type FilterConfig = Pick<Configuration, 'filters' | 'userrules' | 'verbose' | 'getRules'>;
 
 /**
  * TSUrlFilter Engine wrapper
@@ -36,13 +36,18 @@ class EngineApi {
     async startEngine(config: FilterConfig): Promise<void> {
         console.debug('[START ENGINE]: start');
 
-        const { filters, userrules, verbose } = config;
+        const {
+            filters,
+            getRules,
+            userrules,
+            verbose,
+        } = config;
 
         const lists: StringRuleList[] = [];
 
         for (let i = 0; i < filters.length; i += 1) {
-            const { filterId, content } = filters[i];
-            const convertedContent = RuleConverter.convertRules(content);
+            const filterId = filters[i];
+            const convertedContent = RuleConverter.convertRules(await getRules(filterId));
             lists.push(new StringRuleList(filterId, convertedContent));
         }
 

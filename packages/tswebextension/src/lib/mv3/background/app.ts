@@ -110,8 +110,8 @@ export class TsWebExtension implements AppInterface<Configuration> {
 
         this.configuration = configurationValidator.parse(config);
 
-        const enableFiltersIds = this.configuration.filters
-            .map(({ filterId }) => filterId);
+        const enableFiltersIds = this.configuration.filters;
+
         const currentFiltersIds = await FiltersApi.getEnabledRulesets();
         const disableFiltersIds = currentFiltersIds
             .filter((f) => !enableFiltersIds.includes(f)) || [];
@@ -125,6 +125,7 @@ export class TsWebExtension implements AppInterface<Configuration> {
             filters: this.configuration.filters,
             userrules: this.configuration.userrules,
             verbose: this.configuration.verbose,
+            getRules: this.configuration.getRules,
         });
 
         console.debug('[CONFIGURE]: end');
@@ -155,16 +156,36 @@ export class TsWebExtension implements AppInterface<Configuration> {
 
         if (this.isStarted && this.configuration && activeTab?.url && activeTab?.id) {
             const { url, id } = activeTab;
-            const { filters, userrules, verbose } = this.configuration;
-            await engineApi.startEngine({ filters, userrules, verbose });
+            const {
+                filters,
+                userrules,
+                verbose,
+                getRules,
+            } = this.configuration;
+            await engineApi.startEngine({
+                filters,
+                userrules,
+                verbose,
+                getRules,
+            });
             await getAndExecuteScripts(id, url, verbose);
         }
 
         chrome.webNavigation.onCommitted.addListener(
             async (details) => {
                 if (this.isStarted && this.configuration) {
-                    const { filters, userrules, verbose } = this.configuration;
-                    await engineApi.startEngine({ filters, userrules, verbose });
+                    const {
+                        filters,
+                        userrules,
+                        verbose,
+                        getRules,
+                    } = this.configuration;
+                    await engineApi.startEngine({
+                        filters,
+                        userrules,
+                        verbose,
+                        getRules,
+                    });
                     await getAndExecuteScripts(details.tabId, details.url, verbose);
                 }
             },

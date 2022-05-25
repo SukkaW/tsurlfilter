@@ -8,10 +8,9 @@ export const configurationValidator = z.object({
      * content is a string with the full filter list content. The API will
      * parse it into a list of individual rules.
      */
-    filters: z.object({
-        filterId: z.number(),
-        content: z.string(),
-    }).array(),
+    filters: z.number().array(),
+
+    getRules: z.function().args(z.number()).returns(z.string().promise()),
 
     /**
      * List of domain names of sites, which should be excluded from blocking
