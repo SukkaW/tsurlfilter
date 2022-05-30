@@ -12,15 +12,16 @@ import {
     SiteStatus,
     defaultFilteringLog,
     configurationValidator,
+    ConfigurationContext,
     Configuration,
 } from '../../common';
 import { engineApi } from './engine-api';
 
 // TODO: implement
-export class TsWebExtension implements AppInterface<Configuration> {
+export class TsWebExtension implements AppInterface<Configuration, ConfigurationContext> {
     onFilteringLogEvent = defaultFilteringLog.onLogEvent;
 
-    configuration: Configuration | undefined;
+    configuration: ConfigurationContext | undefined;
 
     isStarted = false;
 
@@ -46,12 +47,10 @@ export class TsWebExtension implements AppInterface<Configuration> {
      * Runs configuration process via saving promise to inner startPromise
      */
     private async innerStart(config: Configuration): Promise<void> {
-        this.configuration = configurationValidator.parse(config);
-
         console.debug('[START]: start');
 
         try {
-            await this.configure(this.configuration);
+            await this.configure(config);
         } catch (e) {
             this.startPromise = undefined;
             console.debug('[START]: failed', e);
@@ -81,11 +80,13 @@ export class TsWebExtension implements AppInterface<Configuration> {
             return;
         }
 
+        const configuration = configurationValidator.parse(config);
+
         // Call and wait for promise for allow multiple calling start
-        this.startPromise = this.innerStart(config);
+        this.startPromise = this.innerStart(configuration);
         await this.startPromise;
 
-        await this.executeScriptlets();
+        await this.executeScriptlets(configuration);
     }
 
     /**
@@ -108,9 +109,9 @@ export class TsWebExtension implements AppInterface<Configuration> {
     public async configure(config: Configuration): Promise<void> {
         console.debug('[CONFIGURE]: start with ', config);
 
-        this.configuration = configurationValidator.parse(config);
+        const configuration = configurationValidator.parse(config);
 
-        const enableFiltersIds = this.configuration.filters
+        const enableFiltersIds = configuration.filters
             .map(({ filterId }) => filterId);
         const currentFiltersIds = await FiltersApi.getEnabledRulesets();
         const disableFiltersIds = currentFiltersIds
@@ -118,14 +119,16 @@ export class TsWebExtension implements AppInterface<Configuration> {
 
         await FiltersApi.updateFiltering(disableFiltersIds, enableFiltersIds);
         await UserRulesApi.updateDynamicFiltering(
-            this.configuration.userrules,
+            configuration.userrules,
             this.webAccessibleResourcesPath,
         );
         await engineApi.startEngine({
-            filters: this.configuration.filters,
-            userrules: this.configuration.userrules,
-            verbose: this.configuration.verbose,
+            filters: configuration.filters,
+            userrules: configuration.userrules,
+            verbose: configuration.verbose,
         });
+
+        this.configuration = TsWebExtension.createConfigurationContext(configuration);
 
         console.debug('[CONFIGURE]: end');
     }
@@ -150,24 +153,40 @@ export class TsWebExtension implements AppInterface<Configuration> {
         return messagesApi.handleMessage;
     }
 
-    async executeScriptlets() {
+    async executeScriptlets(config: Configuration) {
         const activeTab = await TabsApi.getActiveTab();
 
-        if (this.isStarted && this.configuration && activeTab?.url && activeTab?.id) {
+        if (this.isStarted && activeTab?.url && activeTab?.id) {
             const { url, id } = activeTab;
-            const { filters, userrules, verbose } = this.configuration;
+            const { filters, userrules, verbose } = config;
             await engineApi.startEngine({ filters, userrules, verbose });
             await getAndExecuteScripts(id, url, verbose);
         }
 
         chrome.webNavigation.onCommitted.addListener(
             async (details) => {
-                if (this.isStarted && this.configuration) {
-                    const { filters, userrules, verbose } = this.configuration;
+                if (this.isStarted) {
+                    const { filters, userrules, verbose } = config;
                     await engineApi.startEngine({ filters, userrules, verbose });
                     await getAndExecuteScripts(details.tabId, details.url, verbose);
                 }
             },
         );
+    }
+
+    /**
+     * Extract Partial Configuration from whole Configration,
+     * excluding heavyweight fields which contains rules
+     * @param configuration Configuration
+     * @returns ConfigurationContext
+     */
+    private static createConfigurationContext(configuration: Configuration): ConfigurationContext {
+        const { filters, verbose, settings } = configuration;
+
+        return {
+            filters: filters.map(({ filterId }) => filterId),
+            verbose,
+            settings,
+        };
     }
 }
