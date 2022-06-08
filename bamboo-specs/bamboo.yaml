@@ -1,14 +1,14 @@
 ---
-!include 'tests.yaml'
+!include 'tsurlfilter-build.yaml'
 
 ---
-!include 'increment.yaml'
+!include 'tsurlfilter-deploy.yaml'
 
 ---
-!include 'build.yaml'
+!include 'tswebextension-build.yaml'
 
 ---
-!include 'deploy.yaml'
+!include 'tswebextension-deploy.yaml'
 
 ---
 !include 'permissions.yaml'
