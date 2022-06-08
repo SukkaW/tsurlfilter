@@ -15,10 +15,6 @@ stages:
   - Increment:
       jobs:
         - Increment
-  - Deploy:
-      manual: 'true'
-      jobs:
-        - Deploy
   - Cleanup:
       final: 'true'
       jobs:
@@ -97,13 +93,6 @@ Increment:
   requirements:
     - adg-docker: 'true'
 
-Deploy:
-  tasks: []
-  final-tasks: []
-  artifacts: []
-  requirements: []
-  other: {}
-
 Cleanup:
   tasks:
     - clean
@@ -115,6 +104,7 @@ branches:
     after-inactive-days: '5'
   link-to-jira: 'true'
 
+# On branches feature/* we need only tests + build
 branch-overrides:
   -
     feature/*:
