@@ -103,15 +103,6 @@ branches:
     after-inactive-days: '5'
   link-to-jira: 'true'
 
-# On branches feature/* we need only tests + build
-branch-overrides:
-  -
-    feature/*:
-      stages:
-        - Build:
-            jobs:
-              - Build
-
 notifications:
   - events:
       - plan-status-changed

@@ -29,6 +29,12 @@ Build:
     volumes:
       "${system.YARN_DIR}": "${bamboo.cacheYarn}"
   tasks:
+    - stop-job:
+        success: 'true'
+        conditions:
+        - variable:
+            not-equals:
+              bamboo.repository.pr.targetBranch: epic/tswebextension
     - checkout:
         force-clean-build: 'true'
     - script:
@@ -103,15 +109,6 @@ branches:
     after-deleted-days: '1'
     after-inactive-days: '5'
   link-to-jira: 'true'
-
-# On branches feature/* we need only tests + build
-branch-overrides:
-  -
-    feature/*:
-      stages:
-        - Build:
-            jobs:
-              - Build
 
 notifications:
   - events:
