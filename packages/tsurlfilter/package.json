@@ -1,11 +1,10 @@
 {
   "name": "@adguard/tsurlfilter",
-  "version": "0.7.62",
+  "version": "1.1.0",
   "description": "This is a TypeScript library that implements AdGuard's content blocking rules",
   "main": "dist/tsurlfilter.umd.js",
   "module": "dist/es/index.js",
   "iife": "dist/tsurlfilter.iife.js",
-  "browser": "dist/tsurlfilter.browser.js",
   "typings": "dist/types",
   "files": [
     "dist",
@@ -26,8 +25,9 @@
   "homepage": "https://github.com/AdguardTeam/tsurlfilter#readme",
   "scripts": {
     "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
-    "prebuild": "rimraf dist",
-    "build": "yarn build:types && rollup -c rollup.config.ts && node tasks/build-txt",
+    "prebuild": "rimraf dist && yarn build:types",
+    "build": "rollup -c rollup.config.ts",
+    "postbuild": "node tasks/build-txt",
     "build:types": "tsc --declaration --emitDeclarationOnly --outdir dist/types",
     "docs": "typedoc src --out docs",
     "start": "rollup -c rollup.config.ts -w",
@@ -78,17 +78,14 @@
     ]
   },
   "dependencies": {
-    "@adguard/scriptlets": "^1.5.18",
-    "extended-css": "git+https://github.com/AdguardTeam/ExtendedCss.git#v1.3.13",
+    "@adguard/scriptlets": "^1.6.11",
     "ip6addr": "^0.2.3",
     "is-cidr": "^4.0.2",
     "is-ip": "^3.1.0",
     "lru_map": "^0.4.1",
     "netmask": "^2.0.2",
     "punycode": "^2.1.1",
-    "text-encoding": "git+https://github.com/AdguardTeam/text-encoding.git#v0.7.1",
-    "tldts": "^5.6.45",
-    "webextension-polyfill": "^0.8.0"
+    "tldts": "^5.6.45"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^21.0.1",
@@ -101,11 +98,10 @@
     "@types/node": "^16.11.10",
     "@types/punycode": "^2.1.0",
     "@types/rollup-plugin-node-globals": "^1.4.1",
-    "@types/webextension-polyfill": "^0.8.2",
-    "@typescript-eslint/eslint-plugin": "5.4.0",
-    "@typescript-eslint/parser": "5.4.0",
+    "@typescript-eslint/eslint-plugin": "^5.18.0",
+    "@typescript-eslint/parser": "^5.18.0",
     "coveralls": "^3.1.1",
-    "eslint": "^8.3.0",
+    "eslint": "^8.12.0",
     "eslint-config-airbnb-typescript": "^16.0.0",
     "eslint-plugin-import": "^2.25.3",
     "jest": "27.3.1",

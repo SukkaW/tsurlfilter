@@ -1,4 +1,4 @@
-import scriptlets from '@adguard/scriptlets';
+import scriptlets, { IConfiguration } from '@adguard/scriptlets';
 import * as rule from './rule';
 import {
     CosmeticRuleMarker,
@@ -12,6 +12,33 @@ import { SimpleRegex } from './simple-regex';
 import { CosmeticRuleParser } from './cosmetic-rule-parser';
 import { Request } from '../request';
 import { Pattern } from './pattern';
+import { ScriptletParser } from '../engine/cosmetic-engine/scriptlet-parser';
+import { config } from '../configuration';
+
+/**
+ * Init script params
+ */
+interface InitScriptParams {
+    debug?: boolean,
+    request?: Request,
+}
+
+/**
+ * Get scriptlet data response type
+ */
+export type ScriptletData = {
+    params: IConfiguration,
+    func: (source: scriptlets.IConfiguration, args: string[]) => void
+};
+
+/**
+ * Script data type
+ */
+type ScriptData = {
+    code: string | null,
+    debug?: boolean,
+    domain?: string
+};
 
 /**
  * CosmeticRuleType is an enumeration of the possible
@@ -114,6 +141,18 @@ export class CosmeticRule implements rule.IRule {
     public verboseInvokedForDomain?: string | undefined = undefined;
 
     /**
+     * Object with script code ready to execute and debug, domain values
+     * @private
+     */
+    private scriptData: ScriptData | null = null;
+
+    /**
+     * Object with scriptlet function and params
+     * @private
+     */
+    private scriptletData: ScriptletData | null = null;
+
+    /**
      * If the rule contains scriptlet content
      */
     public isScriptlet = false;
@@ -132,7 +171,7 @@ export class CosmeticRule implements rule.IRule {
         ':only-child', ':only-of-type', ':optional', ':out-of-range', ':read-only',
         ':read-write', ':required', ':root', ':target', ':valid', ':visited',
         ':-abp-has', ':-abp-contains', ':xpath', ':nth-ancestor', ':upward', ':remove',
-        ':matches-attr', ':matches-property', ':is'];
+        ':matches-attr', ':matches-property', ':is', ':where'];
 
     /**
      * Parses first pseudo class from the specified CSS selector
@@ -232,11 +271,31 @@ export class CosmeticRule implements rule.IRule {
     }
 
     /**
-     * Get rule script string
-     * @param debug
+     * Returns script ready to execute or null
+     * Rebuilds scriptlet script if debug or domain params change
+     * @param options
      */
-    getScript(debug = false): string | undefined {
-        return debug ? this.scriptVerbose : this.script;
+    getScript(options: InitScriptParams = {}): string | null {
+        const { debug = false, request = null } = options;
+        const { scriptData } = this;
+
+        if (scriptData && !this.isScriptlet) {
+            return scriptData.code;
+        }
+
+        if (scriptData && scriptData.debug === debug) {
+            if (request) {
+                if (request.domain === scriptData.domain) {
+                    return scriptData.code;
+                }
+            } else {
+                return scriptData.code;
+            }
+        }
+
+        this.initScript(options);
+
+        return this.scriptData?.code ?? null;
     }
 
     /**
@@ -483,9 +542,9 @@ export class CosmeticRule implements rule.IRule {
 
         // discard css inject rules containing other unsafe selectors
         // https://github.com/AdguardTeam/AdguardBrowserExtension/issues/1920
-        if (/{.*image-set\(.*\)/gi.test(ruleContent) ||
-            /{.*image\(.*\)/gi.test(ruleContent) ||
-            /{.*cross-fade\(.*\)/gi.test(ruleContent)) {
+        if (/{.*image-set\(.*\)/gi.test(ruleContent)
+            || /{.*image\(.*\)/gi.test(ruleContent)
+            || /{.*cross-fade\(.*\)/gi.test(ruleContent)) {
             throw new SyntaxError('CSS modifying rule with unsafe style was omitted');
         }
 
@@ -535,9 +594,7 @@ export class CosmeticRule implements rule.IRule {
      * @param isExtCss
      * @private
      */
-    private static validate(
-        ruleText: string, type: CosmeticRuleType, content: string, isExtCss: boolean,
-    ): void {
+    private static validate(ruleText: string, type: CosmeticRuleType, content: string, isExtCss: boolean): void {
         if (type !== CosmeticRuleType.Css
             && type !== CosmeticRuleType.Js
             && type !== CosmeticRuleType.Html) {
@@ -560,11 +617,66 @@ export class CosmeticRule implements rule.IRule {
             CosmeticRule.validateJsRules(ruleText, content);
         }
 
-        if ((!isExtCss && utils.hasUnquotedSubstring(content, '/*')) ||
-            utils.hasUnquotedSubstring(content, ' /*') ||
-            utils.hasUnquotedSubstring(content, ' //')
+        if ((!isExtCss && utils.hasUnquotedSubstring(content, '/*'))
+            || utils.hasUnquotedSubstring(content, ' /*')
+            || utils.hasUnquotedSubstring(content, ' //')
         ) {
             throw new SyntaxError('Cosmetic rule should not contain comments');
         }
+    }
+
+    /**
+     * Returns the scriptlet's data consisting of the scriptlet function and its arguments.
+     * This method is supposed to be used in the manifest V3 extension.
+     */
+    getScriptletData(): ScriptletData | null {
+        if (this.scriptletData) {
+            return this.scriptletData;
+        }
+
+        this.initScript();
+
+        return this.scriptletData;
+    }
+
+    /**
+     * Updates this.scriptData and if scriptlet this.scriptletData with js ready to execute
+     *
+     * @param options
+     */
+    initScript(options: InitScriptParams = {}) {
+        const { debug = false, request = null } = options;
+
+        const ruleContent = this.getContent();
+        if (!this.isScriptlet) {
+            this.scriptData = {
+                code: ruleContent,
+            };
+            return;
+        }
+
+        const scriptletContent = ruleContent.substring(ADG_SCRIPTLET_MASK.length);
+        const scriptletParams = ScriptletParser.parseRule(scriptletContent);
+
+        const params: scriptlets.IConfiguration = {
+            args: scriptletParams.args,
+            engine: config.engine || '',
+            name: scriptletParams.name,
+            ruleText: this.getText(),
+            verbose: debug,
+            domainName: request?.domain,
+            version: config.version || '',
+        };
+
+        this.scriptData = {
+            code: scriptlets.invoke(params) ?? null,
+            debug,
+            domain: request?.domain,
+        };
+
+        this.scriptletData = {
+            func: scriptlets.getScriptletFunction(params.name),
+            params,
+        };
     }
 }

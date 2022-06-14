@@ -1,18 +1,20 @@
+const path = require('path');
+
 module.exports = {
     root: true,
     parser: '@typescript-eslint/parser',
     parserOptions: {
-        project: ['tsconfig.eslint.json'],
+        tsconfigRootDir: path.join(__dirname),
+        project: 'tsconfig.json',
     },
     plugins: [
         'import',
         '@typescript-eslint',
     ],
     extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/eslint-recommended',
-        'plugin:@typescript-eslint/recommended',
+        'airbnb-base',
         'airbnb-typescript/base',
+        'plugin:@typescript-eslint/recommended',   
     ],
 
     rules: {
@@ -29,5 +31,10 @@ module.exports = {
         'no-constant-condition': ['error', { 'checkLoops': false }],
         '@typescript-eslint/interface-name-prefix': 'off',
         'arrow-body-style': 'off',
+        'consistent-return': 'off',
+        'no-param-reassign': 'off',
+
+        'import/no-cycle': 'off',
+        'import/export': 'off',
     },
 };

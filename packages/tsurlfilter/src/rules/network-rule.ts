@@ -117,7 +117,7 @@ export enum NetworkRuleOption {
         | Stealth,
 
     /** Options supported by host-level network rules * */
-    OptionHostLevelRulesOnly = Important | Badfilter,
+    OptionHostLevelRules = Important | Badfilter | Client | DnsRewrite | DnsType | Ctag,
 
     /**
      * Removeparam compatible modifiers
@@ -311,6 +311,14 @@ export class NetworkRule implements rule.IRule {
      */
     getPermittedDomains(): string[] | null {
         return this.permittedDomains;
+    }
+
+    /**
+     * Gets list of denyallow domains.
+     * See https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#denyallow-modifier
+     */
+    getDenyallowDomains(): string[] | null {
+        return this.denyAllowDomains;
     }
 
     /**
@@ -903,9 +911,9 @@ export class NetworkRule implements rule.IRule {
 
         if (this.enabledOptions !== 0) {
             return ((this.enabledOptions
-                    & NetworkRuleOption.OptionHostLevelRulesOnly)
+                    & NetworkRuleOption.OptionHostLevelRules)
                 | (this.enabledOptions
-                    ^ NetworkRuleOption.OptionHostLevelRulesOnly)) === NetworkRuleOption.OptionHostLevelRulesOnly;
+                    ^ NetworkRuleOption.OptionHostLevelRules)) === NetworkRuleOption.OptionHostLevelRules;
         }
 
         return true;
