@@ -2,27 +2,32 @@
 version: 2
 plan:
   project-key: AJL
-  key: TSURLFILTERBUILD
-  name: tsurlfilter - build
+  key: TSWEBEXTENSIONINCR
+  name: tswebextension - increment
 variables:
   dockerContainer: adguard/node-ssh:14.18--0
 
 stages:
-  - Build:
+  - Increment:
       manual: 'false'
       final: 'false'
       jobs:
-        - Build
+        - Increment
 
-Build:
-  key: BUILD
-  other:
-    clean-working-dir: true
+Increment:
+  key: INCR
   docker:
     image: "${bamboo.dockerContainer}"
     volumes:
       "${system.YARN_DIR}": "${bamboo.cacheYarn}"
   tasks:
+    - stop-job:
+        success: 'true'
+        conditions:
+        - variable:
+            not-equals:
+              # Stop build when current branch not 'epic/tswebextension'
+              bamboo.planRepository.branchName: epic/tswebextension
     - checkout:
         force-clean-build: 'true'
     - script:
@@ -34,26 +39,21 @@ Build:
 
             ls -alt
 
-            npx lerna bootstrap
-            npx lerna run --scope @adguard/tsurlfilter build -- ${bamboo.varsYarn}
+            yarn install
+
+            npx lerna run --scope @adguard/tswebextension increment
 
             # cleanup parent
             rm -rf node_modules
             # cleanup child packages
             npx lerna exec -- rm -rf node_modules
-    - inject-variables:
-        file: ./packages/tsurlfilter/dist/build.txt
-        scope: RESULT
-        namespace: inject
     - any-task:
-        plugin-key: com.atlassian.bamboo.plugins.vcs:task.vcs.tagging
+        plugin-key: com.atlassian.bamboo.plugins.vcs:task.vcs.commit
         configuration:
+          commitMessage: 'skipci: Automatic increment build number'
           selectedRepository: defaultRepository
-          tagName: v${bamboo.inject.version}
   requirements:
     - adg-docker: 'true'
-
-triggers: []
 
 branches:
   create: manually
@@ -68,7 +68,7 @@ notifications:
           name: Build webhook
           url: http://prod.jirahub.service.eu.consul/v1/webhook/bamboo
 
-labels: []
+labels: [ ]
 
 other:
   concurrent-build-plugin: system-default
