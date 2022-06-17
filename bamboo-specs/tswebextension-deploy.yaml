@@ -15,7 +15,6 @@ npmjs:
   triggers: [ ]
   tasks:
     - checkout:
-        path: epic/tswebextension
         force-clean-build: 'true'
     - script:
         interpreter: SHELL
@@ -23,6 +22,8 @@ npmjs:
           - |-
             set -e
             set -x
+
+            git checkout epic/tswebextension
 
             ls -alt
 
