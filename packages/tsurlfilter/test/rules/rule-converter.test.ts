@@ -177,6 +177,14 @@ describe('General', () => {
         result = RuleConverter.convertRule(ruleText);
         expect(result).toEqual([ruleText]);
     });
+
+    it('convert problematic rule', () => {
+        const rulesText = 'ferra.ru##div[data-render-state] + div[class^="jsx-"][class$=" undefined"]';
+        const result = RuleConverter.convertRules(rulesText);
+
+        expect(result).not.toBeNull();
+        expect(result).toEqual(rulesText);
+    });
 });
 
 describe('Converts pseudo elements', () => {
