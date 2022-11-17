@@ -1,6 +1,5 @@
-import { CosmeticOption } from '@adguard/tsurlfilter';
+import { CosmeticOption, RequestType } from '@adguard/tsurlfilter';
 
-import { getCssPayloadValidator } from '../../common';
 import { isHttpOrWsRequest } from '../../common/utils';
 import { logger } from '../utils/logger';
 
@@ -12,6 +11,7 @@ import {
     ExtendedMV3MessageType,
     MessageMV3,
     messageMV3Validator,
+    getCssPayloadValidator,
 } from './messages';
 
 export type MessagesHandlerType = (
@@ -73,7 +73,7 @@ export default class MessagesApi {
                     return;
                 }
 
-                let { url } = res.data;
+                let { url, referrer } = res.data;
 
                 // https://github.com/AdguardTeam/AdguardBrowserExtension/issues/1498
                 // When document url for iframe is about:blank then we use tab url
@@ -81,7 +81,7 @@ export default class MessagesApi {
                     url = sender.tab.url;
                 }
 
-                return this.getCss(url);
+                return this.getCss(url, referrer);
             }
             case ExtendedMV3MessageType.GetCollectedLog: {
                 return declarativeFilteringLog.getCollected();
@@ -95,17 +95,30 @@ export default class MessagesApi {
     /**
      * Builds css for specified url.
      *
-     * @param url Url for which build css.
+     * @param requestUrl Url for which build css.
+     * @param referrerUrl
      *
      * @returns Cosmetic css.
      */
-    private getCss(url: string): CosmeticRules | undefined {
-        logger.debug('[GET CSS]: received call', url);
+    private getCss(requestUrl: string, referrerUrl: string): CosmeticRules | undefined {
+        logger.debug('[GET CSS]: received call', requestUrl);
 
         if (this.tsWebExtension.isStarted) {
+            const result = engineApi.matchRequest({
+                requestUrl,
+                frameUrl: referrerUrl,
+                // Always RequestType.Document, because in MV3 we request CSS
+                // for the already loaded page
+                requestType: RequestType.Document,
+                frameRule: engineApi.matchFrame(requestUrl),
+            });
+
+            const cosmeticOption = result?.getCosmeticOption();
+
             return engineApi.buildCosmeticCss(
-                url,
-                CosmeticOption.CosmeticOptionAll,
+                requestUrl,
+                // FIXME: add MatchingResultgetCosmeticOption
+                cosmeticOption || CosmeticOption.CosmeticOptionAll,
                 false,
                 false,
             );

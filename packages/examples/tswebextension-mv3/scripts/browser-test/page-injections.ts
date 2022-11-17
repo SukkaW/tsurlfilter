@@ -4,7 +4,6 @@ import { LogDetails } from './logger';
 declare global {
     interface Window {
         tsWebExtension: TsWebExtension;
-        isInitialized: boolean;
     }
 }
 

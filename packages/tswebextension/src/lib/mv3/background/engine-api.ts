@@ -12,6 +12,8 @@ import {
     ScriptletData,
     IFilter,
     CosmeticRule,
+    NetworkRule,
+    MatchingResult,
 } from '@adguard/tsurlfilter';
 
 import { getHost } from '../../common/utils';
@@ -26,6 +28,16 @@ const USER_FILTER_ID = 0;
 type EngineConfig = Pick<ConfigurationMV3, 'userrules' | 'verbose'> & {
     filters: IFilter[],
 };
+
+/**
+ * Request Match Query.
+ */
+interface MatchQuery {
+    requestUrl: string;
+    frameUrl: string;
+    requestType: RequestType;
+    frameRule?: NetworkRule | null;
+}
 
 export type CosmeticRules = {
     css: string[],
@@ -123,7 +135,7 @@ class EngineApi {
 
         const frameUrl = getHost(url);
 
-        const frameRule = this.engine.matchFrame(url);
+        const frameRule = this.matchFrame(url);
 
         if (frameRule?.isAllowlist()) {
             return new CosmeticResult();
@@ -132,6 +144,18 @@ class EngineApi {
         const request = new Request(url, frameUrl, RequestType.Document);
 
         return this.engine.getCosmeticResult(request, option);
+    }
+
+    /**
+     *
+     * @param frameUrl
+     */
+    public matchFrame(frameUrl: string): NetworkRule | null {
+        if (!this.engine) {
+            return null;
+        }
+
+        return this.engine.matchFrame(frameUrl);
     }
 
     /**
@@ -228,6 +252,36 @@ class EngineApi {
         });
 
         return scriptletDataList;
+    }
+
+    /**
+     *
+     * @param matchQuery
+     */
+    public matchRequest(matchQuery: MatchQuery): MatchingResult | null {
+        if (!this.engine) {
+            return null;
+        }
+
+        const {
+            requestUrl,
+            frameUrl,
+            requestType,
+        } = matchQuery;
+
+        let { frameRule } = matchQuery;
+
+        const request = new Request(
+            requestUrl,
+            frameUrl,
+            requestType,
+        );
+
+        if (!frameRule) {
+            frameRule = null;
+        }
+
+        return this.engine.matchRequest(request, frameRule);
     }
 
     /**
