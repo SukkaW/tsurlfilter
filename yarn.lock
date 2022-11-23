@@ -3,7 +3,7 @@
 
 
 "@adguard/api@file:packages/adguard-api":
-  version "1.0.0"
+  version "1.1.0"
   dependencies:
     "@adguard/assistant" "^4.3.63"
     "@adguard/filters-downloader" "^1.1.14"

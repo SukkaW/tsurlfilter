@@ -30,6 +30,7 @@ export type {
     ConversionResult,
     FailedEnableRuleSetsError,
     RecordFiltered,
+    MessagesHandlerType,
 };
 
 /**
