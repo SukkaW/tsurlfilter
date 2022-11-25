@@ -48,17 +48,6 @@ const startDownload = async () => {
 
 /**
  * Compiles rules to declarative json
- * Actually for each rule set entry in manifest's declarative_net_request:
- *
- * "declarative_net_request": {
- *   "rule_resources": [{
- *     "id": "ruleset_1",
- *     "enabled": true,
- *     "path": "filters/declarative/rules.json"
- *   }]
- * }
- *
- * we should find corresponding text file in resources, and then convert and save json to path specified in the manifest
  */
 const precompileRules = async () => {
     await startDownload();

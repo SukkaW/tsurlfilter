@@ -19,10 +19,7 @@
 // API entry point
 
 // API Configuration type
-export type { Configuration } from "./schemas";
-
-// Request blocking event type
-export type { RequestBlockingEvent } from "./request-blocking-logger";
+export type { APIConfiguration } from "./schemas";
 
 // Public interface
 export { adguardApi } from "./main";

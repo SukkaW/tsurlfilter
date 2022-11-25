@@ -1,6 +1,6 @@
 /**
  * @file
- * This file is part of Adguard API library (https://github.com/AdguardTeam/tsurlfilter/packages/adguard-api-mv3).
+ * This file is part of Adguard API library (https://github.com/AdguardTeam/tsurlfilter/packages/adguard-api).
  *
  * Adguard API is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
-
-// Schemas entry point
-
-// Api Configuration schema entry point
-export * from "./configuration";
+import { FilterInfo } from "./constants";
+export declare const DEFAULT_FILTERS: FilterInfo[];

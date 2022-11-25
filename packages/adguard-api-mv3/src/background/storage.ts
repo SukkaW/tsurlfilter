@@ -16,41 +16,45 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import browser from "webextension-polyfill";
+class Storage {
+    private storage;
 
-/**
- * Dev-friendly API for key-value extension storage
- */
-export class Storage {
-    // Storage instance
-    private storage = browser.storage.local;
-
-    /**
-     * Save {@link value} for {@link key}
-     *
-     * @param key - storage key
-     * @param value - storage value
-     */
-    public async set(key: string, value: unknown): Promise<void> {
-        await this.storage.set({ [key]: value });
+    constructor(storage: chrome.storage.LocalStorageArea) {
+        this.storage = storage;
     }
 
-    /**
-     * Get storage value by {@link key}
-     *
-     * @param key - storage key
-     * @returns storage value or undefined, if value was not found
-     */
-    public async get(key: string): Promise<unknown> {
-        return (await this.storage.get(key))?.[key];
-    }
+    get = <T>(key: string): Promise<T | undefined> => {
+        return new Promise((resolve, reject) => {
+            this.storage.get([key], (result: { [x: string]: T }) => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                }
+                resolve(result[key]);
+            });
+        });
+    };
 
-    /**
-     * Remove value for {@link key}
-     *
-     * @param key - storage key
-     */
-    public async remove(key: string): Promise<void> {
-        await this.storage.remove(key);
-    }
+    set = (key: string, value: any): Promise<void> => {
+        return new Promise((resolve, reject) => {
+            this.storage.set({ [key]: value }, () => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                }
+                resolve();
+            });
+        });
+    };
+
+    remove = (key: string): Promise<void> => {
+        return new Promise((resolve, reject) => {
+            this.storage.remove(key, () => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                }
+                resolve();
+            });
+        });
+    };
 }
+
+export const storage = new Storage(chrome.storage.local);

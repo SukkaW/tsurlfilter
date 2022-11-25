@@ -23,7 +23,11 @@ import {
     RULE_SET_NAME_PREFIX,
     TooManyRulesError,
     TooManyRegexpRulesError,
+    MessagesHandlerType,
 } from "@adguard/tswebextension/mv3";
+import { FILTERS_CHANGED } from "./constants";
+import { APIConfiguration } from "./schemas";
+import { storage } from "./storage";
 
 export type RuleSetCounters = {
     filterId: number;
@@ -44,9 +48,8 @@ export type RulesStatus = {
     excludedRulesIds: number[];
 };
 
-// TODO: remove prettier!!!
-const { MAX_NUMBER_OF_REGEX_RULES, MAX_NUMBER_OF_DYNAMIC_AND_SESSION_RULES, MAX_NUMBER_OF_ENABLED_STATIC_RULESETS } =
-    chrome.declarativeNetRequest;
+// FIXME: remove prettier!!!
+const { MAX_NUMBER_OF_REGEX_RULES, MAX_NUMBER_OF_DYNAMIC_AND_SESSION_RULES } = chrome.declarativeNetRequest;
 
 const WEB_ACCESSIBLE_RESOURCES_PATH = "/web-accessible-resources/redirects";
 
@@ -55,10 +58,18 @@ class TsWebExtensionWrapper {
 
     private configurationResult: ConfigurationResult | undefined;
 
+    private waitForStart: Promise<void> | undefined;
+
     public filteringLogEnabled: boolean = false;
+
+    private messageHandler: MessagesHandlerType;
 
     constructor() {
         this.tsWebExtension = new TsWebExtension(WEB_ACCESSIBLE_RESOURCES_PATH);
+
+        this.messageHandler = this.tsWebExtension.getMessageHandler();
+
+        chrome.runtime.onMessage.addListener(this.messageHandlerWrapper);
     }
 
     public get ruleSetsCounters(): RuleSetCounters[] {
@@ -71,27 +82,56 @@ class TsWebExtensionWrapper {
         );
     }
 
-    async start(): Promise<void> {
-        const config = await this.getConfiguration();
-        this.configurationResult = await this.tsWebExtension.start(config);
-        const dynamicRulesStatus = await TsWebExtensionWrapper.getDynamicRulesInfo(this.configurationResult);
+    // FIXME: Add reinitialization with read last provided config values from memory
+    private messageHandlerWrapper = (message: any, sender: any, sendResponse: (response?: any) => void): boolean => {
+        (async (): Promise<any> => {
+            if (this.waitForStart) {
+                await this.waitForStart;
+            }
 
-        await this.checkFiltersLimitsChange();
+            // logger.debug("[messageHandlerWrapper]: handle message", message);
+
+            // TODO: use MESSAGE_HANDLER_NAME
+            if (message.handlerName === "tsWebExtension") {
+                return this.messageHandler(message, sender);
+            }
+
+            return null;
+        })()
+            .then(sendResponse)
+            .catch((e: any) => {
+                sendResponse({ error: { message: e.message } });
+            });
+
+        return true;
+    };
+
+    async start(configuration: APIConfiguration): Promise<void> {
+        const start = async (): Promise<void> => {
+            const config = await this.getConfiguration(configuration);
+            this.configurationResult = await this.tsWebExtension.start(config);
+            await TsWebExtensionWrapper.getDynamicRulesInfo(this.configurationResult);
+
+            await this.checkFiltersLimitsChange(configuration);
+        };
+
+        this.waitForStart = start();
+        await this.waitForStart;
     }
 
     async stop(): Promise<void> {
         await this.tsWebExtension.stop();
     }
 
-    async configure(skipCheck?: boolean): Promise<void> {
-        const config = await this.getConfiguration();
+    async configure(configuration: APIConfiguration, skipCheck?: boolean): Promise<void> {
+        const config = await this.getConfiguration(configuration);
         this.configurationResult = await this.tsWebExtension.configure(config);
-        const dynamicRulesStatus = await TsWebExtensionWrapper.getDynamicRulesInfo(this.configurationResult);
+        await TsWebExtensionWrapper.getDynamicRulesInfo(this.configurationResult);
 
         if (skipCheck) {
             return;
         }
-        await this.checkFiltersLimitsChange();
+        await this.checkFiltersLimitsChange(configuration);
     }
 
     static async getDynamicRulesInfo({ dynamicRules }: ConfigurationResult): Promise<DynamicRulesStatus | null> {
@@ -131,13 +171,12 @@ class TsWebExtensionWrapper {
     /**
      * If changed - save new values to store for show warning to user
      * and save list of last used filters
+     * TODO: Check this
+     *
+     * @param configuration
      */
-    private async checkFiltersLimitsChange(): Promise<void> {
-        const wasEnabledIds = filters
-            .getFiltersInfo()
-            .filter(({ groupId, enabled }) => enabled && groupId !== FiltersGroupId.CUSTOM)
-            .map(({ id }) => id)
-            .sort((a: number, b: number) => a - b);
+    private async checkFiltersLimitsChange(configuration: APIConfiguration): Promise<void> {
+        const wasEnabledIds = configuration.filters.sort((a: number, b: number) => a - b);
         const nowEnabledIds = (await chrome.declarativeNetRequest.getEnabledRulesets())
             .map((s) => Number.parseInt(s.slice(RULE_SET_NAME_PREFIX.length), 10))
             .sort((a: number, b: number) => a - b);
@@ -158,31 +197,31 @@ class TsWebExtensionWrapper {
 
         const brokenState = isDifferent();
 
-        await browserActions.setIconBroken(brokenState);
+        // await browserActions.setIconBroken(brokenState);
 
         if (brokenState) {
             // Save last used filters ids to show user
-            await settings.setFiltersChangedList(wasEnabledIds);
-            await filters.setEnabledFiltersIds(nowEnabledIds);
+            await TsWebExtensionWrapper.setFiltersChangedList(wasEnabledIds);
+            const configWithUpdatedFilters = { ...configuration, filters: nowEnabledIds };
 
-            await this.configure(true);
+            await this.configure(configWithUpdatedFilters, true);
             // If state is not broken - clear list of "broken" filters
-        } else if (settings.getSetting<number[]>(SETTINGS_NAMES.FILTERS_CHANGED).length > 0) {
-            await settings.setFiltersChangedList([]);
+        } else if ((await TsWebExtensionWrapper.getFiltersChangedList).length > 0) {
+            await TsWebExtensionWrapper.setFiltersChangedList([]);
         }
     }
 
-    private getConfiguration = async (): Promise<Configuration> => {
-        const filtersInfo = filters.getFiltersInfo();
-        const staticFiltersIds = filters.getEnableFiltersIds().filter((id) => {
-            const filterInfo = filtersInfo.find((f) => f.id === id);
-            return filterInfo && filterInfo.groupId !== FiltersGroupId.CUSTOM;
-        });
-        const customFilters = filters.getEnabledCustomFiltersRules().map((r) => ({
-            filterId: r.id,
-            content: r.rules,
-        }));
+    private static setFiltersChangedList = async (ids: number[]): Promise<void> => {
+        await storage.set(FILTERS_CHANGED, ids);
+    };
 
+    private static getFiltersChangedList = async (): Promise<number[]> => {
+        const ids = await storage.get<number[]>(FILTERS_CHANGED);
+
+        return ids || [];
+    };
+
+    private getConfiguration = async (configuration: APIConfiguration): Promise<Configuration> => {
         const { installType } = await chrome.management.getSelf();
         const isUnpacked = installType === "development";
 
@@ -209,12 +248,11 @@ class TsWebExtensionWrapper {
             filteringLogEnabled: this.filteringLogEnabled,
             filtersPath: "filters",
             ruleSetsPath: "filters/declarative",
-            staticFiltersIds,
+            staticFiltersIds: configuration.filters,
             trustedDomains: [],
-            customFilters,
+            customFilters: [],
             allowlist: [],
-            // TODO: maybe getRules should return array instead of string
-            userrules: (await userRules.getRules()).split("\n").filter((rule) => rule),
+            userrules: configuration.rules || [],
             verbose: isUnpacked,
         };
     };
@@ -222,61 +260,9 @@ class TsWebExtensionWrapper {
     /**
      * Returns tswebextension messages handler
      */
-    getMessageHandler() {
+    getMessageHandler(): MessagesHandlerType {
         return this.tsWebExtension.getMessageHandler();
     }
-
-    /**
-     * Finds and enables filters for current browser locales
-     */
-    enableCurrentLanguagesFilters = async () => {
-        // Cannot check rule sets counters
-        if (!this.configurationResult) {
-            return;
-        }
-
-        const navigatorLocales = navigator.languages.map((locale) => locale.replace("-", "_"));
-        const locales = new Set(navigatorLocales);
-        const localeFilters = DEFAULT_FILTERS.filter((f) => f.localeCodes?.some((code) => locales.has(code))).map((f) =>
-            filters.getFiltersInfo().find(({ id }) => id === f.id)
-        );
-
-        // A loop is needed to step through the asynchronous filter enable operation,
-        // because each filter enable changes the constraints of the rules.
-        for (let i = 0; i < localeFilters.length; i += 1) {
-            const localeFilterInMemory = localeFilters[i];
-            if (!localeFilterInMemory || localeFilterInMemory.enabled) {
-                return;
-            }
-
-            const { id, localeCodes } = localeFilterInMemory;
-            const ruleSet = this.configurationResult.staticFilters.find((r) => {
-                // TODO: Seems like weak relation, not too reliably
-                return r.getId() === `${RULE_SET_NAME_PREFIX}${id}`;
-            });
-            const declarativeRulesCounter = ruleSet?.getRulesCount();
-
-            // eslint-disable-next-line no-await-in-loop
-            const availableStaticRulesCount = await chrome.declarativeNetRequest.getAvailableStaticRuleCount();
-            const enabledStaticFiltersCount = filters
-                .getFiltersInfo()
-                .filter((f) => f.enabled && f.groupId !== FiltersGroupId.CUSTOM).length;
-
-            if (
-                declarativeRulesCounter !== undefined &&
-                declarativeRulesCounter < availableStaticRulesCount &&
-                enabledStaticFiltersCount < MAX_NUMBER_OF_ENABLED_STATIC_RULESETS
-            ) {
-                log.debug(`Trying enable locale filter with id ${id} for locales: ${localeCodes}`);
-                // eslint-disable-next-line no-await-in-loop
-                await filters.enableFilter(id);
-                // eslint-disable-next-line no-await-in-loop
-                await this.configure();
-            } else {
-                log.debug(`Cannot enable locale filter with id ${id} for locales: ${localeCodes}`);
-            }
-        }
-    };
 }
 
 export const adguardApi = new TsWebExtensionWrapper();

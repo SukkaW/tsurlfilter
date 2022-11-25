@@ -15,21 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
-
 import zod from "zod";
-
 /**
  * {@link AdguardApi} configuration runtime validator
  */
-export const configurationValidator = zod.object({
+export declare const configurationValidator: zod.ZodObject<{
     /**
      * An array of filters identifiers.
      *
      * FIXME: You can use filter ids only from provided list of our filters.
      * You can look for possible filters identifiers in the filters metadata file.
      */
-    filters: zod.number().array(),
-
+    filters: zod.ZodArray<zod.ZodNumber, "many">;
     /**
      * An array of custom filtering rules.
      *
@@ -37,7 +34,12 @@ export const configurationValidator = zod.object({
      *
      * @see https://adguard.com/en/filterrules.html
      */
-    rules: zod.string().array().optional(),
-});
-
-export type APIConfiguration = zod.infer<typeof configurationValidator>;
+    rules: zod.ZodOptional<zod.ZodArray<zod.ZodString, "many">>;
+}, "strip", zod.ZodTypeAny, {
+    rules?: string[] | undefined;
+    filters: number[];
+}, {
+    rules?: string[] | undefined;
+    filters: number[];
+}>;
+export declare type APIConfiguration = zod.infer<typeof configurationValidator>;

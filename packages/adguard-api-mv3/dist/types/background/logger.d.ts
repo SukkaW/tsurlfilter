@@ -15,29 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
-
-import zod from "zod";
-
 /**
- * {@link AdguardApi} configuration runtime validator
+ * Simple API for logging
  */
-export const configurationValidator = zod.object({
-    /**
-     * An array of filters identifiers.
-     *
-     * FIXME: You can use filter ids only from provided list of our filters.
-     * You can look for possible filters identifiers in the filters metadata file.
-     */
-    filters: zod.number().array(),
-
-    /**
-     * An array of custom filtering rules.
-     *
-     * These custom rules might be created by a user via AdGuard Assistant UI.
-     *
-     * @see https://adguard.com/en/filterrules.html
-     */
-    rules: zod.string().array().optional(),
-});
-
-export type APIConfiguration = zod.infer<typeof configurationValidator>;
+export declare class Logger {
+    private api;
+    info(...args: unknown[]): void;
+    error(...args: unknown[]): void;
+    warn(...args: unknown[]): void;
+}
