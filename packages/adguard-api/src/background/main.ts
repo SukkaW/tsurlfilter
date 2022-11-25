@@ -45,7 +45,16 @@ import { Logger } from "./logger";
  */
 import localScriptRules from "../local_script_rules.json";
 
-export const WEB_ACCESSIBLE_RESOURCES_PATH = "adguard";
+interface AdguardApiInterface {
+    onAssistantCreateRule: EventChannel<string>;
+    onRequestBlocked: RequestBlockingLogger;
+    start(configuration: Configuration): Promise<Configuration>;
+    stop(): Promise<void>;
+    configure(configuration: Configuration): Promise<Configuration>;
+    openAssistant(tabId: number): Promise<void>;
+    closeAssistant(tabId: number): Promise<void>;
+    getRulesCount(): number;
+}
 
 /**
  * AdGuard API is filtering library, provided following features:
@@ -56,7 +65,7 @@ export const WEB_ACCESSIBLE_RESOURCES_PATH = "adguard";
  * - auto detecting language filters via {@link localeDetectService}
  * - logging request processing via filtering events api, provided by {@link TsWebExtension}
  */
-export class AdguardApi {
+export class AdguardApi implements AdguardApiInterface {
     // Engine instance
     private tswebextension: TsWebExtension;
 
@@ -89,8 +98,8 @@ export class AdguardApi {
      */
     public onRequestBlocked = new RequestBlockingLogger();
 
-    constructor() {
-        this.tswebextension = new TsWebExtension(WEB_ACCESSIBLE_RESOURCES_PATH);
+    constructor(webAccessibleResourcesPath: string = "adguard") {
+        this.tswebextension = new TsWebExtension(webAccessibleResourcesPath);
 
         // TODO: load only in ff
         this.tswebextension.setLocalScriptRules(localScriptRules);

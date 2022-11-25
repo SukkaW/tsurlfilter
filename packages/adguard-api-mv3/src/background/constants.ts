@@ -16,10 +16,10 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const FILTERS_INFO_STORAGE_KEY = "filters_info";
-export const USER_RULES_STATUS_STORAGE_KEY = "user_rules_status";
-export const ENABLED_FILTERS_IDS = "enabled_filters_ids";
-export const FILTERS_CHANGED = "filters_changed";
+export const FILTERS_INFO_STORAGE_KEY = 'filters_info';
+export const USER_RULES_STATUS_STORAGE_KEY = 'user_rules_status';
+export const ENABLED_FILTERS_IDS = 'enabled_filters_ids';
+export const FILTERS_CHANGED = 'filters_changed';
 
 export enum FiltersGroupId {
     CUSTOM = 0,
@@ -44,18 +44,18 @@ export interface FilterInfo {
 
 // FIXME: Check these types
 export enum RulesetType {
-    RULESET_1 = "ruleset_1",
-    RULESET_2 = "ruleset_2",
-    RULESET_3 = "ruleset_3",
-    RULESET_4 = "ruleset_4",
-    RULESET_6 = "ruleset_6",
-    RULESET_7 = "ruleset_7",
-    RULESET_8 = "ruleset_8",
-    RULESET_9 = "ruleset_9",
-    RULESET_13 = "ruleset_13",
-    RULESET_14 = "ruleset_14",
-    RULESET_16 = "ruleset_16",
-    RULESET_224 = "ruleset_224",
+    RULESET_1 = 'ruleset_1',
+    RULESET_2 = 'ruleset_2',
+    RULESET_3 = 'ruleset_3',
+    RULESET_4 = 'ruleset_4',
+    RULESET_6 = 'ruleset_6',
+    RULESET_7 = 'ruleset_7',
+    RULESET_8 = 'ruleset_8',
+    RULESET_9 = 'ruleset_9',
+    RULESET_13 = 'ruleset_13',
+    RULESET_14 = 'ruleset_14',
+    RULESET_16 = 'ruleset_16',
+    RULESET_224 = 'ruleset_224',
 }
 
 // FIXME: Check these types

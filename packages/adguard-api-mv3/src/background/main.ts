@@ -51,7 +51,16 @@ export type RulesStatus = {
 // FIXME: remove prettier!!!
 const { MAX_NUMBER_OF_REGEX_RULES, MAX_NUMBER_OF_DYNAMIC_AND_SESSION_RULES } = chrome.declarativeNetRequest;
 
-const WEB_ACCESSIBLE_RESOURCES_PATH = "/web-accessible-resources/redirects";
+interface AdguardApiInterface {
+    onAssistantCreateRule: EventChannel<string>;
+    // onRequestBlocked: RequestBlockingLogger;
+    start(configuration: Configuration): Promise<Configuration>;
+    stop(): Promise<void>;
+    configure(configuration: Configuration): Promise<Configuration>;
+    openAssistant(tabId: number): Promise<void>;
+    closeAssistant(tabId: number): Promise<void>;
+    getRulesCount(): number;
+}
 
 class TsWebExtensionWrapper {
     private tsWebExtension: TsWebExtension;
@@ -64,8 +73,8 @@ class TsWebExtensionWrapper {
 
     private messageHandler: MessagesHandlerType;
 
-    constructor() {
-        this.tsWebExtension = new TsWebExtension(WEB_ACCESSIBLE_RESOURCES_PATH);
+    constructor(webAccessibleResourcesPath: string = "adguard") {
+        this.tsWebExtension = new TsWebExtension(webAccessibleResourcesPath);
 
         this.messageHandler = this.tsWebExtension.getMessageHandler();
 
@@ -199,6 +208,7 @@ class TsWebExtensionWrapper {
 
         // await browserActions.setIconBroken(brokenState);
 
+        // FIXME: If state has been broken - return new applied configuration
         if (brokenState) {
             // Save last used filters ids to show user
             await TsWebExtensionWrapper.setFiltersChangedList(wasEnabledIds);
@@ -265,4 +275,4 @@ class TsWebExtensionWrapper {
     }
 }
 
-export const adguardApi = new TsWebExtensionWrapper();
+export default TsWebExtensionWrapper;
