@@ -1,0 +1,4502 @@
+[
+	{
+		"id": 114,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||player.ivideosmart.com^",
+			"initiatorDomains": [
+				"myjitsu.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 116,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||softpedia.com/zds.php",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 138,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||pay-day.ru/wp-content/cache/min/1/js/vq_starter.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 155,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||static.insurancedekho.com/pwa/js/bundle/Newsdetail.",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 228,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||widget.golfscape.com^",
+			"initiatorDomains": [
+				"sport360.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 231,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||embed.dugout.com^",
+			"domainType": "thirdParty",
+			"excludedInitiatorDomains": [
+				"sportowefakty.wp.pl"
+			],
+			"resourceTypes": [
+				"script"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 235,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||player.cnevids.com^",
+			"initiatorDomains": [
+				"wired.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 239,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ais.th/asset_index2020/js/chat_and_shop.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 241,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||wikipedia.su/muzikfon.php",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 255,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||img.weblogssl.com/*/js/dailymotion-",
+			"initiatorDomains": [
+				"applesfera.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 299,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fireworkapi1.com/embed/v2/playlists/5m1wZ5/feeds?page_size=10",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 300,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fireworkapi1.com/embed/v2/channels/whats_trending",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 301,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fireworkapi.com/embed/v2/publisher_clients/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 302,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fireworkapi1.com^",
+			"initiatorDomains": [
+				"jj-jj.net",
+				"mensnonno.jp",
+				"olive-hitomawashi.com",
+				"gizmodo.jp",
+				"final-inc.com",
+				"roomie.jp",
+				"gendai.media"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 323,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||point.widget.rakuten.co.jp^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 340,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||images.news18.com/static_news18/pix/ibnhome/news18/jio_saavn_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 377,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||belaruspartisan.by/images/sherem.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 378,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||belaruspartisan.by/images/svaboda3.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 396,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||meczyki.pl/js/news-widget.js",
+			"initiatorDomains": [
+				"devilpage.pl"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 411,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||azby.fmworld.net/usage/images/banner_enquete.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 458,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mwcm.nytimes.com/capi/metered_assets/?plat=*&areas=welcomeAd",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 498,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||newzit.com/static/videoplayer/*/scripts/mol-fe-videoplayer.min.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 501,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||edicloud.edipresse.pl/random/wizaz/video.js",
+			"initiatorDomains": [
+				"wizaz.pl"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 564,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||syouron.com/NEKO_TORA.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 608,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||static3.car.ru/img/ya.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 613,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||darkcrew.org/forum/service_worker.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 633,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||brief.pl/wp-content/uploads/2021/06/baner-www-750x100px.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 648,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fiverr.com/embed_gigs?id",
+			"initiatorDomains": [
+				"ytplaylist-len.herokuapp.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 657,
+		"action": {
+			"type": "redirect",
+			"redirect": {
+				"extensionPath": "/adguard/redirects/nooptext.js"
+			}
+		},
+		"condition": {
+			"urlFilter": "||hentaidude.com/wp-admin/admin-ajax.php?action=geocheck",
+			"resourceTypes": [
+				"xmlhttprequest"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 678,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nicoad.nicovideo.jp/v1/contents/video/*/pickup_supporters",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 680,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||sputnik.by/files/tgparser/sputnik_by.html",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 692,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s.yimg.jp/images/auct/salespromotion/2021_2/0216_stop/376_376.png",
+			"initiatorDomains": [
+				"auctions.yahoo.co.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 722,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||diets.ru/i/rb/start_to_lose_weight_*.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 763,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||youtube.com/embed/",
+			"initiatorDomains": [
+				"eksisozluk.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 764,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||youtube.com/embed/*",
+			"initiatorDomains": [
+				"seyler.eksisozluk.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 776,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mir24.tv/uploaded/resources/Telegramm_1200x90.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 802,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||api.rnet.plus^",
+			"initiatorDomains": [
+				"shakko.ru",
+				"mirovich.media",
+				"livejournal.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 2
+	},
+	{
+		"id": 843,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||embed.sendtonews.com^",
+			"initiatorDomains": [
+				"dailyrecordnews.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 861,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||drozdogan.com/images/koronavirus_banner_*.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 864,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||content.jwplatform.com^",
+			"initiatorDomains": [
+				"techradar.com",
+				"digitalcameraworld.com",
+				"loudersound.com",
+				"musicradar.com",
+				"gardeningetc.com",
+				"livingetc.com",
+				"tomshardware.com",
+				"www-techradar-com.cdn.ampproject.org"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 891,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.viqeo.tv/js/vq_starter.js",
+			"initiatorDomains": [
+				"teleprogramma.pro",
+				"coop-land.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 897,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||search.namu.wiki/api/ranking",
+			"initiatorDomains": [
+				"arca.live"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 898,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||arca.live/api/bywiki.json",
+			"initiatorDomains": [
+				"arca.live"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 940,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.tinypass.com/api/tinypass.min.js",
+			"initiatorDomains": [
+				"seekingalpha.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 959,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||vidtech.cbsinteractive.com^",
+			"initiatorDomains": [
+				"metrolyrics.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 971,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||jiosaavn.com/embed/",
+			"initiatorDomains": [
+				"ndtv.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 990,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||psxplanet.ru/forum/clientscript/ny2021/scripts/game_v4.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 996,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||silvergames.com/div/own.php?",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1010,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||codestudyblog.com/ref/myscripts.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1028,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ilenta.com/images/banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1038,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||expclan.org/styles/banners/skupka.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1039,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||expclan.org/styles/banners/des.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1040,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||expclan.org/styles/banners/iphone.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1058,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "bugsnag.com^",
+			"initiatorDomains": [
+				"adblock-tester.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1059,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/bugsnag.min.js",
+			"initiatorDomains": [
+				"adblock-tester.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1060,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||sentry-cdn.com^",
+			"initiatorDomains": [
+				"adblock-tester.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1091,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||jsrdn.com/s/cs.js",
+			"initiatorDomains": [
+				"foreignpolicy.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1112,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||connatix.com^",
+			"initiatorDomains": [
+				"lifehacker.com",
+				"thegatewaypundit.com",
+				"bleepingcomputer.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1118,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||business-standard.com/covid-*.php",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1135,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.viqeo.tv/embed?playerId=",
+			"initiatorDomains": [
+				"mail.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1136,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||viqeo.tv/js/vq_starter.js",
+			"initiatorDomains": [
+				"mail.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1162,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||t7z.cupid.iqiyi.com/show2?e",
+			"initiatorDomains": [
+				"m.iqiyi.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 1169,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||download.skype.com/share/skypebuttons/js/skypeCheck.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1178,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||api.dmcdn.net^",
+			"initiatorDomains": [
+				"kompasiana.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1184,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||embed.sendtonews.com^",
+			"initiatorDomains": [
+				"chron.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1192,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||dostfilms.*/uploads/readmore.min.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1222,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||animepertutti.org/wp-content/uploads/*/telegramjoin.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1238,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.zmescience.com/wp-content/themes/jnews/assets/dist/image/preloader.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1244,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||adncdnend.azureedge.net^",
+			"initiatorDomains": [
+				"minecraftseedhq.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1248,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||r.dlandroid.com/wp-content/uploads/*/telegram.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1274,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||player.anyclip.com^",
+			"initiatorDomains": [
+				"warcraftlogs.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1292,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||business.ru/files/widgets/VKwidget",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1295,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||golos.ua/assets/img/telegram.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1300,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||juraganfilm.site/ik/info.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1322,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdnjs.cloudflare.com/ajax/libs/Snowstorm/*/snowstorm-min.js",
+			"initiatorDomains": [
+				"forum.antichat.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1326,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||player.anyclip.com^",
+			"initiatorDomains": [
+				"thewindowsclub.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1332,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||i2.kidstaff.com.ua/info-1-5.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1334,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||bloodinfo.net/main/forced_popup_donation.jsp",
+			"resourceTypes": [
+				"main_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1336,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nu6i-bg-net.com/snow3.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1341,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fb.ru/front/build/comments.js",
+			"initiatorDomains": [
+				"fb.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1356,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||avjd014.com/statics/layer_mobile/layer.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1391,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||obozrevatel.com/player/*.htm?autoplay=true&mute=true",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1413,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||m.timesofindia.com/common_cube.cms",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 2
+	},
+	{
+		"id": 1418,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||player.anyclip.com^",
+			"initiatorDomains": [
+				"softpedia.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1444,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||player.anyclip.com^",
+			"initiatorDomains": [
+				"mobilesyrup.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1458,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ferra.media.eagleplatform.com^",
+			"initiatorDomains": [
+				"ferra.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1463,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||imtranslator.net/images/donate.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1502,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||suedkurier.de/_fWS/jsoninplainout/script/shift-2017_private-mode.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1526,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||img.appledaily.com.tw/pay/js/minisite/paywall.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1528,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||img.appledaily.com.tw/pay/js/paywall.*.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1533,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||news.sy/wp-content/uploads/syr.",
+			"resourceTypes": [
+				"media"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1535,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||static.mailerlite.com/js/jquery.validate.min.js",
+			"initiatorDomains": [
+				"ibizaglobalradio.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 1537,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||static.mailerlite.com/js/jquery.validate.min.js",
+			"initiatorDomains": [
+				"nanonet.pl"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 1586,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.britannica.com/mendel/curiosity/eb-mendel-curiosity-300x90c.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1590,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/snow-3d/*",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1627,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||montpellierhandball.com/scripts/fancybox/minified__fancybox.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1647,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.playwire.com/*/embed.js",
+			"initiatorDomains": [
+				"tasteofcinema.com",
+				"slant.co",
+				"gtplanet.net",
+				"readlightnovel.org",
+				"filehippo.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1656,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nnmclub.ch/forum/new_year/style2019e.css",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1657,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nnmclub.ch/forum/new_year/newyear2019g.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1661,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cloudfront.net/_next/chunks/eea-*.js",
+			"initiatorDomains": [
+				"healthline.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1687,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mshop.rediff.com/trending-now/widget",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1688,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||recoprofile.rediff.com/news_recommendation/news_template.html",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1689,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||shopping.rediff.com/trending-now/widget",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1726,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||wibbitz.com^",
+			"initiatorDomains": [
+				"pwinsider.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1760,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn-*.playwire.com/*/embed.js",
+			"initiatorDomains": [
+				"gamezone.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1768,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mcd-sdk.playbuzz.com/embed^",
+			"initiatorDomains": [
+				"appunwrapper.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1773,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||taraz-gov.xn--kz/wp-content/uploads/2018/07/---c7y8a5ad88eeb3irfpb8my0ad.mp4",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1786,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||wp.com/gizchina.it/wp-content/uploads/*/banner-gizdeals.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1794,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||trecetv.es/images/banners/TRECE.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1796,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||wibbitz.com^",
+			"initiatorDomains": [
+				"gamerevolution.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1833,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||javhiv.net/statics/defaultv2/js/debug1.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1851,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||pdj.cc^",
+			"initiatorDomains": [
+				"promodj.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1853,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||widget.crowdynews.com^",
+			"initiatorDomains": [
+				"gmanetwork.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1884,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||d3otfkap419ijo.cloudfront.net/*/lib-components-newsletter-modal.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1888,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||designmodo.com/wp-content/themes/designmodov2.1/js/banner-slides.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1914,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||radioroks.ua^",
+			"initiatorDomains": [
+				"megatrack.top"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1951,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ext-stat.ru^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1952,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mystatext.ru^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1960,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||srviral.com^",
+			"initiatorDomains": [
+				"alrincon.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1976,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||macerkopf.de/wp-content/plugins/dreamgrow-scroll-triggered-box/js/script.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2051,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||view.vzaar.com/*/player",
+			"initiatorDomains": [
+				"filehippo.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2066,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||avinfo.co/i/chromavinfo.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2080,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||lostfilm.info/css*/b/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2083,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||baibako.tv/bg/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2165,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||afisha.ru/dzen/yaDzen.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2167,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||afisha.ru/js/banner_glitch/BannerGlitch.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2168,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||afisha.ru/noindex/IsShowLive.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2182,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||streamspread.com^",
+			"initiatorDomains": [
+				"systemrequirementslab.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2208,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mir-avto-moto.ru^",
+			"initiatorDomains": [
+				"spec-komp.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2217,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||epochtimes.de/assets/themes/eptde16/popup/fb-like-epochtimes.de.html",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2239,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mts.ctc.ru/?nowrap=",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2266,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||am.cdnmob.org/_/img/youtube-bg-filler.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2279,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||kiwi6.com^",
+			"initiatorDomains": [
+				"zuketapaajabhisa.blogspot.com",
+				"zuketapaajabhisa.blogspot.com.tr",
+				"zuketapaajabhisa.blogspot.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2280,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||whoaremyfriends.net^",
+			"initiatorDomains": [
+				"zuketapaajabhisa.blogspot.com",
+				"zuketapaajabhisa.blogspot.com.tr",
+				"zuketapaajabhisa.blogspot.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2289,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "g-tv.ru/videomore_gtv.php?video_id=*&auto_play=1",
+			"initiatorDomains": [
+				"kino-dom.tv"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2302,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||sports.ru/censusbarca/*.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2316,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||vesti.ru/4sport.html",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2421,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yastatic.net/daas/stripe.html",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2547,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||zen.yandex.ru/widget-loader",
+			"excludedInitiatorDomains": [
+				"yandex.by",
+				"yandex.kz",
+				"yandex.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2548,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||zen.yandex.ru/widget-loader",
+			"initiatorDomains": [
+				"mail.yandex.by",
+				"mail.yandex.kz",
+				"mail.yandex.ru",
+				"mail.yandex.com",
+				"mail.yandex.com.tr"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2563,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yandex.*/*stripe.html|",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2603,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||pogoda.mail.ru/*/ct-push-notifications/ct-push-notifications.xml.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2637,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/sociallocker-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2641,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/pandalocker.",
+			"initiatorDomains": [
+				"lanka.ru"
+			],
+			"resourceTypes": [
+				"script"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2680,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||i.dailymail.co.uk/i/pix/2017/08/02/636x90_facebook_ad_sport.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2717,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||trimay.ru/?",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2737,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yargiyayinevi.com/Data/EditorFiles/banners/eylul21/slider-alt",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2740,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||wionews.com/live-tv/embed?autoplay=1&mute=1",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2748,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||zeenews.india.com/live-tv/embed#mute",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2770,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||zn.ua/user/img/special/zn-youtube.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2773,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||robinlinus.github.io/share-the-love/",
+			"initiatorDomains": [
+				"robinlinus.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2795,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nallihanhaber.com/wp-content/uploads/2020/09/nallihansondakika-min.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2929,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||faktxeber.com/images/telegram-logo.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2930,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||i.hizliresim.com/4r4kBG.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2931,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||kfund-media.com/wp-content/uploads/2018/01/580h400_banner_telegram-min.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2932,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mayu-pravo.com/share/slider/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2933,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||u.today/img/satoshi-twitter.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3002,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yastatic.net/daas/atom.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3008,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||yastatic.net/daas/atom.js",
+			"initiatorDomains": [
+				"mail.yandex.by",
+				"mail.yandex.kz",
+				"mail.yandex.ru",
+				"mail.yandex.com",
+				"mail.yandex.com.tr"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 3020,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.tinypass.com/api/tinypass.min.js",
+			"initiatorDomains": [
+				"digiday.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3044,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||image.mediapen.com/popup/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3045,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||image.mediapen.com/*/series_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3090,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||daidata.goraggio.com/ad_image",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3100,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cuonet.com/data/file/plan/thumb-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3102,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||sports.smt.docomo.ne.jp/img/bnr/bnr_dgame.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3106,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rakuten.co.jp/com/advance/ichiba/rc-gp-sp_banner_scv/sp/condition.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3115,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||hbzb111.com/api/advert/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3138,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yimg.jp/images/realestate/special/*compTopImpact_",
+			"initiatorDomains": [
+				"realestate.yahoo.co.jp"
+			],
+			"resourceTypes": [
+				"image"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3147,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mj-king.net/img/BannerAdvertisement/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3148,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mj-king.net/img/bnr/bnr_*_300x200.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3149,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mjk-r.net/common/sample/full01/img/bnr_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3150,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mjk-r.net/common/sample/full01/img/bg_special_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3151,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mjk-r.net/common/sample/smart01/img/bnr_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3158,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||japan-indepth.jp/wp-content/uploads/2019/02/jid_member.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3164,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||gamewith.jp/ad/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3173,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||r.mradx.net^*.html?data=",
+			"initiatorDomains": [
+				"cloud.mail.ru"
+			],
+			"resourceTypes": [
+				"sub_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3183,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yanmaga.jp/api/customers/viewer_banners/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3249,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||news-postseven.com/uploads/*/banner_300x300.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3261,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||oricon.co.jp/sp/img/_parts/manual/yomurun/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3272,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||insurance.rakuten.co.jp/car/img/banner/mno_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3274,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||lolipop.jp/img/bnr/bnr_lolipop_ad_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3285,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nijiyome.jp/css/contents_pc/topjack.css",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3286,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nijiyome.com/nijiyome-img/img/banners/*/topjack_",
+			"initiatorDomains": [
+				"nijiyome.jp"
+			],
+			"resourceTypes": [
+				"image"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3326,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||kidona.rakuten.co.jp/imgt/brand/banner/*_mno_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3328,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||takarakuji.rakuten.co.jp/image/banner/other/external/r_mobile_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3329,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||takarakuji.rakuten.co.jp/pc/champ/loto/img/external/r_mobile_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3336,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rakuten-sonpo.co.jp/Portals/0/images/common/group/bnr_pr_life_partner_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3349,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yimg.jp/images/yjtop-common/extension/promo/*/new/banner/weather_banner.png",
+			"initiatorDomains": [
+				"weather.yahoo.co.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3351,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||pharma.mynavi.jp/img/areabnr/bnr_top_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3352,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||pharma.mynavi.jp/sp/img/bg_pr.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3375,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fc2.com/video/img/banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3379,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||sponichi.co.jp/gamble/auto/images/charilotobanner005_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3389,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xgoo.jp/top2018/conductor_banner",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3430,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||sourcenext.com/~/media/Images/pr_sc/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3439,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rakuten-bank.co.jp/shared/images/top/pr/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3487,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||octoparse.com/media/*/web-banner-1.jpeg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3490,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||p.dmm.co.jp/p/bnr/dc/topics/large/book_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3499,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xgoo.jp/images/common/banner_*_320_150",
+			"initiatorDomains": [
+				"oshiete.goo.ne.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3500,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xgoo.jp/images/common/banner_*_630_110",
+			"initiatorDomains": [
+				"oshiete.goo.ne.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3520,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||myjcom.jp/special/common/tvguide/banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3595,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||weraveyou.com/wp-content/uploads/*/*/sample-pack-ad.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3601,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||gomovies-online.cam/addons/*.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3661,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||taboola.com^",
+			"initiatorDomains": [
+				"sankei.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3670,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/stock_bnr_300-",
+			"initiatorDomains": [
+				"food-foto.jp",
+				"model-foto.jp",
+				"pro-foto.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3684,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||radiko.jp/static/image/half_banner.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3687,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||news.sod.co.jp/wp-content/uploads/*/prime_cp_",
+			"domainType": "firstParty",
+			"resourceTypes": [
+				"image"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3690,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||bizocean.jp/column/wp-content/uploads/2017/11/temply_banner",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3692,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||goobike.com/img/",
+			"initiatorDomains": [
+				"bikebros.co.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3699,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/random_affiliate.js",
+			"initiatorDomains": [
+				"elog.tokyo",
+				"freegame-mugen.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3710,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cloudfront.net/column/*/eikaiwa_ad_bannar_",
+			"initiatorDomains": [
+				"weblio.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3723,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rakuten-static.com/1/grp/banner/js/create.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3732,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fc2.com/js/blog/headbar_ad_load.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3736,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||brocardi.it/frontend/images/banner-quesito-libero-pensoso.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3744,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mora.jp/pc/img/jack/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3746,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rakuten.co.jp/sitemap/img/banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3757,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||jugem.jp/user_blog/ad/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3767,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||gdm.or.jp/bimg/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3772,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cloudfront.net/column/*/eikaiwa_ad_bannar_",
+			"initiatorDomains": [
+				"eikaiwa.weblio.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3775,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||casting-porno-tube.com/wp-content/uploads/*/Banner1.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3777,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xtube.com/staticcdn/promotion/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3786,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cloudfront.net/widgets2021/banner/index.html",
+			"initiatorDomains": [
+				"tvn24.pl"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3796,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cf.quizizz.com/img/super/ads/ads_banner*.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3809,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||kakaku.com/script/itemview/RdmReviewAd.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3822,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||tsite.jp/resource/t-mall/hit/game_bnr_sp.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3830,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.duden.de/public_files/*/DO_Plus-banner-boxer.mp4",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3834,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||limg.imgsmail.ru/informers/vk-slides/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3862,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yomiuri.co.jp/assets/images/footer-subscribe/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3888,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||elegantthemes.com/js/promo_slide_in.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3917,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||widgets.hawk-assets.co.uk^",
+			"initiatorDomains": [
+				"techradar.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3930,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||shop.investors.com/images/promotional/shop/*/index.html",
+			"initiatorDomains": [
+				"investors.com"
+			],
+			"resourceTypes": [
+				"sub_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 3951,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||dorzeczy.pl/dorzeczy/_*/widgets/promocja-tygodnika-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4015,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||photobucket.com/resources/common/js/prompt.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4020,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||vgc.no/vgpluss/campaigns/wp.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4023,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.r10.net/r10/i/r10.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4123,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||weraveyou.com/wp-content/uploads/*/WeRaveYou_PromotionAD6.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4125,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||teknoblog.com/wp-content/uploads/*/teknoblog-patreon-300-250@2x.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4185,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||img.stripst.com/*/previews",
+			"initiatorDomains": [
+				"xhamster.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4186,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xhamsterpremium.com^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4267,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||media.giphy.com/headers/2018-09-21-03-1537542191/FilmFestHPBannerFINAL.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4330,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||flashondemand.top-ix.org/video-omg/channels/vvvvid.mp4",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4334,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||playwire.com^",
+			"initiatorDomains": [
+				"psprices.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4348,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rsload.net/images5/usperiasfg.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4349,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rsload.net/images5/premssf1.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4353,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||myshows.me/shared/img/fe/banners/pro-*.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4360,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||aidma.104.com.tw/js/e104aidma.php",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4368,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||digiseller.ru^",
+			"initiatorDomains": [
+				"megaoblako.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4381,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s.yimg.com/rx/up/builds/8.5.18/ifcp.html",
+			"initiatorDomains": [
+				"mail.yahoo.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4382,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s.yimg.com/rx/builds/*/iframe-controller-page.html",
+			"initiatorDomains": [
+				"mail.yahoo.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4399,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||irtelecom.az/images/new-slider/*.mp4",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4412,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||forums.comodo.com/Themes/comodov2/images/free-signup.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4425,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||attservicesinc.tt.omtrdc.net/m2/attservicesinc/mbox/json?mbox=",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 2
+	},
+	{
+		"id": 4439,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yimg.com/*/js/generic_yset_search-min.js^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4453,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||filearchive.cnews.ru/*promo",
+			"initiatorDomains": [
+				"cnews.ru"
+			],
+			"resourceTypes": [
+				"media"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4463,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nim.ru/i/1920_1101/banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4496,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||contributions.guardianapis.com^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4554,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||images.wondershare.com/*/fotophire-article-banner.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4572,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ec.geo-online.co.jp/img/usr/cotegory/risumaho_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4573,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||smafi.info/assets/images/advertising/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4586,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||tenor.com/*/search-entrypoint-optimized.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4624,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||blog.esuteru.com/js/azrank/swiper.min.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4625,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||linksgroup.heteml.net/js/output/hatima/amazon_ranking",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4686,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||aurora.network/images/banners/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4694,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||imagel.sekainavi.com/images/banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4724,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||promo.datacamp.com/banner.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4736,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||image.rakuten.co.jp/cyberbay/cabinet/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4746,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||znetlive.com/*/flash-banner-2.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4747,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||dailyhostnews.com/pdf/flash-banner-1.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4751,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||livenewsworld.com/wp-content/*/pum/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4758,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||crio.do/blog/assets/images/crio-offerings",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4766,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ecuabet.com/banner-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4791,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||brandboardapi.yemek.com/ad/getadbyslug",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4819,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||niutrans.com/static/img/right-banner.",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4845,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.eapteka.ru/local/react/build/static/*/loyaltyProgramm.",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4846,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||asahicom.jp/shukatsunavi/assets/images/column/prebiz_banner660x100px.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4851,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||seolaboratory.jp/banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4864,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||darkreader.org/elements/backers-graph.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4880,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||appsrentables.com/images/flyer1-apps-vs.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4881,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||appsrentables.com/images/flyer1-apps-secretos.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4939,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||superprof.es/apuntes/wp-content/themes/sp_ressources/dist/videos/apprenez-a-la-maison-desktop.m4v",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4943,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||visionplus.id/videocontents/vod/",
+			"initiatorDomains": [
+				"okezone.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4985,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||knowledgecity.com/blog/wp-content/uploads/*/KnowledgeCity-Banner-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 4986,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||knowledgecity.com/blog/wp-content/uploads/*/FreeCourses-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5001,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||bostonreview.net/sites/default/files/Side_Column_ad",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5007,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||edsys.in/wp-content/themes/edsys/images/blog_side_banner.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5011,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||spinny.com/blog/wp-content/uploads/*/*WithCTA",
+			"resourceTypes": [
+				"image"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5015,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mmocs.com/templates/game/images/join_affiliate.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5038,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||pcdn.co/wp-content/uploads/*/Read-Our-Story",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5039,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||digify.com/wp-content/uploads/*/Internal-Blog_Graphics_Education-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5043,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"regexFilter": "/(mybook-new|sign-book2)\\.(jpg|png)/",
+			"initiatorDomains": [
+				"zhangxinxu.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5052,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fireeye.com/*/services/images/bnr-mandiant-advantage",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5070,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||phpnet.us/images/web.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5076,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||p.dmm.co.jp/p/general/ds/bnr/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5095,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||blockadblock.com/adblocking/wp-content/uploads/*/internalvert_300x200.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5097,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||static.foxnews.com/static/orion/styles/img/fox-news/nation-promo/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5105,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||hub.packtpub.com/wp-content/uploads/2019/07/Generic.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5140,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||torguard.net/blog/wp-content/uploads/2018/09/torguard-090418-300x250.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5141,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mifirm.net/assets/img/micloud.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5143,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||harness.io/wp-content/uploads/*/PipelinePatterns.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5196,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rolo.nocdnrlly.xyz/images/nflbanner.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5222,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cmtscience.ru/photos/shares/banners/5eba53abef3e6.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5224,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mirsmart.com.ua/image/catalog/bg/bg-sh-xiaomi-vivo.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5240,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||img.news.goo.ne.jp/image_proxy/resize/*/topics/*/s_banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5241,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||image.infoseek.rakuten.co.jp/content/MNO_banner/MNO_PC_300x125_",
+			"initiatorDomains": [
+				"news.infoseek.co.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5242,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||script.softcube.com^",
+			"initiatorDomains": [
+				"foxtrot.com.ua"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5247,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.myanimelist.net/images/event/support_mal/banner-ani-*.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5253,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||betonsuccess.ru/cache/user_beton_banners/banner_*.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5258,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||usefomo.com^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5283,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||androidheadlines.com/wp-content/uploads/2019/07/AH-TechDeals-300x150.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5284,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||androidheadlines.com/wp-content/uploads/2020/04/AH-Latest-Tech-Deals-Wide.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5291,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||img1.infobank.by/images/imagesindb/banner-perevody-150419-3.png.aspx",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5293,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||zviazda.by/banners/padpiska202025.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5301,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||letu.ru/common/img/background/doma_*.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5337,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||pcsecrets.ru/wp-content/uploads/*/word_book*.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5351,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||blackhole.beeline.ru/i/banners/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5381,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||i.bcrncdn.com/promotions/devaluation/182x600/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5383,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||manisamanset.gen.tr/uploads/manset-reklam",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5393,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||doeda.com/wp-content/*/porno.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5406,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||abeagle-public.buzzfeed.com/public/v2/experiment_variants?",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5413,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fmovies.cab/addons/img/merry_christmas",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5436,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mytoysgroup.scene7.com/is/image/myToysGroup/*-nnk_plakativ",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5437,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||redecanais.com/imgs-videos/bannervip.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5443,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||shop.kicker.de^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5447,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||g.doubleclick.net/gpt/pubads_impl_",
+			"initiatorDomains": [
+				"notebooksbilliger.de"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 2
+	},
+	{
+		"id": 5448,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||googlesyndication.com/simgad",
+			"initiatorDomains": [
+				"notebooksbilliger.de"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 2
+	},
+	{
+		"id": 5478,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||1pornoxxx.com/templates/1pornoxxx/images/rkl300.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5483,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||uploadgig.com/static/vid1.mp4",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5488,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||unikal.org/images/r3.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5502,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||journalistenwatch.com/wp-content/uploads/2017/08/Boxerin-03.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5503,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||vkstorm.ru/banners/",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5504,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||files.webmoney.ru/files/vHbEEBYW/inline",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5511,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||banner.consultant.ru^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5518,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||vc.ru/static/special/yota-stratum/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5523,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||news.atv.az/images/top-banner.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5524,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||softbesplatno.net/templates/FreeSoft/images/banner*.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5565,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||illicium.wmtransfer.com^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5566,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||illicium.web.money^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5567,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||archdaily.com/auth/js/kenneth.js^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5568,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||c-s.net.ua/images/200x200-empty.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5569,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mpgh.net/images/mini_offur.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5570,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||new-line.net.ua/templates/CounterStrike/images/8831.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5577,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||bb.tele2.ru/media/video/*mobile",
+			"initiatorDomains": [
+				"tele2.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5578,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||bb.tele2.ru/media/video/*desktop",
+			"initiatorDomains": [
+				"tele2.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5611,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mtb-news.de/news/*/Radon_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 5614,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ecogolik.ru/upload/iblock/628/Sentio_Adv.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 6491,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||destyy.com^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 6492,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||gestyy.com^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 6847,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||statesman.com/section/widget-eedition-ads",
+			"initiatorDomains": [
+				"statesman-tx.newsmemory.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 7452,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||videogamesblogger.com/javascripts/interstitial.client.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7456,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fastly.jsdelivr.net/npm/disable-devtool@latest/disable-devtool.min.js",
+			"initiatorDomains": [
+				"dizipal1.cloud",
+				"dizipal2.cloud",
+				"dizipal3.cloud",
+				"dizipal4.cloud",
+				"dizipal5.cloud",
+				"dizipal6.cloud",
+				"dizipal7.cloud",
+				"dizipal8.cloud",
+				"dizipal9.cloud",
+				"dizipal10.cloud",
+				"dizipal11.cloud",
+				"dizipal12.cloud",
+				"dizipal13.cloud",
+				"dizipal14.cloud",
+				"dizipal15.cloud",
+				"dizipal16.cloud",
+				"dizipal17.cloud",
+				"dizipal18.cloud",
+				"dizipal19.cloud",
+				"dizipal20.cloud",
+				"dizipal21.cloud",
+				"dizipal22.cloud",
+				"dizipal23.cloud",
+				"dizipal24.cloud",
+				"dizipal25.cloud",
+				"dizipal26.cloud",
+				"dizipal27.cloud",
+				"dizipal28.cloud",
+				"dizipal29.cloud",
+				"dizipal30.cloud",
+				"dizipal31.cloud",
+				"dizipal32.cloud",
+				"dizipal33.cloud",
+				"dizipal34.cloud",
+				"dizipal35.cloud",
+				"dizipal36.cloud",
+				"dizipal37.cloud",
+				"dizipal38.cloud",
+				"dizipal39.cloud",
+				"dizipal40.cloud",
+				"dizipal41.cloud",
+				"dizipal42.cloud",
+				"dizipal43.cloud",
+				"dizipal44.cloud",
+				"dizipal45.cloud",
+				"dizipal46.cloud",
+				"dizipal47.cloud",
+				"dizipal48.cloud",
+				"dizipal49.cloud",
+				"dizipal50.cloud",
+				"dizipal51.cloud",
+				"dizipal52.cloud",
+				"dizipal53.cloud",
+				"dizipal54.cloud",
+				"dizipal55.cloud",
+				"dizipal56.cloud",
+				"dizipal57.cloud",
+				"dizipal58.cloud",
+				"dizipal59.cloud",
+				"dizipal60.cloud",
+				"dizipal61.cloud",
+				"dizipal62.cloud",
+				"dizipal63.cloud",
+				"dizipal64.cloud",
+				"dizipal65.cloud",
+				"dizipal66.cloud",
+				"dizipal67.cloud",
+				"dizipal68.cloud",
+				"dizipal69.cloud",
+				"dizipal70.cloud",
+				"dizipal71.cloud",
+				"dizipal72.cloud",
+				"dizipal73.cloud",
+				"dizipal74.cloud",
+				"dizipal75.cloud",
+				"dizipal76.cloud",
+				"dizipal77.cloud",
+				"dizipal78.cloud",
+				"dizipal79.cloud",
+				"dizipal80.cloud",
+				"dizipal81.cloud",
+				"dizipal82.cloud",
+				"dizipal83.cloud",
+				"dizipal84.cloud",
+				"dizipal85.cloud",
+				"dizipal86.cloud",
+				"dizipal87.cloud",
+				"dizipal88.cloud",
+				"dizipal89.cloud",
+				"dizipal90.cloud",
+				"dizipal91.cloud",
+				"dizipal92.cloud",
+				"dizipal93.cloud",
+				"dizipal94.cloud",
+				"dizipal95.cloud",
+				"dizipal96.cloud",
+				"dizipal97.cloud",
+				"dizipal98.cloud",
+				"dizipal99.cloud",
+				"dizipal100.cloud",
+				"dizipal101.cloud",
+				"dizipal102.cloud",
+				"dizipal103.cloud",
+				"dizipal104.cloud",
+				"dizipal105.cloud",
+				"dizipal106.cloud",
+				"dizipal107.cloud",
+				"dizipal108.cloud",
+				"dizipal109.cloud",
+				"dizipal110.cloud",
+				"dizipal111.cloud",
+				"dizipal112.cloud",
+				"dizipal113.cloud",
+				"dizipal114.cloud",
+				"dizipal115.cloud",
+				"dizipal116.cloud",
+				"dizipal117.cloud",
+				"dizipal118.cloud",
+				"dizipal119.cloud",
+				"dizipal120.cloud",
+				"dizipal121.cloud",
+				"dizipal122.cloud",
+				"dizipal123.cloud",
+				"dizipal124.cloud",
+				"dizipal125.cloud",
+				"dizipal126.cloud",
+				"dizipal127.cloud",
+				"dizipal128.cloud",
+				"dizipal129.cloud",
+				"dizipal130.cloud",
+				"dizipal131.cloud",
+				"dizipal132.cloud",
+				"dizipal133.cloud",
+				"dizipal134.cloud",
+				"dizipal135.cloud",
+				"dizipal136.cloud",
+				"dizipal137.cloud",
+				"dizipal138.cloud",
+				"dizipal139.cloud",
+				"dizipal140.cloud",
+				"dizipal141.cloud",
+				"dizipal142.cloud",
+				"dizipal143.cloud",
+				"dizipal144.cloud",
+				"dizipal145.cloud",
+				"dizipal146.cloud",
+				"dizipal147.cloud",
+				"dizipal148.cloud",
+				"dizipal149.cloud",
+				"dizipal150.cloud",
+				"dizipal151.cloud",
+				"dizipal152.cloud",
+				"dizipal153.cloud",
+				"dizipal154.cloud",
+				"dizipal155.cloud",
+				"dizipal156.cloud",
+				"dizipal157.cloud",
+				"dizipal158.cloud",
+				"dizipal159.cloud",
+				"dizipal160.cloud",
+				"dizipal161.cloud",
+				"dizipal162.cloud",
+				"dizipal163.cloud",
+				"dizipal164.cloud",
+				"dizipal165.cloud",
+				"dizipal166.cloud",
+				"dizipal167.cloud",
+				"dizipal168.cloud",
+				"dizipal169.cloud",
+				"dizipal170.cloud",
+				"dizipal171.cloud",
+				"dizipal172.cloud",
+				"dizipal173.cloud",
+				"dizipal174.cloud",
+				"dizipal175.cloud",
+				"dizipal176.cloud",
+				"dizipal177.cloud",
+				"dizipal178.cloud",
+				"dizipal179.cloud",
+				"dizipal180.cloud",
+				"dizipal181.cloud",
+				"dizipal182.cloud",
+				"dizipal183.cloud",
+				"dizipal184.cloud",
+				"dizipal185.cloud",
+				"dizipal186.cloud",
+				"dizipal187.cloud",
+				"dizipal188.cloud",
+				"dizipal189.cloud",
+				"dizipal190.cloud",
+				"dizipal191.cloud",
+				"dizipal192.cloud",
+				"dizipal193.cloud",
+				"dizipal194.cloud",
+				"dizipal195.cloud",
+				"dizipal196.cloud",
+				"dizipal197.cloud",
+				"dizipal198.cloud",
+				"dizipal199.cloud",
+				"dizipal200.cloud"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7460,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fastly.jsdelivr.net/npm/disable-devtool@latest/disable-devtool.min.js",
+			"initiatorDomains": [
+				"dizipal300.com",
+				"dizipal301.com",
+				"dizipal302.com",
+				"dizipal303.com",
+				"dizipal304.com",
+				"dizipal305.com",
+				"dizipal306.com",
+				"dizipal307.com",
+				"dizipal308.com",
+				"dizipal309.com",
+				"dizipal310.com",
+				"dizipal311.com",
+				"dizipal312.com",
+				"dizipal313.com",
+				"dizipal314.com",
+				"dizipal315.com",
+				"dizipal316.com",
+				"dizipal317.com",
+				"dizipal318.com",
+				"dizipal319.com",
+				"dizipal320.com",
+				"dizipal321.com",
+				"dizipal322.com",
+				"dizipal323.com",
+				"dizipal324.com",
+				"dizipal325.com",
+				"dizipal326.com",
+				"dizipal327.com",
+				"dizipal328.com",
+				"dizipal329.com",
+				"dizipal330.com",
+				"dizipal331.com",
+				"dizipal332.com",
+				"dizipal333.com",
+				"dizipal334.com",
+				"dizipal335.com",
+				"dizipal336.com",
+				"dizipal337.com",
+				"dizipal338.com",
+				"dizipal339.com",
+				"dizipal340.com",
+				"dizipal341.com",
+				"dizipal342.com",
+				"dizipal343.com",
+				"dizipal344.com",
+				"dizipal345.com",
+				"dizipal346.com",
+				"dizipal347.com",
+				"dizipal348.com",
+				"dizipal349.com",
+				"dizipal350.com",
+				"dizipal351.com",
+				"dizipal352.com",
+				"dizipal353.com",
+				"dizipal354.com",
+				"dizipal355.com",
+				"dizipal356.com",
+				"dizipal357.com",
+				"dizipal358.com",
+				"dizipal359.com",
+				"dizipal360.com",
+				"dizipal361.com",
+				"dizipal362.com",
+				"dizipal363.com",
+				"dizipal364.com",
+				"dizipal365.com",
+				"dizipal366.com",
+				"dizipal367.com",
+				"dizipal368.com",
+				"dizipal369.com",
+				"dizipal370.com",
+				"dizipal371.com",
+				"dizipal372.com",
+				"dizipal373.com",
+				"dizipal374.com",
+				"dizipal375.com",
+				"dizipal376.com",
+				"dizipal377.com",
+				"dizipal378.com",
+				"dizipal379.com",
+				"dizipal380.com",
+				"dizipal381.com",
+				"dizipal382.com",
+				"dizipal383.com",
+				"dizipal384.com",
+				"dizipal385.com",
+				"dizipal386.com",
+				"dizipal387.com",
+				"dizipal388.com",
+				"dizipal389.com",
+				"dizipal390.com",
+				"dizipal391.com",
+				"dizipal392.com",
+				"dizipal393.com",
+				"dizipal394.com",
+				"dizipal395.com",
+				"dizipal396.com",
+				"dizipal397.com",
+				"dizipal398.com",
+				"dizipal399.com",
+				"dizipal400.com",
+				"dizipal401.com",
+				"dizipal402.com",
+				"dizipal403.com",
+				"dizipal404.com",
+				"dizipal405.com",
+				"dizipal406.com",
+				"dizipal407.com",
+				"dizipal408.com",
+				"dizipal409.com",
+				"dizipal410.com",
+				"dizipal411.com",
+				"dizipal412.com",
+				"dizipal413.com",
+				"dizipal414.com",
+				"dizipal415.com",
+				"dizipal416.com",
+				"dizipal417.com",
+				"dizipal418.com",
+				"dizipal419.com",
+				"dizipal420.com",
+				"dizipal421.com",
+				"dizipal422.com",
+				"dizipal423.com",
+				"dizipal424.com",
+				"dizipal425.com",
+				"dizipal426.com",
+				"dizipal427.com",
+				"dizipal428.com",
+				"dizipal429.com",
+				"dizipal430.com",
+				"dizipal431.com",
+				"dizipal432.com",
+				"dizipal433.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7490,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/content-copy-protection-disable-right-click/assets/*",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7491,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/ungrabber/js/ungrabber.min.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7492,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/image-watermark/js/no-right-click.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7493,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/wp-content-copy-protection/assets/*",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7494,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/jcwp-copy-paste-blocker/*",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7495,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/digiproveblog/*",
+			"excludedInitiatorDomains": [
+				"wordpress.org"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7496,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/disable-right-click/*",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7497,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/right-click-disable-orignal/*",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7500,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||belezaedieta.com^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7502,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||script.gmarket.co.kr/js/itemdweb/ItemBase.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7503,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||theaircurrent.com/wp-content/themes/slate/print.css",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7504,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||tv-asahi.co.jp/wp-content/themes/favclip-master/js/front.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7505,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xn--90adear.xn--p1ai/media/gibdd/build/js/nocopy.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7506,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||a24.com.ua/design/imed/js/ncp.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7507,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cafe.naver.com/static/js/mycafe/javascript/autosourcing*.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7508,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||securitylab.ru/js/cpb.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7509,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xiebruce.top/wp-content/themes/nisarg-child/js/custom-non-login.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7510,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||camoero.com/wp-content/themes/luxech/luxech.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7511,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||suntory.co.jp/softdrink/craftboss/flash/assets/img/mouse.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7512,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||suntory.co.jp/softdrink/craftboss/flash/assets/js/main.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7513,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||tmgrup.com.tr/*/pageProtection.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7514,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||profilki.pl/kody/niekopiuj.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7515,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||bajery.net/adds/copy_b.php",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7516,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xn--b1aew.xn--p1ai/media/*/js/nocopy.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7517,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.web.tv/asset/javascripts/smothScroll.min.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 7518,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||serialuk.net/js/copyright.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 428,
+		"action": {
+			"type": "redirect",
+			"redirect": {
+				"transform": {
+					"queryTransform": {
+						"removeParams": [
+							"autoplay"
+						]
+					}
+				}
+			}
+		},
+		"condition": {
+			"urlFilter": "||player.octivid.com/*/video?*&autoplay=",
+			"initiatorDomains": [
+				"kooora.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	}
+]

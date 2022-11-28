@@ -16,10 +16,8 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// API entry point
+import AdguardApi from './main';
 
-// API Configuration type
-export type { APIConfiguration } from "./schemas";
+export type { APIConfiguration } from './schemas';
 
-// Public interface
-export { adguardApi } from "./main";
+export { AdguardApi };

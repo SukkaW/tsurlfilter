@@ -1,0 +1,23 @@
+[
+	{
+		"id": 257,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||chrome.test.filter.com^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 277,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||uim.tifbs.net/js/2048.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	}
+]

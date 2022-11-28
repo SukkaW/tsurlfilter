@@ -1,0 +1,294 @@
+[
+	{
+		"id": 116,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||r.bat.bing.com/?ld=",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 122,
+		"action": {
+			"type": "allowAllRequests"
+		},
+		"condition": {
+			"urlFilter": "||search.yahoo.com^",
+			"resourceTypes": [
+				"main_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 4
+	},
+	{
+		"id": 162,
+		"action": {
+			"type": "allowAllRequests"
+		},
+		"condition": {
+			"urlFilter": "://www.google.*/aclk",
+			"resourceTypes": [
+				"main_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 189,
+		"action": {
+			"type": "allowAllRequests"
+		},
+		"condition": {
+			"urlFilter": "||ask.com/web",
+			"resourceTypes": [
+				"main_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 4
+	},
+	{
+		"id": 272,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||startpage.com/adsense/search/async-ads.js",
+			"initiatorDomains": [
+				"startpage.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 273,
+		"action": {
+			"type": "allowAllRequests"
+		},
+		"condition": {
+			"urlFilter": "||startpage.com^",
+			"resourceTypes": [
+				"main_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 276,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||an.yandex.ru",
+			"initiatorDomains": [
+				"irr.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 279,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||an.yandex.ru",
+			"initiatorDomains": [
+				"nigma.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 317,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||an.yandex.ru",
+			"initiatorDomains": [
+				"search.tut.by"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 319,
+		"action": {
+			"type": "allowAllRequests"
+		},
+		"condition": {
+			"urlFilter": "||nova.rambler.ru/search",
+			"resourceTypes": [
+				"main_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 4
+	},
+	{
+		"id": 320,
+		"action": {
+			"type": "allowAllRequests"
+		},
+		"condition": {
+			"urlFilter": "||images.rambler.ru/",
+			"resourceTypes": [
+				"main_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 4
+	},
+	{
+		"id": 353,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "/gb.php?idb_=",
+			"initiatorDomains": [
+				"ek.ua",
+				"m.ua"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 354,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||info.price.nadavi.*/*.php?p4g_api_type_=iframe",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 359,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||adwolf.ru^",
+			"initiatorDomains": [
+				"retrofm.ru",
+				"radio7.ru",
+				"europaplus.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 360,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||retrofm.ru/template/Retro-2012/js/adwolf.js",
+			"initiatorDomains": [
+				"retrofm.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 367,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||shop.kicker.de^",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 381,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||securepubads.g.doubleclick.net/tag/js/gpt.js",
+			"initiatorDomains": [
+				"adda247.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 382,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||securepubads.g.doubleclick.net/gpt/pubads_impl_*.js",
+			"initiatorDomains": [
+				"adda247.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 383,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||securepubads.g.doubleclick.net/gampad/ads?gdfp_req=1",
+			"initiatorDomains": [
+				"adda247.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 384,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||tpc.googlesyndication.com/simgad/",
+			"initiatorDomains": [
+				"adda247.com"
+			],
+			"resourceTypes": [
+				"image"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 385,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||adclick.g.doubleclick.net/pcs/click?xai=",
+			"resourceTypes": [
+				"main_frame"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	}
+]

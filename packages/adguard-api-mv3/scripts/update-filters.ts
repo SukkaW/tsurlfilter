@@ -24,13 +24,14 @@ import { getFilterName } from '@adguard/tswebextension/mv3/utils';
 import axios from 'axios';
 import { ensureDir } from 'fs-extra';
 
-const FILTERS_DIR = '../src/filters';
+// FIXME: Export to webpack
+export const FILTERS_DIR = './src/filters';
 const DEST_RULE_SETS_DIR = `${FILTERS_DIR}/declarative`;
 
-// Export to ../src/background/main.ts
+// FIXME: Export to ../src/background/main.ts
 const RESOURCES_DIR = '/adguard/redirects';
 
-const ADGUARD_FILTERS_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 224];
+export const ADGUARD_FILTERS_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 224];
 
 const EXTENSION_FILTERS_SERVER_URL_FORMAT = 'https://filters.adtidy.org/extension/chromium';
 const FILTER_DOWNLOAD_URL_FORMAT = `${EXTENSION_FILTERS_SERVER_URL_FORMAT}/filters/%filter.txt`;
@@ -41,13 +42,13 @@ export type UrlType = {
     file: string;
 };
 
-const getUrlsOfFiltersResources = () => ADGUARD_FILTERS_IDS.map((filterId) => ({
+const getUrlsOfFiltersResources = (): UrlType[] => ADGUARD_FILTERS_IDS.map((filterId) => ({
     id: filterId,
     url: FILTER_DOWNLOAD_URL_FORMAT.replace('%filter', `${filterId}`),
     file: getFilterName(filterId),
 }));
 
-const downloadFilter = async (url: UrlType, filtersDir: string) => {
+const downloadFilter = async (url: UrlType, filtersDir: string): Promise<void> => {
     console.info(`Download ${url.url}...`);
 
     const response = await axios.get(url.url, { responseType: 'arraybuffer' });
@@ -57,7 +58,7 @@ const downloadFilter = async (url: UrlType, filtersDir: string) => {
     console.info(`Download ${url.url} done`);
 };
 
-const startDownload = async () => {
+const startDownload = async (): Promise<void> => {
     await ensureDir(FILTERS_DIR);
 
     const urls = getUrlsOfFiltersResources();
@@ -65,12 +66,12 @@ const startDownload = async () => {
 };
 
 /**
- * Compiles rules to declarative json.
+ * Downloads and converts filters.
  */
-const precompileRules = async () => {
+const downloadAndConvertFilters = async (): Promise<void> => {
     await startDownload();
 
     await convertFilters(FILTERS_DIR, RESOURCES_DIR, DEST_RULE_SETS_DIR, true);
 };
 
-precompileRules();
+downloadAndConvertFilters();

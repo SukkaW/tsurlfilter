@@ -19,4 +19,4 @@
 // Schemas entry point
 
 // Api Configuration schema entry point
-export * from "./configuration";
+export * from './configuration';

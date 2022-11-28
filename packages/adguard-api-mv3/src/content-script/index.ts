@@ -16,4 +16,4 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import "@adguard/tswebextension/mv3/content-script";
+import '@adguard/tswebextension/mv3/content-script';

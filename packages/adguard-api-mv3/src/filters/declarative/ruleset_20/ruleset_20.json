@@ -1,0 +1,1167 @@
+[
+	{
+		"id": 86,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/wp-content/plugins/ioimedia-app-banner/*",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 87,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/js/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 88,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||2app.lk^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 89,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||br.app.link^",
+			"domainType": "thirdParty",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 117,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||loader.to/images/loader/loader_app.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 128,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||hket.com/res/*/hketapp_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 144,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s.yimg.jp/images/realestate/tmpl2014/img/app/footer_banner.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 325,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||jmd.co.jp/api/linkimg.php?imgid=JMD_Application_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 328,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||gu-global.com/*/material/l1/app",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 355,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||okinawaokuyami.com/images/common/app_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 475,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s.yimg.jp/images/weather/promo/banner",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 527,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||static.curazy.com/image/banner_curazy_app.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 540,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||scdn.line-apps.com/stf/line-news/js/thirdparty/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 560,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||kangaroobro.com/bn.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 561,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||kangaroobro.com/bnpc.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 624,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||popdaily.com.tw/statics/images/appDownloadBanner.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 685,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||mangalove.me/images/app_yuudou.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 698,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||baby-calendar.jp/img/common/app/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 699,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||baby-calendar.jp/images/default_web/banner_side_app.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 769,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||st.work.ua/js/app-banner-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 798,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||st.work.ua/js/app-banner||st.work.ua/js/app-banner-src_*.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 822,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||united-arrows.co.jp/sp/js/smartbanner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 832,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||seiga.nicovideo.jp/manga/img/manga/common/app_store_banner_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 833,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||seiga.nicovideo.jp/manga/resources/viewer/dl_banner.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 838,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||tomorrowland.co.jp/assets/smartbanner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 840,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||noin.shop/_nuxt/img/btn_webapp.appStore",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 849,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||carservice.r10s.jp/img/top/sidebar-app-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 863,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s.jlogos.com/images/jlogosbanner2.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 868,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||static.gc-img.net/img/parts/banner_readafter.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 882,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||fc2.com/video/img/b/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 885,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||d-card.jp/st/smartbanner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 892,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||doga.hikakujoho.com/assets/sp/img/common/aukana_app.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 894,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||vitbichi.by/wp-content/uploads/*/banner_prilozhenie.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 900,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||bangumi.skyperfectv.co.jp/i/TV_guide_app_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 910,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||jpnumber.com/m/img/googleplaylink.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 945,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||audee.jp/js/smart.banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 949,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||app-assets.cpcdn.com/next-cookpad/_next/static/media/app_sample_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 963,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||glav-dostavka.ru/js/n-smartbanner.min.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1003,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||abhipedia.abhimanu.com/UP/FreeResources/*-Down-load-android-app-on-playstore.jpeg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1023,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||akm-img-a-in.tosshub.com/sites/lallantop/resources/images/Web_Banner.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1091,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||i.glbimg.com/og/ig/infoglobo1/static/blog/_js/redesign2019/smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1104,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||groups.tapatalk-cdn.com/static/js/smartbanner_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1117,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||pikicast.com/js/view/layer/asset/layer.store.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1121,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.jsdelivr.net/gh/dsx0095/thcdn/statics/js/layer/layer.js",
+			"initiatorDomains": [
+				"tv.ci"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1123,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||tver.jp/img/sd_to_app_banner.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1141,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||portal.librus.pl/images/base/aplikacjamobilna.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1142,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||portal.librus.pl/images/base/aplikacjamobilna_mobile.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1143,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||portal.librus.pl/ad|",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1174,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/images/playstore-",
+			"initiatorDomains": [
+				"bhaskar.com",
+				"divyabhaskar.co.in"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1181,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ssl.pstatic.net/static/m/comic/im/app_banner_",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1197,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||m.555duo.net/images/app.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1198,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||m.youwu333.com/images/app.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1218,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nekopoi.care/wp-content/plugins/mobiloud-smart-app-banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1254,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||xgoo.jp/img/portal/misc/footer_app_recommend/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1273,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||m.pufei8.com/skin/iymbl-app.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1291,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||farmlend.ru/images/megi-app.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1296,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||getnada.com/google_play_banner.",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1314,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||nekto.me/chat/img/gplay.",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1320,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||m.hindustantimes.com/res/img/*/app.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1325,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||i2.sinaimg.cn/*/searchCallup.js",
+			"initiatorDomains": [
+				"gu.sina.cn"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1328,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||myaccount.earthlink.net/cam/images/login/ad-4.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1336,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||iwatchme2u.com/Public/banner.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1346,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||i2.bahamut.com.tw/js/plugins/dialogify.min.js",
+			"initiatorDomains": [
+				"m.gamer.com.tw"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1357,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s3.amazonaws.com/uploads/image/505544/33ab86499a.png",
+			"initiatorDomains": [
+				"nishinippon.co.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1366,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s.yimg.jp/images/news-app/promo/banner/",
+			"initiatorDomains": [
+				"news.yahoo.co.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1367,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||yimg.jp/images/shp_app/flagship/web2app/smartappbnr/",
+			"initiatorDomains": [
+				"shopping.yahoo.co.jp"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1405,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/googleplay_135x40.png",
+			"initiatorDomains": [
+				"xn----etbbecbrbp5ahkja1ae7v.xn--p1ai",
+				"kingisepp-today.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1406,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/appstore_135x40.png",
+			"initiatorDomains": [
+				"xn----etbbecbrbp5ahkja1ae7v.xn--p1ai",
+				"kingisepp-today.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1447,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||jx.la/*/true.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1448,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||jx.la/*/h.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1472,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||images.finanzen.net/images/b_devisen/waehrungsrechner_300x100.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1473,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||js.em.com.br/*/smartBanner.*.min.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1474,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||picdumps.com/ddeal*.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1481,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||cdn.branch.io^",
+			"initiatorDomains": [
+				"underarmour.com",
+				"pressreader.com",
+				"medium.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1489,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||naturalnews.com/Images/NaturalNews-App-",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1508,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||adab.com/photos/back44.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1517,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||forum.doctorhead.ru/mobiquo/tapadetect.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1534,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||static.riafan.ru/assets-mobile/*/smartbanner.",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1552,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||instagram.com/static/images/appstore-install-badges^",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1641,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||m.autohome.com.cn/news/cdn_20180706/view/ah/nsee.html",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1660,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||play.google.com/intl/en_us/badges/",
+			"initiatorDomains": [
+				"richluck.ru"
+			],
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1714,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||hibiny.com/images/new_site/iphone/app-store.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1715,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||hibiny.com/images/new_site/iphone/google-play.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1732,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||static.fastpic.ru/android.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1756,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||teknowebim.com/uploads/mobil-ads.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1762,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||superfb.com/_img/banner/sfb*.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1763,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||superfb.com/_img/mobil_imaj.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1768,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||m.faz.net/*/fit/project/files/js/smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1787,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||klavyer.com/android/klavyer-android-uygulamamiz.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1798,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||dogruhaber.com.tr/image/foto/*/mobil-uygulamamamiz_*.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1803,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||rueconomics.ru/template/mobile/assets/jquery.smartbanner/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1804,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||gamer-mods.ru/.s/src/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1835,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||turnkeymobileapps.com/*/smart-app-banner.",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1898,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "/mobiquo/smartbanner/appbanner.js",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1906,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||banki.ru/static/common/vendor-libs/jquery.smartbanner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1907,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||malatyahaber.com/wp-content/uploads/2016/05/SA.gif",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1908,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||ntv.com.tr/Content/img/promote.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1909,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||s.livelib.ru/js/smartbanner.",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1910,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||turkiyecocuk.com.tr/banner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1911,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||unleashedprepaids.com/mobiquo/smartbanner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 1912,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||vizefinalsorupaylasimi.com/uploads/googleplay.jpg",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2219,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||bokete.jp/images/banner_over_w640.png",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2287,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||dumskaya.net/js/appbanner/",
+			"isUrlFilterCaseSensitive": false
+		}
+	},
+	{
+		"id": 2319,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||fashion-headline.com/js/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 2321,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||bfn.today/min/*/js/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 2323,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||mafia.ua/js/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 2325,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||mckolomen.ru/js/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 2327,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||rshb.ru/source/js/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 2331,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "/js/jquery.smartbanner.js",
+			"initiatorDomains": [
+				"fiyatseyir.com",
+				"greyhound.com",
+				"amalgama-lab.com",
+				"m.halkbank.com.tr",
+				"intime.ua",
+				"avic.ua",
+				"mirage.ru",
+				"speedtest.net",
+				"energy.de",
+				"hermesworld.com",
+				"lekvapteke.ru",
+				"mcdonalds.com.tr",
+				"yalispor.com.tr",
+				"metroturizm.com.tr",
+				"anadolu.edu.tr",
+				"whatpub.com"
+			],
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	},
+	{
+		"id": 2333,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||cdn.bustracker.utrack.com/js/jquery.smartbanner.js",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 1
+	}
+]

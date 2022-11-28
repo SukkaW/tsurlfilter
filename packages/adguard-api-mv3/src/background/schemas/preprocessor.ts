@@ -16,33 +16,33 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import zod from "zod";
+import zod from 'zod';
 
 /**
  * In some cases we want to preprocessing input before validation
  * For example, cast loaded filter metadata item id field from string to number before validation:
  *
- * { filterId: "1", ... } -> { filterId: 1, ... }
+ * { filterId: "1", ... } -> { filterId: 1, ... }.
  */
 export class SchemaPreprocessor {
     /**
-     * {@link zod} runtime validator with {@link castStringToBoolean} preprocessor
+     * {@link zod} runtime validator with {@link castStringToBoolean} preprocessor.
      */
     public static booleanValidator = zod.preprocess(SchemaPreprocessor.castStringToBoolean, zod.boolean());
 
     /**
-     * {@link zod} runtime validator with {@link castStringToNumber} preprocessor
+     * {@link zod} runtime validator with {@link castStringToNumber} preprocessor.
      */
     public static numberValidator = zod.preprocess(SchemaPreprocessor.castStringToNumber, zod.number());
 
     /**
      * If {@link value} is string, cast it to number, else returns original value.
      *
-     * @param value - preprocessed value
-     * @returns number value, if string passed, else returns original value
+     * @param value - Preprocessed value.
+     * @returns Number value, if string passed, else returns original value.
      */
     private static castStringToNumber(value: unknown): number | unknown {
-        if (typeof value === "string") {
+        if (typeof value === 'string') {
             return Number(value);
         }
 
@@ -52,11 +52,11 @@ export class SchemaPreprocessor {
     /**
      * If {@link value} is string, cast it to boolean, else returns original value.
      *
-     * @param value - preprocessed value
-     * @returns boolean value, if string passed, else returns original value
+     * @param value - Preprocessed value.
+     * @returns Boolean value, if string passed, else returns original value.
      */
     private static castStringToBoolean(value: unknown): boolean | unknown {
-        if (typeof value === "string") {
+        if (typeof value === 'string') {
             try {
                 return Boolean(JSON.parse(value));
             } catch (e) {

@@ -1,14 +1,16 @@
-const path = require("path");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const ESLintPlugin = require("eslint-webpack-plugin");
+const path = require('path');
 
-const MODE = process.env.MODE || "production";
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const MODE = process.env.MODE || 'production';
 
 module.exports = {
     mode: MODE,
     entry: {
-        "adguard-api": "./src/background/index.ts",
-        "adguard-content": "./src/content-script/index.ts",
+        'adguard-api': './src/background/index.ts',
+        'adguard-content': './src/content-script/index.ts',
     },
     module: {
         rules: [
@@ -17,18 +19,18 @@ module.exports = {
                 exclude: /node_modules/,
                 use: [
                     {
-                        loader: "babel-loader",
+                        loader: 'babel-loader',
                         options: {
                             presets: [
                                 [
-                                    "@babel/preset-env",
+                                    '@babel/preset-env',
                                     {
-                                        targets: { chrome: "84" },
-                                        useBuiltIns: "usage",
+                                        targets: { chrome: '84' },
+                                        useBuiltIns: 'usage',
                                         corejs: { version: 3, proposals: true },
                                     },
                                 ],
-                                "@babel/preset-typescript",
+                                '@babel/preset-typescript',
                             ],
                         },
                     },
@@ -36,22 +38,28 @@ module.exports = {
             },
         ],
     },
-    plugins: [new CleanWebpackPlugin(), new ESLintPlugin()],
+    plugins: [
+        new CleanWebpackPlugin(),
+        new ESLintPlugin(),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    context: 'src',
+                    from: 'filters',
+                    to: 'filters',
+                },
+            ],
+        }),
+    ],
     resolve: {
-        extensions: [".ts", ".js"],
-        // Node modules polyfills
-        fallback: {
-            url: require.resolve("url"),
-        },
+        extensions: ['.ts', '.js'],
     },
     optimization: {
-        minimize: false,
+        minimize: true,
     },
     output: {
-        filename: "[name].js",
-        path: path.resolve(__dirname, "dist"),
-        library: {
-            type: "umd",
-        },
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'dist'),
+        library: { type: 'umd' },
     },
 };

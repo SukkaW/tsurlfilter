@@ -16,19 +16,23 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import zod from "zod";
+import zod from 'zod';
+
+import { ADGUARD_FILTERS_IDS } from '../../../../scripts/update-filters';
 
 /**
- * {@link AdguardApi} configuration runtime validator
+ * {@link AdguardApi} Configuration runtime validator.
  */
 export const configurationValidator = zod.object({
     /**
      * An array of filters identifiers.
      *
-     * FIXME: You can use filter ids only from provided list of our filters.
+     * FIXME: Describe limitations
      * You can look for possible filters identifiers in the filters metadata file.
      */
-    filters: zod.number().array(),
+    filters: zod.number().array().refine((arr) => {
+        arr.every((id) => ADGUARD_FILTERS_IDS.includes(id));
+    }),
 
     /**
      * An array of custom filtering rules.

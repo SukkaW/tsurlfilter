@@ -24,10 +24,11 @@ import {
     TooManyRulesError,
     TooManyRegexpRulesError,
     MessagesHandlerType,
-} from "@adguard/tswebextension/mv3";
-import { FILTERS_CHANGED } from "./constants";
-import { APIConfiguration } from "./schemas";
-import { storage } from "./storage";
+} from '@adguard/tswebextension/mv3';
+
+import { FILTERS_CHANGED } from './constants';
+import { APIConfiguration } from './schemas';
+import { storage } from './storage';
 
 export type RuleSetCounters = {
     filterId: number;
@@ -52,7 +53,7 @@ export type RulesStatus = {
 const { MAX_NUMBER_OF_REGEX_RULES, MAX_NUMBER_OF_DYNAMIC_AND_SESSION_RULES } = chrome.declarativeNetRequest;
 
 interface AdguardApiInterface {
-    onAssistantCreateRule: EventChannel<string>;
+    // onAssistantCreateRule: EventChannel<string>;
     // onRequestBlocked: RequestBlockingLogger;
     start(configuration: Configuration): Promise<Configuration>;
     stop(): Promise<void>;
@@ -62,18 +63,25 @@ interface AdguardApiInterface {
     getRulesCount(): number;
 }
 
-class TsWebExtensionWrapper {
+/**
+ *
+ */
+export default class AdguardApi {
     private tsWebExtension: TsWebExtension;
 
     private configurationResult: ConfigurationResult | undefined;
 
     private waitForStart: Promise<void> | undefined;
 
-    public filteringLogEnabled: boolean = false;
+    public filteringLogEnabled = false;
 
     private messageHandler: MessagesHandlerType;
 
-    constructor(webAccessibleResourcesPath: string = "adguard") {
+    /**
+     *
+     * @param webAccessibleResourcesPath
+     */
+    constructor(webAccessibleResourcesPath = 'adguard') {
         this.tsWebExtension = new TsWebExtension(webAccessibleResourcesPath);
 
         this.messageHandler = this.tsWebExtension.getMessageHandler();
@@ -81,6 +89,9 @@ class TsWebExtensionWrapper {
         chrome.runtime.onMessage.addListener(this.messageHandlerWrapper);
     }
 
+    /**
+     *
+     */
     public get ruleSetsCounters(): RuleSetCounters[] {
         return (
             this.configurationResult?.staticFilters.map((ruleset) => ({
@@ -101,7 +112,7 @@ class TsWebExtensionWrapper {
             // logger.debug("[messageHandlerWrapper]: handle message", message);
 
             // TODO: use MESSAGE_HANDLER_NAME
-            if (message.handlerName === "tsWebExtension") {
+            if (message.handlerName === 'tsWebExtension') {
                 return this.messageHandler(message, sender);
             }
 
@@ -115,11 +126,15 @@ class TsWebExtensionWrapper {
         return true;
     };
 
+    /**
+     *
+     * @param configuration
+     */
     async start(configuration: APIConfiguration): Promise<void> {
         const start = async (): Promise<void> => {
             const config = await this.getConfiguration(configuration);
             this.configurationResult = await this.tsWebExtension.start(config);
-            await TsWebExtensionWrapper.getDynamicRulesInfo(this.configurationResult);
+            await AdguardApi.getDynamicRulesInfo(this.configurationResult);
 
             await this.checkFiltersLimitsChange(configuration);
         };
@@ -128,14 +143,22 @@ class TsWebExtensionWrapper {
         await this.waitForStart;
     }
 
+    /**
+     *
+     */
     async stop(): Promise<void> {
         await this.tsWebExtension.stop();
     }
 
+    /**
+     *
+     * @param configuration
+     * @param skipCheck
+     */
     async configure(configuration: APIConfiguration, skipCheck?: boolean): Promise<void> {
         const config = await this.getConfiguration(configuration);
         this.configurationResult = await this.tsWebExtension.configure(config);
-        await TsWebExtensionWrapper.getDynamicRulesInfo(this.configurationResult);
+        await AdguardApi.getDynamicRulesInfo(this.configurationResult);
 
         if (skipCheck) {
             return;
@@ -143,6 +166,11 @@ class TsWebExtensionWrapper {
         await this.checkFiltersLimitsChange(configuration);
     }
 
+    /**
+     *
+     * @param root0
+     * @param root0.dynamicRules
+     */
     static async getDynamicRulesInfo({ dynamicRules }: ConfigurationResult): Promise<DynamicRulesStatus | null> {
         const {
             ruleSets: [ruleset],
@@ -178,9 +206,14 @@ class TsWebExtensionWrapper {
     }
 
     /**
-     * If changed - save new values to store for show warning to user
-     * and save list of last used filters
+     * .
      * TODO: Check this
+     * If changed - save new values to store for show warning to user
+     * and save list of last used filters.
+     *
+     * @param configuration
+     */
+    /**
      *
      * @param configuration
      */
@@ -211,13 +244,13 @@ class TsWebExtensionWrapper {
         // FIXME: If state has been broken - return new applied configuration
         if (brokenState) {
             // Save last used filters ids to show user
-            await TsWebExtensionWrapper.setFiltersChangedList(wasEnabledIds);
+            await AdguardApi.setFiltersChangedList(wasEnabledIds);
             const configWithUpdatedFilters = { ...configuration, filters: nowEnabledIds };
 
             await this.configure(configWithUpdatedFilters, true);
             // If state is not broken - clear list of "broken" filters
-        } else if ((await TsWebExtensionWrapper.getFiltersChangedList).length > 0) {
-            await TsWebExtensionWrapper.setFiltersChangedList([]);
+        } else if ((await AdguardApi.getFiltersChangedList).length > 0) {
+            await AdguardApi.setFiltersChangedList([]);
         }
     }
 
@@ -233,7 +266,7 @@ class TsWebExtensionWrapper {
 
     private getConfiguration = async (configuration: APIConfiguration): Promise<Configuration> => {
         const { installType } = await chrome.management.getSelf();
-        const isUnpacked = installType === "development";
+        const isUnpacked = installType === 'development';
 
         return {
             settings: {
@@ -256,8 +289,8 @@ class TsWebExtensionWrapper {
                 },
             },
             filteringLogEnabled: this.filteringLogEnabled,
-            filtersPath: "filters",
-            ruleSetsPath: "filters/declarative",
+            filtersPath: 'filters',
+            ruleSetsPath: 'filters/declarative',
             staticFiltersIds: configuration.filters,
             trustedDomains: [],
             customFilters: [],
@@ -268,11 +301,9 @@ class TsWebExtensionWrapper {
     };
 
     /**
-     * Returns tswebextension messages handler
+     * Returns tswebextension messages handler.
      */
     getMessageHandler(): MessagesHandlerType {
         return this.tsWebExtension.getMessageHandler();
     }
 }
-
-export default TsWebExtensionWrapper;
