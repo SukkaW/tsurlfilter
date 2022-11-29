@@ -299,13 +299,14 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
     }
 
     /**
-     * Not implemented.
+     * Gets current loaded rules in the filtering engine
+     * (except declarative rules).
      *
-     * @returns Number.
+     * @returns Number of loaded rules in the filtering engine.
      */
     // eslint-disable-next-line class-methods-use-this
     public getRulesCount(): number {
-        return 0;
+        return engineApi.getRulesCount();
     }
 
     /**
