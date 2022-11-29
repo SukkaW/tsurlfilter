@@ -12,6 +12,7 @@ import { getAndExecuteScripts } from './scriptlets';
 import { engineApi } from './engine-api';
 import { declarativeFilteringLog, RecordFiltered } from './declarative-filtering-log';
 import RuleSetsLoaderApi from './rule-sets-loader-api';
+import { Assistant } from './assistant';
 import {
     ConfigurationMV3,
     ConfigurationMV3Context,
@@ -43,6 +44,11 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
      * Fires on filtering log event.
      */
     onFilteringLogEvent = defaultFilteringLog.onLogEvent;
+
+    /**
+     * Fires when a rule has been created from the helper.
+     */
+    onAssistantCreateRule = Assistant.onCreateRule;
 
     /**
      * This is where the configuration is stored, excluding "heavy" fields:
@@ -270,16 +276,27 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
     }
 
     /**
-     * Not implemented.
+     * Opens the AdGuard assistant in the specified tab.
+     *
+     * @param tabId The ID of the tab where is needed to open
+     * the AdGuard assistant.
      */
     // eslint-disable-next-line class-methods-use-this
-    public openAssistant(): void {}
+    public async openAssistant(tabId: number): Promise<void> {
+        await Assistant.openAssistant(tabId);
+    }
 
     /**
-     * Not implemented.
+     * Closes the AdGuard assistant in the specified tab.
+     *
+     * @param tabId The ID of the tab where is needed to close
+     * the AdGuard assistant.
      */
+    // TODO: deprecated?
     // eslint-disable-next-line class-methods-use-this
-    public closeAssistant(): void {}
+    public async closeAssistant(tabId: number): Promise<void> {
+        await Assistant.closeAssistant(tabId);
+    }
 
     /**
      * Not implemented.
