@@ -44,7 +44,8 @@ export const initAssistant = (): void => {
                 break;
             }
             default: {
-                sendResponse(null);
+                logger.debug(`Not found handler for message type '${message.type}'`);
+                sendResponse(false);
             }
         }
     });
