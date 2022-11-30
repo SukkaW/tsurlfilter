@@ -49,7 +49,7 @@ export type RulesStatus = {
     excludedRulesIds: number[];
 };
 
-export const WEB_RESOURCES_PATH = '/adguard/redirects';
+export const WEB_RESOURCES_PATH = '/adguard/resources';
 
 const { MAX_NUMBER_OF_REGEX_RULES, MAX_NUMBER_OF_DYNAMIC_AND_SESSION_RULES } = chrome.declarativeNetRequest;
 

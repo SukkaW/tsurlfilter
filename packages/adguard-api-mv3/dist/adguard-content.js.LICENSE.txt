@@ -1,0 +1,23 @@
+/*!
+ * AdGuard Assistant - v4.3.63 - Tue Aug 23 2022
+ * https://github.com/AdguardTeam/AdguardAssistant#adguard-assistant
+ * Copyright (c) 2022 AdGuard. Licensed GPL-3.0
+ */
+
+/*!
+ * Sizzle CSS Selector Engine v2.3.4-pre-adguard
+ * https://sizzlejs.com/
+ *
+ * Copyright JS Foundation and other contributors
+ * Released under the MIT license
+ * https://js.foundation/
+ *
+ * Date: 2020-08-04
+ */
+
+/*! extended-css - v1.3.14 - Fri Mar 18 2022
+* https://github.com/AdguardTeam/ExtendedCss
+* Copyright (c) 2022 AdGuard. Licensed GPL-3.0
+*/
+
+/*! https://mths.be/cssescape v1.5.1 by @mathias | MIT license */

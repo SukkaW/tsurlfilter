@@ -33,7 +33,7 @@ export declare type RulesStatus = {
     limitExceed: boolean;
     excludedRulesIds: number[];
 };
-export declare const WEB_RESOURCES_PATH = "/adguard/redirects";
+export declare const WEB_RESOURCES_PATH = "/adguard/resources";
 /**
  *
  */

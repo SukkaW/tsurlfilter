@@ -1,13 +1,11 @@
-# AdGuard API
+# AdGuard API MV3
 **Version: 1.0.0**
 
 AdGuard API is filtering library, provided following features:
 
-- request and content filtering, using [@adguard/tswebextension](../tswebextension/README.md)
-- filtering rules list management (downloading, caching and auto updates)
+- request and content filtering, using [@adguard/tswebextension/mv3](../tswebextension/README.md)
+- declarative rules sets management: enable/disable provided static filter lists or add/edit/delete dynamic rules
 - content blocking via AdGuard Assistant UI
-- auto detecting language filters
-- logging request processing
 
 ## Table of content
   - [Installation](#installation)
@@ -32,30 +30,169 @@ The library code can be loaded either via `script` tag or as an `npm` module.
 
 1. Copy `adguard-api.js` and `adguard-content.js` scripts from `dist` to the directory near `manifest.json`
 
-2. Create `adguard` directory near `manifest.json`
+2. Copy `filters` directory from `dist` to the directory near `manifest.json`
 
-3. Place [web accessible resources](#required-web-accessible-resources) into `adguard` directory
+3. Create `adguard` directory near `manifest.json`
 
-4. Add AdGuard's content script to the manifest:
-```
-    {
-      "all_frames": true,
-      "js": ["adguard-content.js"],
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ],
-      "match_about_blank": true,
-      "run_at": "document_start"
+4. Place [web accessible resources](#required-web-accessible-resources) into `resources` inside `adguard` directory
+
+5. Update manifest file:
+    1. Add AdGuard's content script to the manifest:
+    ```
+    "content_scripts": [
+        {
+          "all_frames": true,
+          "js": ["adguard-content.js"],
+          "matches": [
+            "http://*/*",
+            "https://*/*"
+          ],
+          "match_about_blank": true,
+          "run_at": "document_start"
+        }
+      ]
+    ```
+
+    2. Add path to web accessible resources:
+    ```
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "/war/*"
+            ],
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "use_dynamic_url": true
+        }
+    ]
+    ```
+
+    3. Add list of declarative rule sets
+    ```
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "ruleset_1",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_1/ruleset_1.json"
+            },
+            {
+                "id": "ruleset_2",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_2/ruleset_2.json"
+            },
+            {
+                "id": "ruleset_3",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_3/ruleset_3.json"
+            },
+            {
+                "id": "ruleset_4",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_4/ruleset_4.json"
+            },
+            {
+                "id": "ruleset_5",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_5/ruleset_5.json"
+            },
+            {
+                "id": "ruleset_6",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_6/ruleset_6.json"
+            },
+            {
+                "id": "ruleset_7",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_7/ruleset_7.json"
+            },
+            {
+                "id": "ruleset_8",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_8/ruleset_8.json"
+            },
+            {
+                "id": "ruleset_9",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_9/ruleset_9.json"
+            },
+            {
+                "id": "ruleset_10",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_10/ruleset_10.json"
+            },
+            {
+                "id": "ruleset_11",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_11/ruleset_11.json"
+            },
+            {
+                "id": "ruleset_13",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_13/ruleset_13.json"
+            },
+            {
+                "id": "ruleset_14",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_14/ruleset_14.json"
+            },
+            {
+                "id": "ruleset_15",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_15/ruleset_15.json"
+            },
+            {
+                "id": "ruleset_16",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_16/ruleset_16.json"
+            },
+            {
+                "id": "ruleset_17",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_17/ruleset_17.json"
+            },
+            {
+                "id": "ruleset_18",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_18/ruleset_18.json"
+            },
+            {
+                "id": "ruleset_19",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_19/ruleset_19.json"
+            },
+            {
+                "id": "ruleset_20",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_20/ruleset_20.json"
+            },
+            {
+                "id": "ruleset_21",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_21/ruleset_21.json"
+            },
+            {
+                "id": "ruleset_22",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_22/ruleset_22.json"
+            },
+            {
+                "id": "ruleset_224",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_224/ruleset_224.json"
+            },
+        ]
     }
+    ```
+
+6. Import AdGuard api file
+```
+  import "adguard-api.js";
 ```
 
-5. Add AdGuard's script to the background page:
-```
-  <script type="text/javascript" src="adguard-api.js"></script>
-```
-
-AdGuard API is exposed through a global javascript object: `adguardApi`.
+AdGuard API is exposed through a `AdguardApi` class.
 
 ### Module installation
 
@@ -70,9 +207,9 @@ or
 yarn add @adguard/api
 ```
 
-2. Import `adguardApi` instance to background script
+2. Import `AdguardApi` instance to background script
 ```
-import { adguardApi } from "@adguard/api";
+import { AdguardApi } from "@adguard/api";
 ```
 
 3. Import `adguard-contents` in top of you content script entry
@@ -83,20 +220,160 @@ import '@adguard/api/content-script';
 
 4. Add [web accessible resources](#required-web-accessible-resources) downloading in your build pipeline or load it manually
 
-5. Setup manifest content-script with imported `adguard-contents` as follow
+5. TODO: Copy filters from dist?
 
-```
-    {
-      "all_frames": true,
-      "js": [<YOUR content-script bundle>],
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ],
-      "match_about_blank": true,
-      "run_at": "document_start"
+6. Setup manifest:
+    1. Add content-script with imported `adguard-contents` as follow
+
+    ```
+        "content_scripts": [
+          {
+            "all_frames": true,
+            "js": [<YOUR content-script bundle>],
+            "matches": [
+              "http://*/*",
+              "https://*/*"
+            ],
+            "match_about_blank": true,
+            "run_at": "document_start"
+          }
+        ]
+    ```
+
+    2. Add path to web accessible resources:
+    ```
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "/war/*"
+            ],
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "use_dynamic_url": true
+        }
+    ]
+    ```
+
+    3. Add list of declarative rule sets
+    ```
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "ruleset_1",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_1/ruleset_1.json"
+            },
+            {
+                "id": "ruleset_2",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_2/ruleset_2.json"
+            },
+            {
+                "id": "ruleset_3",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_3/ruleset_3.json"
+            },
+            {
+                "id": "ruleset_4",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_4/ruleset_4.json"
+            },
+            {
+                "id": "ruleset_5",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_5/ruleset_5.json"
+            },
+            {
+                "id": "ruleset_6",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_6/ruleset_6.json"
+            },
+            {
+                "id": "ruleset_7",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_7/ruleset_7.json"
+            },
+            {
+                "id": "ruleset_8",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_8/ruleset_8.json"
+            },
+            {
+                "id": "ruleset_9",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_9/ruleset_9.json"
+            },
+            {
+                "id": "ruleset_10",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_10/ruleset_10.json"
+            },
+            {
+                "id": "ruleset_11",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_11/ruleset_11.json"
+            },
+            {
+                "id": "ruleset_13",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_13/ruleset_13.json"
+            },
+            {
+                "id": "ruleset_14",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_14/ruleset_14.json"
+            },
+            {
+                "id": "ruleset_15",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_15/ruleset_15.json"
+            },
+            {
+                "id": "ruleset_16",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_16/ruleset_16.json"
+            },
+            {
+                "id": "ruleset_17",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_17/ruleset_17.json"
+            },
+            {
+                "id": "ruleset_18",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_18/ruleset_18.json"
+            },
+            {
+                "id": "ruleset_19",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_19/ruleset_19.json"
+            },
+            {
+                "id": "ruleset_20",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_20/ruleset_20.json"
+            },
+            {
+                "id": "ruleset_21",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_21/ruleset_21.json"
+            },
+            {
+                "id": "ruleset_22",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_22/ruleset_22.json"
+            },
+            {
+                "id": "ruleset_224",
+                "enabled": false,
+                "path": "filters/declarative/ruleset_224/ruleset_224.json"
+            },
+        ]
     }
-```
+    ```
+
 
 ### Required web accessible resources
 
@@ -108,43 +385,25 @@ Adguard API requires [web accessible resources](https://developer.chrome.com/doc
 ```typescript
 type Configuration = {
     filters: number[],
-    allowlist?: string[],
-    blocklist?: string[],
     rules?: string[],
-    filtersMetadataUrl: string,
-    filterRulesUrl: string,
 };
 ```
 
 **Properties:**
 
-- `filters` (mandatory) - An array of filters identifiers. You can look for possible filters identifiers in the [filters metadata file](https://filters.adtidy.org/extension/chromium/filters.json).
-
-- `allowlist` (optional) - An array of domains, for which AdGuard won't work.
-
-- `blocklist` (optional) - This property completely changes AdGuard behavior. If it is defined, Adguard will work for domains from the `blocklist` only. All other domains will be ignored. If `blocklist` is defined, `allowlist` will be ignored.
+- `filters` (mandatory) - An array of filters identifiers. You can use any of ours filters:
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 224].
 
 - `rules` (optional) - An array of custom filtering rules. Here is an [article](https://adguard.com/en/filterrules.html) describing filtering rules syntax. These custom rules might be created by a user via AdGuard Assistant UI.
-
-- `filtersMetadataUrl` (mandatory) - An absolute path to a file, containing filters metadata. Once started, AdGuard will periodically check filters updates by downloading this file. Example: `https://filters.adtidy.org/extension/chromium/filters.json`.
-
-- `filterRulesUrl` (mandatory) - URL mask used for fetching filters rules. `{filter_id}` parameter will be replaced with an actual filter identifier. Example: `https://filters.adtidy.org/extension/chromium/filters/{filter_id}.txt` (English filter (filter id = 2) will be loaded from: `https://filters.adtidy.org/extension/chromium/2.txt`)
 
 **Example:**
 ```typescript
 
 const configuration: Configuration = {
     filters: [],
-    allowlist: [],
-    blocklist: [],
-    rules: [],
-    filtersMetadataUrl: 'https://filters.adtidy.org/extension/chromium/filters.json',
-    filterRulesUrl: 'https://filters.adtidy.org/extension/chromium/filters/{filter_id}.txt'
+    rules?: [],
 };
 ```
-
-> **Please note, that we do not allow using `filters.adtidy.org` other than for testing purposes**. You have to use your own server for storing filters files. You can (and actually should) to use `filters.adtidy.org` for updating files on your side periodically.
-
 
 ## Methods
 

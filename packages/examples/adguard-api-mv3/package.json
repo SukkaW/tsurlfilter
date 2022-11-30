@@ -5,9 +5,7 @@
   "author": "adguard@adguard.com",
   "license": "GPL-3.0",
   "scripts": {
-    "build": "yarn build:precompile-rules && yarn build:extension",
-    "build:extension": "node -r esbuild-register ./scripts/build/index.ts",
-    "build:precompile-rules": "node -r esbuild-register ./scripts/precompile-rules.ts",
+    "build": "node -r esbuild-register ./scripts/build/index.ts",
     "lint": "eslint 'extension/**/*.ts' 'scripts/**/*.ts'",
     "tswebextension": "tswebextension"
   },
