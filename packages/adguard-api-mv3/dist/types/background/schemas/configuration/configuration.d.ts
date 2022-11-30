@@ -16,6 +16,7 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 import zod from 'zod';
+export declare const ADGUARD_FILTERS_IDS: number[];
 /**
  * {@link AdguardApi} Configuration runtime validator.
  */

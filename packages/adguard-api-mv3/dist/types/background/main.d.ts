@@ -33,6 +33,7 @@ export declare type RulesStatus = {
     limitExceed: boolean;
     excludedRulesIds: number[];
 };
+export declare const WEB_RESOURCES_PATH = "/adguard/redirects";
 /**
  *
  */
@@ -93,4 +94,10 @@ export default class AdguardApi {
      * Returns tswebextension messages handler.
      */
     getMessageHandler(): MessagesHandlerType;
+    /**
+     * Creates new adguardApi instance
+     *
+     * @returns AdguardApi instance
+     */
+    static create(): AdguardApi;
 }

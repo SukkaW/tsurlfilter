@@ -49,7 +49,8 @@ export type RulesStatus = {
     excludedRulesIds: number[];
 };
 
-// FIXME: remove prettier!!!
+export const WEB_RESOURCES_PATH = '/adguard/redirects';
+
 const { MAX_NUMBER_OF_REGEX_RULES, MAX_NUMBER_OF_DYNAMIC_AND_SESSION_RULES } = chrome.declarativeNetRequest;
 
 interface AdguardApiInterface {
@@ -81,7 +82,7 @@ export default class AdguardApi {
      *
      * @param webAccessibleResourcesPath
      */
-    constructor(webAccessibleResourcesPath = 'adguard') {
+    constructor(webAccessibleResourcesPath = WEB_RESOURCES_PATH) {
         this.tsWebExtension = new TsWebExtension(webAccessibleResourcesPath);
 
         this.messageHandler = this.tsWebExtension.getMessageHandler();
@@ -305,5 +306,14 @@ export default class AdguardApi {
      */
     getMessageHandler(): MessagesHandlerType {
         return this.tsWebExtension.getMessageHandler();
+    }
+
+    /**
+     * Creates new adguardApi instance
+     *
+     * @returns AdguardApi instance
+     */
+    public static create(): AdguardApi {
+        return new AdguardApi();
     }
 }

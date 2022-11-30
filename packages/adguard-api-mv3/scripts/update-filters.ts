@@ -23,20 +23,16 @@ import { convertFilters } from '@adguard/tsurlfilter/cli';
 import { getFilterName } from '@adguard/tswebextension/mv3/utils';
 import axios from 'axios';
 import { ensureDir } from 'fs-extra';
+import { WEB_RESOURCES_PATH } from 'src/background/main';
+import { ADGUARD_FILTERS_IDS } from 'src/background/schemas';
 
-// FIXME: Export to webpack
-export const FILTERS_DIR = './src/filters';
+const FILTERS_DIR = './src/filters';
 const DEST_RULE_SETS_DIR = `${FILTERS_DIR}/declarative`;
-
-// FIXME: Export to ../src/background/main.ts
-const RESOURCES_DIR = '/adguard/redirects';
-
-export const ADGUARD_FILTERS_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 224];
 
 const EXTENSION_FILTERS_SERVER_URL_FORMAT = 'https://filters.adtidy.org/extension/chromium';
 const FILTER_DOWNLOAD_URL_FORMAT = `${EXTENSION_FILTERS_SERVER_URL_FORMAT}/filters/%filter.txt`;
 
-export type UrlType = {
+type UrlType = {
     id: number;
     url: string;
     file: string;
@@ -71,7 +67,7 @@ const startDownload = async (): Promise<void> => {
 const downloadAndConvertFilters = async (): Promise<void> => {
     await startDownload();
 
-    await convertFilters(FILTERS_DIR, RESOURCES_DIR, DEST_RULE_SETS_DIR, true);
+    await convertFilters(FILTERS_DIR, WEB_RESOURCES_PATH, DEST_RULE_SETS_DIR, true);
 };
 
 downloadAndConvertFilters();

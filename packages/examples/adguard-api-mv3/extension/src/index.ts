@@ -1,12 +1,15 @@
 /* eslint-disable no-console */
-import { adguardApi, APIConfiguration } from "@adguard/api";
+import { AdguardApi, APIConfiguration } from "@adguard/api";
 
-// FIXME: This code will reevaluate when service worker will be reloaded
+// FIXME: Add assistant
+// FIXME: Add counter
 (async (): Promise<void> => {
     const configuration: APIConfiguration = {
         filters: [2],
         rules: ["example.org##h1"],
     };
+
+    const adguardApi = AdguardApi.create();
 
     await adguardApi.start(configuration);
 
