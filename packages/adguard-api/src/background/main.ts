@@ -45,6 +45,8 @@ import { Logger } from "./logger";
  */
 import localScriptRules from "../local_script_rules.json";
 
+export const WEB_ACCESSIBLE_RESOURCES_PATH = "adguard";
+
 interface AdguardApiInterface {
     onAssistantCreateRule: EventChannel<string>;
     onRequestBlocked: RequestBlockingLogger;
@@ -98,8 +100,8 @@ export class AdguardApi implements AdguardApiInterface {
      */
     public onRequestBlocked = new RequestBlockingLogger();
 
-    constructor(webAccessibleResourcesPath: string = "adguard") {
-        this.tswebextension = new TsWebExtension(webAccessibleResourcesPath);
+    constructor() {
+        this.tswebextension = new TsWebExtension(WEB_ACCESSIBLE_RESOURCES_PATH);
 
         // TODO: load only in ff
         this.tswebextension.setLocalScriptRules(localScriptRules);
