@@ -1,10 +1,12 @@
 /* eslint-disable no-console */
-import { copyWar } from "@adguard/tswebextension/cli";
-import { buildRunner } from "./build-runner";
-import { config } from "./webpack.config";
-import { WEB_ACCESSIBLE_RESOURCES_PATH } from "../constants";
+import { copyWar } from '@adguard/tswebextension/cli';
 
-const build = async () => {
+import { WEB_ACCESSIBLE_RESOURCES_PATH } from '../constants';
+
+import { buildRunner } from './build-runner';
+import { config } from './webpack.config';
+
+const build = async (): Promise<void> => {
     try {
         await buildRunner(config);
         await copyWar(WEB_ACCESSIBLE_RESOURCES_PATH);

@@ -1,6 +1,6 @@
 /* eslint-disable no-console  */
 /* eslint-disable import/no-extraneous-dependencies */
-import webpack, { Stats, Configuration } from "webpack";
+import webpack, { Stats, Configuration } from 'webpack';
 
 type CompilerCallback = (err?: Error | null, stats?: Stats) => void;
 
@@ -27,8 +27,8 @@ export const buildRunner = (webpackConfig: Configuration, watch = false): Promis
                         all: false,
                         errors: true,
                         moduleTrace: true,
-                        logging: "error",
-                    })
+                        logging: 'error',
+                    }),
                 );
                 reject();
                 return;
@@ -38,7 +38,7 @@ export const buildRunner = (webpackConfig: Configuration, watch = false): Promis
                 stats.toString({
                     chunks: false, // Makes the build much quieter
                     colors: true, // Shows colors in the console
-                })
+                }),
             );
             resolve();
         });

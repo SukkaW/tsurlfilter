@@ -47,7 +47,6 @@ module.exports = {
         'jsdoc/require-param-type': 'off',
         'jsdoc/require-returns-type': 'off',
         'jsdoc/require-throws': 'error',
-        'jsdoc/require-file-overview': 'error',
         'jsdoc/require-description-complete-sentence': ['warn'],
         'jsdoc/require-jsdoc': [
             'warn',

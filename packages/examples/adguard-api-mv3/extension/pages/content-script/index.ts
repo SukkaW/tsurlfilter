@@ -1,1 +1,1 @@
-import "@adguard/api/content-script";
+import '@adguard/api/content-script';
