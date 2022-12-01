@@ -17,24 +17,9 @@ module.exports = {
             {
                 test: /\.ts/,
                 exclude: /node_modules/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: [
-                                [
-                                    '@babel/preset-env',
-                                    {
-                                        targets: { chrome: '84' },
-                                        useBuiltIns: 'usage',
-                                        corejs: { version: 3, proposals: true },
-                                    },
-                                ],
-                                '@babel/preset-typescript',
-                            ],
-                        },
-                    },
-                ],
+                use: [{
+                    loader: 'babel-loader',
+                }],
             },
         ],
     },
