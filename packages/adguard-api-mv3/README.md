@@ -187,6 +187,8 @@ The library code can be loaded either via `script` tag or as an `npm` module.
     }
     ```
 
+Recommended to enable only filter#2 by the default.
+
 6. Import AdGuard api file
 ```
   import "adguard-api.js";

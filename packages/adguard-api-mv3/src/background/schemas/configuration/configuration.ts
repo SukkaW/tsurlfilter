@@ -42,6 +42,8 @@ export const configurationValidator = zod.object({
      * @see https://adguard.com/en/filterrules.html
      */
     rules: zod.string().array().optional(),
+
+    verbose: zod.boolean(),
 });
 
 export type APIConfiguration = zod.infer<typeof configurationValidator>;

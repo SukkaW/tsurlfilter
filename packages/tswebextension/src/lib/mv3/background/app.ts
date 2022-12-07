@@ -4,14 +4,13 @@ import { AppInterface, defaultFilteringLog } from '../../common';
 import { logger } from '../utils/logger';
 import { FailedEnableRuleSetsError } from '../errors/failed-enable-rule-sets-error';
 
-import FiltersApi, { UpdateStaticFiltersResult } from './filters-api';
+import FiltersApi, { filtersApi, RULE_SET_NAME_PREFIX } from './filters-api';
 import UserRulesApi, { ConversionResult } from './user-rules-api';
 import MessagesApi, { MessagesHandlerType } from './messages-api';
 import { TabsApi, tabsApi } from './tabs-api';
 import { getAndExecuteScripts } from './scriptlets';
 import { engineApi } from './engine-api';
 import { declarativeFilteringLog, RecordFiltered } from './declarative-filtering-log';
-import RuleSetsLoaderApi from './rule-sets-loader-api';
 import { Assistant } from './assistant';
 import {
     ConfigurationMV3,
@@ -20,9 +19,17 @@ import {
 } from './configuration';
 
 type ConfigurationResult = {
-    staticFiltersStatus: UpdateStaticFiltersResult,
-    staticFilters: IRuleSet[],
+    staticFilters: {
+        errors: FailedEnableRuleSetsError[],
+        ruleSets: IRuleSet[],
+    },
     dynamicRules: ConversionResult
+};
+
+export type RuleSetCounters = {
+    filterId: number,
+    rulesCount: number,
+    regexpRulesCount: number
 };
 
 // Reexport types
@@ -37,7 +44,7 @@ export type {
 /**
  * The TsWebExtension class is a facade for working with the Chrome
  * declarativeNetRequest module: enabling/disabling static filters,
- * adding/editing/deleting custom filters or custom rules,
+ * adding/editing/deleting custom filters or custom rules and
  * starting/stopping declarative filtering log.
  */
 export class TsWebExtension implements AppInterface<ConfigurationMV3, ConfigurationMV3Context, ConfigurationResult> {
@@ -70,6 +77,17 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
     private startPromise: Promise<ConfigurationResult> | undefined;
 
     /**
+     * Path to directory with filters' text rules.
+     */
+    private readonly filtersPath: string;
+
+    /**
+     * Path to directory with converted rule sets.
+     * Note: it's better to convert filters with @tsurlfilter/cli.convertFilters.
+     */
+    private readonly ruleSetsPath: string;
+
+    /**
      * Web accessible resources path in the result bundle
      * relative to the root dir. Should start with leading slash '/'.
      */
@@ -78,11 +96,20 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
     /**
      * Creates new {@link TsWebExtension} class.
      *
+     * @param filtersPath Path to directory with filters' text rules.
+     * @param ruleSetsPath Path to directory with converted rule sets.
+     * Note: it's better to convert filters with @tsurlfilter/cli.convertFilters.
      * @param webAccessibleResourcesPath Path to resources.
      *
      * @see {@link TsWebExtension.webAccessibleResourcesPath} for details.
      */
-    constructor(webAccessibleResourcesPath?: string) {
+    constructor(
+        filtersPath: string,
+        ruleSetsPath: string,
+        webAccessibleResourcesPath?: string,
+    ) {
+        this.filtersPath = filtersPath;
+        this.ruleSetsPath = ruleSetsPath;
         this.webAccessibleResourcesPath = webAccessibleResourcesPath;
 
         // Keep app context when use method as callback
@@ -103,6 +130,26 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
         try {
             const res = await this.configure(config);
             await this.executeScriptlets();
+
+            const manifest = chrome.runtime.getManifest();
+            // eslint-disable-next-line max-len
+            const manifestRuleSets = manifest.declarative_net_request.rule_resources as chrome.declarativeNetRequest.Ruleset[];
+            // FIXME: Create helpers for filterId -> ruleSetId and ruleSetId -> filterId
+            const manifestRuleSetsIds = manifestRuleSets
+                .map(({ id }) => Number.parseInt(id.slice(RULE_SET_NAME_PREFIX.length), 10));
+
+            // Loads list of filters listed in the manifest
+            await filtersApi.createAndSaveStaticFilters(
+                manifestRuleSetsIds,
+                this.filtersPath,
+            );
+
+            // Loads list of rule sets
+            await filtersApi.createAndSaveStaticRuleSets(
+                manifestRuleSets,
+                filtersApi.getStaticFilters(),
+                this.ruleSetsPath,
+            );
 
             this.isStarted = true;
             this.startPromise = undefined;
@@ -203,25 +250,27 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
     public async configure(config: ConfigurationMV3): Promise<ConfigurationResult> {
         logger.debug('[CONFIGURE]: start with ', config);
 
+        if (!this.isStarted) {
+            throw new Error('TsWebExtension is not started.');
+        }
+
         const configuration = configurationMV3Validator.parse(config);
 
-        // Wrap filters to tsurlfilter.IFilter
-        const staticFilters = FiltersApi.createStaticFilters(
-            configuration.staticFiltersIds,
-            configuration.filtersPath,
-        );
         const customFilters = FiltersApi.createCustomFilters(configuration.customFilters);
-        const filtersIdsToEnable = staticFilters
-            .map((filter) => filter.getId());
+        const filtersIdsToEnable = configuration.staticFiltersIds;
         const currentFiltersIds = await FiltersApi.getEnabledRuleSets();
         const filtersIdsToDisable = currentFiltersIds
             .filter((f) => !filtersIdsToEnable.includes(f)) || [];
 
         // Update list of enabled static filters
-        const staticFiltersStatus = await FiltersApi.updateFiltering(
+        const updateStaticFiltersErrors = await FiltersApi.updateFiltering(
             filtersIdsToDisable,
             filtersIdsToEnable,
         );
+        const enabledStaticFiltersIds = updateStaticFiltersErrors.length > 0
+            ? updateStaticFiltersErrors[0].currentEnabledRuleSetsIds
+                .map((id) => Number.parseInt(id.slice(RULE_SET_NAME_PREFIX.length), 10))
+            : filtersIdsToEnable;
 
         // Convert custom filters and user rules into one rule set and apply it
         const dynamicRules = await UserRulesApi.updateDynamicFiltering(
@@ -230,10 +279,21 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
             this.webAccessibleResourcesPath,
         );
 
+        const allStaticFilters = filtersApi.getStaticFilters();
+        const allStaticRuleSets = filtersApi.getStaticRuleSets();
+
+        const enabledStaticFilters = allStaticFilters.filter((f) => {
+            return enabledStaticFiltersIds.includes(f.getId());
+        });
+        const enabledStaticRuleSets = allStaticRuleSets.filter((r) => {
+            const ruleSetId = Number.parseInt(r.getId().slice(RULE_SET_NAME_PREFIX.length), 10);
+            return enabledStaticFiltersIds.includes(ruleSetId);
+        });
+
         // Reload engine for cosmetic rules
         engineApi.waitingForEngine = engineApi.startEngine({
             filters: [
-                ...staticFilters,
+                ...enabledStaticFilters,
                 ...customFilters,
             ],
             userrules: configuration.userrules,
@@ -241,19 +301,8 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
         });
         await engineApi.waitingForEngine;
 
-        // Wrap filters into rule sets
-        const ruleSetsLoaderApi = new RuleSetsLoaderApi(config.ruleSetsPath);
-        const manifest = chrome.runtime.getManifest();
-        // eslint-disable-next-line max-len
-        const manifestRuleSets = manifest.declarative_net_request.rule_resources as chrome.declarativeNetRequest.Ruleset[];
-        const staticRuleSetsTasks = manifestRuleSets.map(({ id }) => {
-            return ruleSetsLoaderApi.createRuleSet(id, staticFilters);
-        });
-        const staticRuleSets = await Promise.all(staticRuleSetsTasks);
-
-        // TODO: Recreate only dynamic rule set, because static cannot be changed
         const ruleSets = [
-            ...staticRuleSets,
+            ...enabledStaticRuleSets,
             ...dynamicRules.ruleSets,
         ];
         declarativeFilteringLog.ruleSets = ruleSets;
@@ -270,8 +319,10 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
         logger.debug('[CONFIGURE]: end');
 
         return {
-            staticFiltersStatus,
-            staticFilters: staticRuleSets,
+            staticFilters: {
+                errors: updateStaticFiltersErrors,
+                ruleSets: enabledStaticRuleSets,
+            },
             dynamicRules,
         };
     }
@@ -357,19 +408,31 @@ export class TsWebExtension implements AppInterface<ConfigurationMV3, Configurat
             customFilters,
             verbose,
             settings,
-            filtersPath,
-            ruleSetsPath,
             filteringLogEnabled,
         } = configuration;
 
         return {
             staticFiltersIds,
             customFilters: customFilters.map(({ filterId }) => filterId),
-            filtersPath,
-            ruleSetsPath,
             filteringLogEnabled,
             verbose,
             settings,
         };
+    }
+
+    /**
+     * Gets list of {@link RuleSetCounters}.
+     *
+     * @returns List of {@link RuleSetCounters}.
+     */
+    static get ruleSetsCounters(): RuleSetCounters[] {
+        const staticRuleSets = filtersApi.getStaticRuleSets();
+
+        return staticRuleSets
+            .map((ruleset) => ({
+                filterId: Number(ruleset.getId().slice(RULE_SET_NAME_PREFIX.length)),
+                rulesCount: ruleset.getRulesCount(),
+                regexpRulesCount: ruleset.getRegexpRulesCount(),
+            })) || [];
     }
 }

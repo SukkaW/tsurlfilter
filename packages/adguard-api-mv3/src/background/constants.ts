@@ -19,7 +19,6 @@
 export const FILTERS_INFO_STORAGE_KEY = 'filters_info';
 export const USER_RULES_STATUS_STORAGE_KEY = 'user_rules_status';
 export const ENABLED_FILTERS_IDS = 'enabled_filters_ids';
-export const FILTERS_CHANGED = 'filters_changed';
 
 export enum FiltersGroupId {
     CUSTOM = 0,

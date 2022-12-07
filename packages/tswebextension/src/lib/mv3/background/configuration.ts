@@ -19,17 +19,6 @@ export const configurationMV3Validator = configurationValidator.extend({
     }).array(),
 
     /**
-     * Path to directory with filters' text rules.
-     */
-    filtersPath: zod.string(),
-
-    /**
-     * Path to directory with converted rule sets.
-     * Note: it's better to convert filters with tsurlfilter.convertFilters.
-     */
-    ruleSetsPath: zod.string(),
-
-    /**
      * Enables filtering log if true.
      */
     filteringLogEnabled: zod.boolean(),

@@ -18,13 +18,15 @@ export interface AppInterface<TConfiguration, TConfigurationContext, TConfigurat
     onFilteringLogEvent: EventChannelInterface<FilteringLogEvent>,
 
     /**
-      * Starts api
-      * @param configuration
-      */
+     * Starts api
+     *
+     * @param configuration
+     */
     start: (configuration: TConfiguration) => Promise<TConfigurationResult>;
 
     /**
      * Updates configuration
+     *
      * @param configuration
      */
     configure: (configuration: TConfiguration) => Promise<TConfigurationResult>;

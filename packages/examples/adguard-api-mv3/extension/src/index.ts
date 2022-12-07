@@ -12,25 +12,27 @@ import { AdguardApi, APIConfiguration } from '@adguard/api';
 
     // console log current rules count, loaded in engine
     const logTotalCount = (): void => {
-        console.log('Total rules count:', adguardApi.getRulesCount());
+        console.log('Total rules in engine count:', adguardApi.getRulesCount());
+
+        const staticRuleSetsRegularRules = adguardApi.staticRuleSetsCounters
+            .reduce((sum, counters) => sum + counters.rulesCount, 0);
+        console.log('Total regular rules in static filters:', staticRuleSetsRegularRules);
+
+        const staticRuleSetsRegexpRules = adguardApi.staticRuleSetsCounters
+            .reduce((sum, counters) => sum + counters.rulesCount, 0);
+        console.log('Total regexp rules in static filters:', staticRuleSetsRegexpRules);
+
+        const dynamicRegularRules = adguardApi.dynamicRulesInfo?.rules;
+        console.log('Total regular rules in dynamic rules:', dynamicRegularRules);
+
+        const dynamicRegexpRules = adguardApi.dynamicRulesInfo?.regexpsRules;
+        console.log('Total regexp rules in dynamic rules:', dynamicRegexpRules);
     };
-
-    await adguardApi.start(configuration);
-
-    console.log('Finished Adguard API initialization.');
-    logTotalCount();
-
-    configuration.rules!.push('||google.com^$document');
-
-    await adguardApi.configure(configuration);
-
-    console.log('Finished Adguard API re-configuration');
-    logTotalCount();
 
     // update config on assistant rule apply
     adguardApi.onAssistantCreateRule.subscribe(async (rule) => {
         console.log(`Rule ${rule} was created by Adguard Assistant`);
-        configuration.rules!.push(rule);
+        configuration.rules?.push(rule);
         await adguardApi.configure(configuration);
         console.log('Finished Adguard API re-configuration');
         logTotalCount();
@@ -50,6 +52,26 @@ import { AdguardApi, APIConfiguration } from '@adguard/api';
             // do nothing
         }
     });
+
+    await adguardApi.start(configuration);
+
+    console.log('Finished Adguard API initialization.');
+    logTotalCount();
+
+    configuration.rules?.push('||google.com^$document');
+
+    await adguardApi.configure(configuration);
+
+    console.log('Finished Adguard API re-configuration');
+    logTotalCount();
+
+    // Enable all available filters to test browser limitation
+    configuration.filters = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 224];
+
+    const appliedConfiguration = await adguardApi.configure(configuration);
+
+    console.log('Finished Adguard API after enable too much filters: ', appliedConfiguration.filters);
+    logTotalCount();
 
     // Disable Adguard in 1 minute
     setTimeout(async () => {

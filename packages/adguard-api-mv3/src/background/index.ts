@@ -16,8 +16,25 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AdguardApi from './main';
+import AdguardApi, {
+    ConfigurationResult,
+    RULE_SET_NAME_PREFIX,
+    TooManyRulesError,
+    TooManyRegexpRulesError,
+    RuleSetCounters,
+    DynamicRulesStatus,
+    RulesStatus,
+} from './main';
 
 export type { APIConfiguration } from './schemas';
 
-export { AdguardApi };
+export {
+    AdguardApi,
+    ConfigurationResult,
+    RULE_SET_NAME_PREFIX,
+    TooManyRulesError,
+    TooManyRegexpRulesError,
+    RuleSetCounters,
+    DynamicRulesStatus,
+    RulesStatus,
+};

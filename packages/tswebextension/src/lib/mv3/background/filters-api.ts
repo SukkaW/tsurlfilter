@@ -1,15 +1,12 @@
-import { Filter, IFilter } from '@adguard/tsurlfilter';
+import { Filter, IFilter, IRuleSet } from '@adguard/tsurlfilter';
 
 import { FailedEnableRuleSetsError } from '../errors/failed-enable-rule-sets-error';
 import { getFilterName } from '../utils/get-filter-name';
 
 import { ConfigurationMV3 } from './configuration';
+import RuleSetsLoaderApi from './rule-sets-loader-api';
 
 export const RULE_SET_NAME_PREFIX = 'ruleset_';
-
-export type UpdateStaticFiltersResult = {
-    errors: FailedEnableRuleSetsError[],
-};
 
 /**
  * FiltersApi knows how to enable or disable static rule sets (which were built
@@ -17,6 +14,16 @@ export type UpdateStaticFiltersResult = {
  * loading its contents.
  */
 export default class FiltersApi {
+    /**
+     * Cached list of static filters.
+     */
+    private staticFilters: IFilter[] = [];
+
+    /**
+     * Cached list of static rule sets.
+     */
+    private staticRuleSets: IRuleSet[] = [];
+
     /**
      * Enables or disables the provided rule set identifiers.
      *
@@ -26,10 +33,8 @@ export default class FiltersApi {
     static async updateFiltering(
         disableFiltersIds: number[],
         enableFiltersIds?: number[],
-    ): Promise<UpdateStaticFiltersResult> {
-        const res: UpdateStaticFiltersResult = {
-            errors: [],
-        };
+    ): Promise<FailedEnableRuleSetsError[]> {
+        const errors: FailedEnableRuleSetsError[] = [];
 
         const enableRulesetIds = enableFiltersIds?.map((filterId) => `${RULE_SET_NAME_PREFIX}${filterId}`) || [];
         const disableRulesetIds = disableFiltersIds?.map((filterId) => `${RULE_SET_NAME_PREFIX}${filterId}`) || [];
@@ -41,16 +46,18 @@ export default class FiltersApi {
             });
         } catch (e) {
             const msg = 'Cannot change list of enabled rule sets';
+            const currentEnabledRuleSetsIds = await chrome.declarativeNetRequest.getEnabledRulesets();
             const err = new FailedEnableRuleSetsError(
                 msg,
                 enableRulesetIds,
                 disableRulesetIds,
+                currentEnabledRuleSetsIds,
                 e as Error,
             );
-            res.errors.push(err);
+            errors.push(err);
         }
 
-        return res;
+        return errors;
     }
 
     /**
@@ -80,20 +87,28 @@ export default class FiltersApi {
     }
 
     /**
-     * Loads content for provided filters ids;.
+     * Wraps provided list of static filters ID's to {@link IFilter} and save
+     * them to inner cache.
      *
      * @param filtersIds List of filters ids.
      * @param filtersPath Path to filters directory.
+     */
+    public createAndSaveStaticFilters(
+        filtersIds: number[],
+        filtersPath: string,
+    ): void {
+        this.staticFilters = filtersIds.map((filterId) => new Filter(filterId, {
+            getContent: () => FiltersApi.loadFilterContent(filterId, filtersPath),
+        }));
+    }
+
+    /**
+     * Returns list of {@link IFilter} with a lazy content loading feature.
      *
      * @returns List of {@link IFilter} with a lazy content loading feature.
      */
-    static createStaticFilters(
-        filtersIds: ConfigurationMV3['staticFiltersIds'],
-        filtersPath: string,
-    ): IFilter[] {
-        return filtersIds.map((filterId) => new Filter(filterId, {
-            getContent: () => this.loadFilterContent(filterId, filtersPath),
-        }));
+    public getStaticFilters(): IFilter[] {
+        return this.staticFilters;
     }
 
     /**
@@ -108,4 +123,36 @@ export default class FiltersApi {
             getContent: () => Promise.resolve(f.content.split('\n')),
         }));
     }
+
+    /**
+     * Wraps provided list of manifest rule sets to to {@link IRuleSet} and save
+     * them to inner cache.
+     *
+     * @param manifestRuleSets List of {@link chrome.declarativeNetRequest.Ruleset}.
+     * @param staticFilters List of {@link IFilter}.
+     * @param ruleSetsPath Path to directory with converted rule sets.
+     */
+    public async createAndSaveStaticRuleSets(
+        manifestRuleSets: chrome.declarativeNetRequest.Ruleset[],
+        staticFilters: IFilter[],
+        ruleSetsPath: string,
+    ): Promise<void> {
+        // Wrap filters into rule sets
+        const ruleSetsLoaderApi = new RuleSetsLoaderApi(ruleSetsPath);
+        const staticRuleSetsTasks = manifestRuleSets.map(({ id }) => {
+            return ruleSetsLoaderApi.createRuleSet(id, staticFilters);
+        });
+        this.staticRuleSets = await Promise.all(staticRuleSetsTasks);
+    }
+
+    /**
+     * Returns list of {@link IRuleSet} with a lazy content loading feature.
+     *
+     * @returns List of {@link IRuleSet} with a lazy content loading feature.
+     */
+    public getStaticRuleSets(): IRuleSet[] {
+        return this.staticRuleSets;
+    }
 }
+
+export const filtersApi = new FiltersApi();

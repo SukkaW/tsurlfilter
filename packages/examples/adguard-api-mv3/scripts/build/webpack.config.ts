@@ -92,8 +92,8 @@ export const config: Configuration = {
                     transform: updateManifest,
                 },
                 {
-                    context: 'extension',
-                    from: 'filters',
+                    // TODO: Is it ok?
+                    from: 'node_modules/@adguard/api/dist/filters',
                     to: 'filters',
                 },
             ],
