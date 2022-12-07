@@ -16,8 +16,9 @@
  * along with Adguard API. If not, see <http://www.gnu.org/licenses/>.
  */
 import { EventChannel } from '@adguard/tswebextension';
-import { ConfigurationResult, MessagesHandlerType } from '@adguard/tswebextension/mv3';
+import { ConfigurationResult as TsWebExtensionConfigurationResult, RULE_SET_NAME_PREFIX, TooManyRulesError, TooManyRegexpRulesError, MessagesHandlerType } from '@adguard/tswebextension/mv3';
 import { APIConfiguration } from './schemas';
+export { RULE_SET_NAME_PREFIX, TooManyRulesError, TooManyRegexpRulesError, };
 export declare type RuleSetCounters = {
     filterId: number;
     rulesCount: number;
@@ -34,15 +35,28 @@ export declare type RulesStatus = {
     limitExceed: boolean;
     excludedRulesIds: number[];
 };
+export declare type ConfigurationResult = TsWebExtensionConfigurationResult & {
+    dynamicRules: {
+        status: DynamicRulesStatus | null;
+    };
+};
+export declare const FILTERS_PATH = "filters/";
+export declare const DECLARATIVE_RULE_SETS_PATH = "filters/declarative/";
 export declare const WEB_RESOURCES_PATH = "/adguard/resources";
+export declare enum StaticFiltersLimits {
+    MaxRulesLimit = 1,
+    MaxRegexpsLimit = 2,
+    MaxFiltersLimit = 3
+}
 interface AdguardApiInterface {
     onAssistantCreateRule: EventChannel<string>;
-    start(configuration: APIConfiguration): Promise<void>;
+    start(configuration: APIConfiguration): Promise<ConfigurationResult>;
     stop(): Promise<void>;
-    configure(configuration: APIConfiguration): Promise<void>;
+    configure(configuration: APIConfiguration): Promise<ConfigurationResult>;
     openAssistant(tabId: number): Promise<void>;
     closeAssistant(tabId: number): Promise<void>;
     getRulesCount(): number;
+    canEnableStaticFilter(filterId: number): StaticFiltersLimits | null;
 }
 /**
  * AdGuard API is filtering library, provided following features:
@@ -50,10 +64,21 @@ interface AdguardApiInterface {
  * - content blocking via AdGuard Assistant UI, provided by {@link TsWebExtension}.
  */
 export default class AdguardApi implements AdguardApiInterface {
+    /**
+     * Engine instance.
+     */
     private tsWebExtension;
+    /**
+     * Stores status of current enabled rules.
+     */
     private configurationResult;
+    /**
+     * Waiting for start engine to prevent race conditions.
+     */
     private waitForStart;
-    filteringLogEnabled: boolean;
+    /**
+     * Stores handler for "inner" messages.
+     */
     private messageHandler;
     /**
      * {@link TsWebExtension} {@link EventChannel},
@@ -61,24 +86,38 @@ export default class AdguardApi implements AdguardApiInterface {
      */
     onAssistantCreateRule: EventChannel<string>;
     /**
+     * Stores current available rules counter.
+     */
+    private availableStaticRulesCount;
+    /**
+     * Stores amount of current enabled static filters.
+     */
+    private enabledStaticFiltersCounter;
+    /**
+     * Stores amount of current enabled rules with regular expressions.
+     */
+    private enabledStaticFiltersRegexps;
+    /**
      * Creates new AdGuard API class.
      *
+     * @param filtersPath Path to directory with filters' text rules.
+     * @param ruleSetsPath Path to directory with converted rule sets.
      * @param webAccessibleResourcesPath - Path to the web accessible resources.
      */
-    constructor(webAccessibleResourcesPath?: string);
+    constructor(filtersPath?: string, ruleSetsPath?: string, webAccessibleResourcesPath?: string);
     /**
      * Returns counters of current enabled static rule sets.
      *
      * @returns Counters of current enabled static rule sets.
      */
-    get ruleSetsCounters(): RuleSetCounters[];
+    static get staticRuleSetsCounters(): RuleSetCounters[];
     private messageHandlerWrapper;
     /**
      * Starts engine.
      *
      * @param configuration {@link APIConfiguration}.
      */
-    start(configuration: APIConfiguration): Promise<void>;
+    start(configuration: APIConfiguration): Promise<ConfigurationResult>;
     /**
      * Stops engine.
      */
@@ -87,28 +126,20 @@ export default class AdguardApi implements AdguardApiInterface {
      * Modifies AdGuard {@link APIConfiguration}.
      *
      * @param configuration {@link APIConfiguration}.
-     * @param skipCheck Whether it is necessary to check whether the limit
-     * is exceeded.
      */
-    configure(configuration: APIConfiguration, skipCheck?: boolean): Promise<void>;
+    configure(configuration: APIConfiguration): Promise<ConfigurationResult>;
+    /**
+     *
+     * @param configurationResult
+     */
+    private updateCounters;
     /**
      * Returns information about dynamic rules from current configuration.
      *
-     * @param root0 {@link ConfigurationResult}.
-     * @param root0.dynamicRules {@link ConversionResult}.
+     * @param configurationResult
      * @returns Object {@link DynamicRulesStatus} with counters of dynamic rules.
      */
-    static getDynamicRulesInfo({ dynamicRules }: ConfigurationResult): Promise<DynamicRulesStatus | null>;
-    /**
-     * TODO: Check this.
-     * If changed - save new values to store for show warning to user
-     * and save list of last used filters.
-     *
-     * @param configuration {@link APIConfiguration}.
-     */
-    private checkFiltersLimitsChange;
-    private static setFiltersChangedList;
-    private static getFiltersChangedList;
+    private getDynamicRulesStatus;
     /**
      * Returns configuration object.
      *
@@ -149,5 +180,26 @@ export default class AdguardApi implements AdguardApiInterface {
      * @returns AdguardApi instance.
      */
     static create(): AdguardApi;
+    /**
+     *
+     * @param filterId
+     */
+    private canEnableFilterRules;
+    /**
+     *
+     * @param filterId
+     */
+    private canEnableFilterRegexps;
+    /**
+     *
+     */
+    private get isMaxEnabledFilters();
+    /**
+     * Checks whether a static filter can be enabled or not.
+     *
+     * @param filterId Static filter ID.
+     * @returns One of the {@link StaticFiltersLimits} if the filter cannot be
+     * enabled, or null if the restrictions will not be exceeded.
+     */
+    canEnableStaticFilter(filterId: number): StaticFiltersLimits | null;
 }
-export {};

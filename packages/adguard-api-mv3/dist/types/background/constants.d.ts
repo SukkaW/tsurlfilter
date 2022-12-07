@@ -18,7 +18,6 @@
 export declare const FILTERS_INFO_STORAGE_KEY = "filters_info";
 export declare const USER_RULES_STATUS_STORAGE_KEY = "user_rules_status";
 export declare const ENABLED_FILTERS_IDS = "enabled_filters_ids";
-export declare const FILTERS_CHANGED = "filters_changed";
 export declare enum FiltersGroupId {
     CUSTOM = 0,
     MAIN = 1,

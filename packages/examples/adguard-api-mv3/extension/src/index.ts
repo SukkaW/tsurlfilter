@@ -1,31 +1,34 @@
 /* eslint-disable jsdoc/require-file-overview */
 /* eslint-disable no-console */
-import { AdguardApi, APIConfiguration } from '@adguard/api';
+import { AdguardApi, APIConfiguration, ConfigurationResult } from '@adguard/api';
 
 (async (): Promise<void> => {
     const configuration: APIConfiguration = {
         filters: [2],
         rules: ['example.org##h1'],
+        verbose: true,
     };
 
     const adguardApi = AdguardApi.create();
 
     // console log current rules count, loaded in engine
-    const logTotalCount = (): void => {
-        console.log('Total rules in engine count:', adguardApi.getRulesCount());
+    const logTotalCount = (configurationResult: ConfigurationResult): void => {
+        console.log('Total rules in engine:', adguardApi.getRulesCount());
 
-        const staticRuleSetsRegularRules = adguardApi.staticRuleSetsCounters
-            .reduce((sum, counters) => sum + counters.rulesCount, 0);
+        // FIXME: Remove raw ruleSets
+        const staticRuleSetsRegularRules = configurationResult.staticFilters.ruleSets
+            .reduce((sum, r) => sum + r.getRulesCount(), 0);
         console.log('Total regular rules in static filters:', staticRuleSetsRegularRules);
 
-        const staticRuleSetsRegexpRules = adguardApi.staticRuleSetsCounters
-            .reduce((sum, counters) => sum + counters.rulesCount, 0);
+        // FIXME: Remove raw ruleSets
+        const staticRuleSetsRegexpRules = configurationResult.staticFilters.ruleSets
+            .reduce((sum, r) => sum + r.getRegexpRulesCount(), 0);
         console.log('Total regexp rules in static filters:', staticRuleSetsRegexpRules);
 
-        const dynamicRegularRules = adguardApi.dynamicRulesInfo?.rules;
+        const dynamicRegularRules = configurationResult.dynamicRules.status?.rules.enabledCount;
         console.log('Total regular rules in dynamic rules:', dynamicRegularRules);
 
-        const dynamicRegexpRules = adguardApi.dynamicRulesInfo?.regexpsRules;
+        const dynamicRegexpRules = configurationResult.dynamicRules.status?.regexpsRules.enabledCount;
         console.log('Total regexp rules in dynamic rules:', dynamicRegexpRules);
     };
 
@@ -33,9 +36,9 @@ import { AdguardApi, APIConfiguration } from '@adguard/api';
     adguardApi.onAssistantCreateRule.subscribe(async (rule) => {
         console.log(`Rule ${rule} was created by Adguard Assistant`);
         configuration.rules?.push(rule);
-        await adguardApi.configure(configuration);
+        const res = await adguardApi.configure(configuration);
         console.log('Finished Adguard API re-configuration');
-        logTotalCount();
+        logTotalCount(res);
     });
 
     chrome.runtime.onMessage.addListener(async (message) => {
@@ -53,25 +56,25 @@ import { AdguardApi, APIConfiguration } from '@adguard/api';
         }
     });
 
-    await adguardApi.start(configuration);
+    let res = await adguardApi.start(configuration);
 
     console.log('Finished Adguard API initialization.');
-    logTotalCount();
+    logTotalCount(res);
 
     configuration.rules?.push('||google.com^$document');
 
-    await adguardApi.configure(configuration);
+    res = await adguardApi.configure(configuration);
 
     console.log('Finished Adguard API re-configuration');
-    logTotalCount();
+    logTotalCount(res);
 
     // Enable all available filters to test browser limitation
     configuration.filters = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 224];
 
-    const appliedConfiguration = await adguardApi.configure(configuration);
+    res = await adguardApi.configure(configuration);
 
-    console.log('Finished Adguard API after enable too much filters: ', appliedConfiguration.filters);
-    logTotalCount();
+    console.log('Finished Adguard API after enable too much filters: ', res.staticFilters);
+    logTotalCount(res);
 
     // Disable Adguard in 1 minute
     setTimeout(async () => {

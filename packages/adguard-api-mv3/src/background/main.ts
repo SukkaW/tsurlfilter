@@ -20,7 +20,7 @@ import { EventChannel } from '@adguard/tswebextension';
 import {
     TsWebExtension,
     Configuration as TsWebExtensionConfiguration,
-    ConfigurationResult,
+    ConfigurationResult as TsWebExtensionConfigurationResult,
     RULE_SET_NAME_PREFIX,
     TooManyRulesError,
     TooManyRegexpRulesError,
@@ -30,7 +30,6 @@ import {
 import { APIConfiguration } from './schemas';
 
 export {
-    ConfigurationResult,
     RULE_SET_NAME_PREFIX,
     TooManyRulesError,
     TooManyRegexpRulesError,
@@ -55,6 +54,13 @@ export type RulesStatus = {
     excludedRulesIds: number[];
 };
 
+// FIXME: Exclude raw ruleSets from staticFilters and dynamicRules sections
+export type ConfigurationResult = TsWebExtensionConfigurationResult & {
+    dynamicRules: {
+        status: DynamicRulesStatus | null,
+    }
+};
+
 export const FILTERS_PATH = 'filters/';
 export const DECLARATIVE_RULE_SETS_PATH = 'filters/declarative/';
 export const WEB_RESOURCES_PATH = '/adguard/resources';
@@ -72,9 +78,9 @@ const {
 
 interface AdguardApiInterface {
     onAssistantCreateRule: EventChannel<string>;
-    start(configuration: APIConfiguration): Promise<APIConfiguration>;
+    start(configuration: APIConfiguration): Promise<ConfigurationResult>;
     stop(): Promise<void>;
-    configure(configuration: APIConfiguration): Promise<APIConfiguration>;
+    configure(configuration: APIConfiguration): Promise<ConfigurationResult>;
     openAssistant(tabId: number): Promise<void>;
     closeAssistant(tabId: number): Promise<void>;
     getRulesCount(): number;
@@ -100,7 +106,7 @@ export default class AdguardApi implements AdguardApiInterface {
     /**
      * Waiting for start engine to prevent race conditions.
      */
-    private waitForStart: Promise<APIConfiguration> | undefined;
+    private waitForStart: Promise<ConfigurationResult> | undefined;
 
     /**
      * Stores handler for "inner" messages.
@@ -114,10 +120,25 @@ export default class AdguardApi implements AdguardApiInterface {
     public onAssistantCreateRule: EventChannel<string>;
 
     /**
+     * Stores current available rules counter.
+     */
+    private availableStaticRulesCount = 0;
+
+    /**
+     * Stores amount of current enabled static filters.
+     */
+    private enabledStaticFiltersCounter = 0;
+
+    /**
+     * Stores amount of current enabled rules with regular expressions.
+     */
+    private enabledStaticFiltersRegexps = 0;
+
+    /**
      * Creates new AdGuard API class.
      *
-     * @param filtersPath
-     * @param ruleSetsPath
+     * @param filtersPath Path to directory with filters' text rules.
+     * @param ruleSetsPath Path to directory with converted rule sets.
      * @param webAccessibleResourcesPath - Path to the web accessible resources.
      */
     constructor(
@@ -139,20 +160,11 @@ export default class AdguardApi implements AdguardApiInterface {
     }
 
     /**
-     * Returns status of the static sets of rules.
-     *
-     * @returns Status of the static sets of rules.
-     */
-    // public get staticRuleSetsStatus(): UpdateStaticFiltersResult | null {
-    //     return this.configurationResult?.staticFiltersStatus || null;
-    // }
-
-    /**
      * Returns counters of current enabled static rule sets.
      *
      * @returns Counters of current enabled static rule sets.
      */
-    public get staticRuleSetsCounters(): RuleSetCounters[] {
+    static get staticRuleSetsCounters(): RuleSetCounters[] {
         return TsWebExtension.ruleSetsCounters;
     }
 
@@ -184,12 +196,24 @@ export default class AdguardApi implements AdguardApiInterface {
      *
      * @param configuration {@link APIConfiguration}.
      */
-    async start(configuration: APIConfiguration): Promise<APIConfiguration> {
-        const start = async (): Promise<APIConfiguration> => {
+    async start(configuration: APIConfiguration): Promise<ConfigurationResult> {
+        const start = async (): Promise<ConfigurationResult> => {
             const config = await this.getConfiguration(configuration);
-            this.configurationResult = await this.tsWebExtension.start(config);
+            const configurationResult = await this.tsWebExtension.start(config);
 
-            return this.checkExceedFiltersLimits(configuration);
+            await this.updateCounters(configurationResult);
+
+            const dynamicRulesStatus = this.getDynamicRulesStatus(configurationResult);
+
+            const result: ConfigurationResult = {
+                staticFilters: configurationResult.staticFilters,
+                dynamicRules: {
+                    ...configurationResult.dynamicRules,
+                    status: dynamicRulesStatus,
+                },
+            };
+
+            return result;
         };
 
         this.waitForStart = start();
@@ -208,36 +232,52 @@ export default class AdguardApi implements AdguardApiInterface {
      * Modifies AdGuard {@link APIConfiguration}.
      *
      * @param configuration {@link APIConfiguration}.
-     * @param skipCheck Whether it is necessary to check whether the limit
-     * is exceeded.
      */
-    async configure(configuration: APIConfiguration, skipCheck?: boolean): Promise<APIConfiguration> {
+    async configure(configuration: APIConfiguration): Promise<ConfigurationResult> {
         const config = await this.getConfiguration(configuration);
-        this.configurationResult = await this.tsWebExtension.configure(config);
 
-        if (skipCheck) {
-            return configuration;
-        }
+        const configurationResult = await this.tsWebExtension.configure(config);
 
-        return this.checkExceedFiltersLimits(configuration);
+        await this.updateCounters(configurationResult);
+
+        const dynamicRulesStatus = this.getDynamicRulesStatus(configurationResult);
+
+        const result: ConfigurationResult = {
+            staticFilters: configurationResult.staticFilters,
+            dynamicRules: {
+                ...configurationResult.dynamicRules,
+                status: dynamicRulesStatus,
+            },
+        };
+
+        return result;
+    }
+
+    /**
+     *
+     * @param configurationResult
+     */
+    private async updateCounters(configurationResult: TsWebExtensionConfigurationResult): Promise<void> {
+        this.availableStaticRulesCount = await chrome.declarativeNetRequest.getAvailableStaticRuleCount();
+        this.enabledStaticFiltersCounter = configurationResult.staticFilters.ruleSets.length;
+        this.enabledStaticFiltersRegexps = configurationResult.staticFilters.ruleSets
+            .reduce((sum, item) => sum + item.getRegexpRulesCount(), 0);
     }
 
     /**
      * Returns information about dynamic rules from current configuration.
      *
+     * @param configurationResult
      * @returns Object {@link DynamicRulesStatus} with counters of dynamic rules.
      */
-    public get dynamicRulesInfo(): DynamicRulesStatus | null {
-        if (!this.configurationResult) {
-            return null;
-        }
-
+    // eslint-disable-next-line class-methods-use-this
+    private getDynamicRulesStatus(configurationResult: TsWebExtensionConfigurationResult): DynamicRulesStatus | null {
         const {
             dynamicRules: {
                 ruleSets: [ruleset],
                 limitations,
             },
-        } = this.configurationResult;
+        } = configurationResult;
 
         if (!ruleset) {
             return null;
@@ -265,45 +305,6 @@ export default class AdguardApi implements AdguardApiInterface {
                 excludedRulesIds: regexpRulesLimitExceedErr?.excludedRulesIds || [],
             },
         };
-    }
-
-    /**
-     * If changed - save new values to store for show warning to user
-     * and save list of last used filters.
-     *
-     * @param configuration {@link APIConfiguration}.
-     * @returns Changed {@link APIConfiguration} if browser disabled some
-     * static filters.
-     */
-    private async checkExceedFiltersLimits(configuration: APIConfiguration): Promise<APIConfiguration> {
-        const wasEnabledIds = configuration.filters.sort((a: number, b: number) => a - b);
-        const nowEnabledIds = (await chrome.declarativeNetRequest.getEnabledRulesets())
-            .map((s) => Number.parseInt(s.slice(RULE_SET_NAME_PREFIX.length), 10))
-            .sort((a: number, b: number) => a - b);
-
-        const isConfigurationChanged = (): boolean => {
-            if (wasEnabledIds.length !== nowEnabledIds.length) {
-                return true;
-            }
-
-            for (let i = 0; i <= wasEnabledIds.length; i += 1) {
-                if (nowEnabledIds[i] !== wasEnabledIds[i]) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        if (isConfigurationChanged()) {
-            const configWithCurrentFilters = { ...configuration, filters: nowEnabledIds };
-
-            await this.configure(configWithCurrentFilters, true);
-
-            return configWithCurrentFilters;
-        }
-
-        return configuration;
     }
 
     /**
@@ -398,12 +399,7 @@ export default class AdguardApi implements AdguardApiInterface {
      * @param filterId
      */
     private canEnableFilterRules(filterId: number): boolean {
-        const filterToEnable = this.filters.find((f) => f.id === filterId);
-        if (!filterToEnable) {
-            return false;
-        }
-
-        const ruleSet = this.ruleSetsCounters.find((r) => r.filterId === filterToEnable.id);
+        const ruleSet = AdguardApi.staticRuleSetsCounters.find((r) => r.filterId === filterId);
         const declarativeRulesCounter = ruleSet?.rulesCount;
         if (declarativeRulesCounter === undefined) {
             return false;
@@ -417,13 +413,7 @@ export default class AdguardApi implements AdguardApiInterface {
      * @param filterId
      */
     private canEnableFilterRegexps(filterId: number): boolean {
-        const filterToEnable = this.filters
-            .find((f) => f.id === filterId);
-        if (!filterToEnable) {
-            return false;
-        }
-
-        const ruleSet = this.ruleSetsCounters.find((r) => r.filterId === filterToEnable.id);
+        const ruleSet = AdguardApi.staticRuleSetsCounters.find((r) => r.filterId === filterId);
         const regexpRulesCounter = ruleSet?.regexpRulesCount;
         if (regexpRulesCounter === undefined) {
             return false;

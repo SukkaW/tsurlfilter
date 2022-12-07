@@ -36,11 +36,14 @@ export declare const configurationValidator: zod.ZodObject<{
      * @see https://adguard.com/en/filterrules.html
      */
     rules: zod.ZodOptional<zod.ZodArray<zod.ZodString, "many">>;
+    verbose: zod.ZodBoolean;
 }, "strip", zod.ZodTypeAny, {
     rules?: string[] | undefined;
+    verbose: boolean;
     filters: number[];
 }, {
     rules?: string[] | undefined;
+    verbose: boolean;
     filters: number[];
 }>;
 export declare type APIConfiguration = zod.infer<typeof configurationValidator>;
