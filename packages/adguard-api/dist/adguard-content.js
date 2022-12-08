@@ -55053,3 +55053,4 @@ const applyExtendedCss = (cssText) => {
 /******/ })()
 ;
 });
+//# sourceMappingURL=adguard-content.js.map

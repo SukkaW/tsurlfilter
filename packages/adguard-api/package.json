@@ -1,6 +1,6 @@
 {
   "name": "@adguard/api",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "This is a TypeScript library that implements AdGuard's extension API",
   "main": "dist/adguard-api.js",
   "typings": "dist/types/background/index.d.ts",
@@ -21,7 +21,8 @@
     "postbuild": "yarn types && node tasks/build-txt",
     "prepush": "yarn build",
     "types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly --outdir dist/types",
-    "check-types": "tsc --project tsconfig.build.json --noemit"
+    "check-types": "tsc --project tsconfig.build.json --noemit",
+    "increment": "yarn version --patch --no-git-tag-version"
   },
   "author": "Adguard",
   "license": "GPL-3.0-only",
@@ -34,8 +35,8 @@
     "zod": "3.19.1"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.19.4",
     "@babel/core": "7.16.0",
+    "@babel/preset-env": "^7.19.4",
     "@babel/preset-typescript": "^7.18.6",
     "@types/webextension-polyfill": "0.9.1",
     "@typescript-eslint/eslint-plugin": "^5.41.0",
