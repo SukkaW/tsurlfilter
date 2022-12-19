@@ -1,8 +1,6 @@
-import { nanoid } from 'nanoid';
-
-const createPolicy = (): TrustedTypePolicy => {
+export const createTrustedTypesPolicy = (): TrustedTypePolicy => {
     const defaultPolicy = {
-        name: `AGPolicy-${nanoid()}`,
+        name: 'AGPolicy',
         createHTML: (input: string): TrustedHTML => {
             return {
                 toJSON: () => JSON.stringify(input),
@@ -24,7 +22,7 @@ const createPolicy = (): TrustedTypePolicy => {
     };
 
     if (window.trustedTypes && window.trustedTypes.createPolicy) {
-        return window.trustedTypes.createPolicy(`AGPolicy-${nanoid()}`, {
+        return window.trustedTypes.createPolicy(defaultPolicy.name, {
             createHTML: (input: string): string => {
                 return input;
             },
@@ -39,8 +37,6 @@ const createPolicy = (): TrustedTypePolicy => {
 
     return defaultPolicy;
 };
-
-export const AGPolicy = createPolicy();
 
 interface CreateHTMLCallback {
     (input: string, args: any[]): string;

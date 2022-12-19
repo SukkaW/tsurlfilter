@@ -7,6 +7,9 @@ import { initAssistant } from './assistant';
 
 export * from '../../common/stealth-helper';
 export * from './cookie-controller';
+export * from './trusted-types-policy';
+
+export { CssHitsCounter, ExtendedCss };
 
 ElementCollapser.start();
 
@@ -51,7 +54,7 @@ const applyExtendedCss = (cssText: string) => {
 /**
  * Runs CookieController
  *
- * * Steps:
+ * Steps:
  * - content script requests matching cookie rules for the frame(in which this script is executed)
  * - service returns matching set of rules data to content script
  * - the rules are applied with TSUrlFilterContentScript.CookieController
