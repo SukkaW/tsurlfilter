@@ -1,5 +1,11 @@
 export const createTrustedTypesPolicy = (): TrustedTypePolicy => {
     const defaultPolicy = {
+        // The name for the trusted-types policy should only be 'AGPolicy',because corelibs can
+        // allow our policy if the server has restricted the creation of a trusted-types policy with
+        // the directive 'Content-Security-Policy: trusted-types <policyName>;`.
+        // If such a header is presented in the server response, corelibs adds permission to create
+        // the 'AGPolicy' policy with the 'allow-duplicates' option to prevent errors.
+        // See AG-18204 for details.
         name: 'AGPolicy',
         createHTML: (input: string): TrustedHTML => {
             return {
@@ -39,15 +45,18 @@ export const createTrustedTypesPolicy = (): TrustedTypePolicy => {
 };
 
 interface CreateHTMLCallback {
-    (input: string, args: any[]): string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (input: string, ...args: any[]): string;
 }
 
 interface CreateScriptCallback {
-    (input: string, args: any[]): string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (input: string, ...args: any[]): string;
 }
 
 interface CreateScriptURLCallback {
-    (input: string, args: any[]): string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (input: string, ...args: any[]): string;
 }
 
 interface TrustedTypePolicyOptions {
@@ -73,9 +82,12 @@ interface TrustedHTML {
 
 interface TrustedTypePolicy {
     readonly name: string;
-    createHTML(input: string, args: any[]): TrustedHTML;
-    createScript(input: string, args: any[]): TrustedScript;
-    createScriptURL(input: string, args: any[]): TrustedScriptURL;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createHTML(input: string, ...args: any[]): TrustedHTML;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createScript(input: string, ...args: any[]): TrustedScript;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createScriptURL(input: string, ...args: any[]): TrustedScriptURL;
 }
 
 interface TrustedTypePolicyFactory {
@@ -85,8 +97,11 @@ interface TrustedTypePolicyFactory {
     createPolicy(policyName: string, policyOptions?: TrustedTypePolicyOptions): TrustedTypePolicy;
     getAttributeType(tagName: string, attribute: string, elementNs?: string, attrNs?: string): string | null;
     getPropertyType(tagName: string, property: string, elementNs?: string): string | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isHTML(value: any): boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isScript(value: any): boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isScriptURL(value: any): boolean;
 }
 
