@@ -27,7 +27,7 @@ Increment:
         - variable:
             not-equals:
               # Stop increment when current branch not 'master'
-              bamboo.planRepository.branchName: master
+              bamboo.planRepository.1.branchName: master
     - checkout:
         force-clean-build: 'true'
     - script:
