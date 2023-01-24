@@ -292,6 +292,17 @@ export class CssHitsCounter {
                     }
 
                     const { target } = mutationRecord;
+
+                    // TODO: Adding two observers causes page crash.
+                    //
+                    // You can reproduce this issue, starting two adblockers
+                    // with enabled 'send statistic' option and navigating to page with blocked cosmetic elements.
+                    //
+                    // When the probe element is removed, the first observer handles the deletion and re-adds it.
+                    // The newly added probe will be removed by the filtering mechanism.
+                    // The second observer will process this deletion and re-add the probe added by the first observer.
+                    // The first observer is triggered to remove the probe of the second observer,
+                    // which causes a memory leak during processing.
                     if (!node.parentNode && target) {
                         // Most likely this is a "probe" element that was added and then
                         // immediately removed from DOM.
