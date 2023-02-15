@@ -1,7 +1,9 @@
+/* eslint-disable class-methods-use-this */
 import { NetworkRule, StringRuleList } from '@adguard/tsurlfilter';
 import { Configuration } from '../../common/configuration';
 import { getDomain } from '../../common/utils/url';
 import { engineApi } from './engine-api';
+import { appContext } from './context';
 
 /**
  * Allowlist service.
@@ -11,9 +13,23 @@ export class AllowlistApi {
 
     domains: string[] = [];
 
-    inverted = false;
+    /**
+     * Is allowlist enabled.
+     *
+     * @returns True if allowlist is enabled, otherwise returns false.
+     */
+    public get enabled(): boolean {
+        return Boolean(appContext.configuration?.settings.allowlistEnabled);
+    }
 
-    enabled = false;
+    /**
+     * Is allowlist inverted.
+     *
+     * @returns True if allowlist is inverted, otherwise returns false.
+     */
+    public get inverted(): boolean {
+        return Boolean(appContext.configuration?.settings.allowlistInverted);
+    }
 
     /**
      * Configures allowlist state based on app configuration.
@@ -21,18 +37,7 @@ export class AllowlistApi {
      * @param configuration App configuration.
      */
     public configure(configuration: Configuration): void {
-        const {
-            allowlist,
-            settings,
-        } = configuration;
-
-        const {
-            allowlistEnabled,
-            allowlistInverted,
-        } = settings;
-
-        this.enabled = allowlistEnabled;
-        this.inverted = allowlistInverted;
+        const { allowlist } = configuration;
 
         const domains: string[] = [];
 
