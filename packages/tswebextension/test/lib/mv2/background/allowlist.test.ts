@@ -1,6 +1,9 @@
 import { NetworkRule, StringRuleList } from '@adguard/tsurlfilter';
 import { AllowlistApi } from '@lib/mv2/background/allowlist';
+import { appContext } from '@lib/mv2/background/context';
 import { engineApi } from '@lib/mv2/background/engine-api';
+import type { Configuration } from '@lib/common';
+
 import { getConfigFixture } from '../../../fixtures/config';
 
 describe('Allowlist Api', () => {
@@ -9,6 +12,15 @@ describe('Allowlist Api', () => {
     beforeEach(() => {
         allowlistApi = new AllowlistApi();
     });
+
+    const setAppContext = (config: Configuration): void => {
+        appContext.isAppStarted = true;
+        appContext.configuration = {
+            filters: [],
+            verbose: config.verbose,
+            settings: config.settings,
+        };
+    };
 
     describe('Parses hostnames from allowlist', () => {
         const cases = [
@@ -23,6 +35,8 @@ describe('Allowlist Api', () => {
             const config = getConfigFixture();
 
             config.allowlist = input;
+
+            setAppContext(config);
 
             allowlistApi.configure(config);
 
@@ -71,6 +85,8 @@ describe('Allowlist Api', () => {
             config.allowlist = ['example.com'];
             config.settings.allowlistEnabled = enabled;
             config.settings.allowlistInverted = inverted;
+
+            setAppContext(config);
 
             allowlistApi.configure(config);
 
@@ -129,6 +145,8 @@ describe('Allowlist Api', () => {
             config.allowlist = allowlist;
             config.settings.allowlistEnabled = true;
             config.settings.allowlistInverted = inverted;
+
+            setAppContext(config);
 
             allowlistApi.configure(config);
 
