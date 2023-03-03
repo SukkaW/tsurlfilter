@@ -38,23 +38,43 @@ export class DomainModifier {
         const permittedDomains: string[] = [];
         const restrictedDomains: string[] = [];
 
-        const parts = domains.split(sep);
-        for (let i = 0; i < parts.length; i += 1) {
-            let domain = parts[i].toLocaleLowerCase();
-            let restricted = false;
-            if (domain.startsWith('~')) {
-                restricted = true;
-                domain = domain.substring(1).trim();
-            }
-
-            if (domain === '') {
-                throw new SyntaxError(`Empty domain specified in "${domains}"`);
-            }
-
-            if (restricted) {
-                restrictedDomains.push(domain);
+        const collectDomain = (rawDomain: string) => {
+            if (rawDomain.startsWith('~')) {
+                // cut `~` before the domain
+                // and save domain as restricted
+                restrictedDomains.push(rawDomain.toLowerCase().substring(1).trim());
             } else {
-                permittedDomains.push(domain);
+                // otherwise save domain as permitted
+                permittedDomains.push(rawDomain.toLowerCase());
+            }
+        };
+
+        let sepIndex;
+        let parsedDomain;
+        let domainsStrToParse = domains;
+
+        while (domainsStrToParse.length) {
+            sepIndex = domainsStrToParse.indexOf(sep);
+            if (sepIndex === -1) {
+                // no `sep` in the domains string
+                collectDomain(domainsStrToParse);
+                domainsStrToParse = '';
+            } else if (sepIndex > 0) {
+                // get the domain before `sep`
+                parsedDomain = domainsStrToParse.slice(0, sepIndex);
+                collectDomain(parsedDomain);
+                // save new version of string left to parse
+                domainsStrToParse = domainsStrToParse.slice(sepIndex + 1);
+                // `sep` ends the domains string
+                // e.g. '$domain=example.com|'
+                if (domainsStrToParse.length === 0) {
+                    throw new SyntaxError(`Empty domain specified in "${domains}" after "${parsedDomain}"`);
+                }
+            } else {
+                // sepIndex === 0 which means that `sep` starts the domains string
+                // e.g. '$domain=|example.com'
+                // or   ',example.com##div'
+                throw new SyntaxError(`Empty domain specified in "${domainsStrToParse}"`);
             }
         }
 
