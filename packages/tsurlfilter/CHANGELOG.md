@@ -1,6 +1,20 @@
 # TSUrlFilter Changelog
 
 
+## v1.0.77
+
+### Changed
+
+- The way rule domains are parsed
+
+
+## v1.0.76
+
+### Fixed
+
+- Avoid cases where two `CssHitsCounter`s try to append and remove the same elements one after another
+
+
 ## v1.0.75
 
 ### Changed
