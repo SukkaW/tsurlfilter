@@ -10,19 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated Scriptlets to v1.9.1
-
-
-## v1.0.76
-
-### Fixed
-
-- Avoid cases where two `CssHitsCounter`s try to append and remove the same elements one after another
-
-
-## v1.0.77
-
-### Changed
-
 - The way rule domains are parsed
 
 
