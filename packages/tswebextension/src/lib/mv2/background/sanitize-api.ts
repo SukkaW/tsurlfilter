@@ -5,7 +5,7 @@ import { RequestContext, BACKGROUND_TAB_ID } from './request';
 import { removeHeader } from './utils';
 
 /**
- * // TODO add documentation.
+ * This API is used to remove traceable data from requests initiated by the background extension.
  */
 export class SanitizeApi {
     /**
