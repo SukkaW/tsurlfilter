@@ -18,6 +18,11 @@ export interface AppInterface<TConfiguration, TConfigurationContext, TConfigurat
     onFilteringLogEvent: EventChannelInterface<FilteringLogEvent>,
 
     /**
+     * Fires when a rule has been created from the helper.
+     */
+    onAssistantCreateRule: EventChannelInterface<string>;
+
+    /**
      * Starts api.
      *
      * @param configuration App configuration.

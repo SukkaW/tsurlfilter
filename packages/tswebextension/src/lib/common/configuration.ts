@@ -1,65 +1,87 @@
 import { z } from 'zod';
 
 /**
- * Stealth mode options schema.
+ * Stealth mode configuration schema.
  */
 export const stealthConfigValidator = z.object({
     /**
-     * Is destruct first-party cookies enabled.
+     * Should the application set a fixed lifetime from
+     * {@link StealthConfig.selfDestructFirstPartyCookiesTime} for first-party
+     * cookies.
      */
     selfDestructFirstPartyCookies: z.boolean(),
 
     /**
-     * Cookie maxAge in minutes.
+     * Time in minutes to delete first-party cookies.
      */
     selfDestructFirstPartyCookiesTime: z.number(),
 
     /**
-     * Is destruct third-party cookies enabled.
+     * Should the application set a fixed lifetime from
+     * {@link StealthConfig.selfDestructThirdPartyCookiesTime} for third-party
+     * cookies.
      */
     selfDestructThirdPartyCookies: z.boolean(),
 
     /**
-     * Cookie maxAge in minutes.
+     * Time in minutes to delete third-party cookies.
      */
     selfDestructThirdPartyCookiesTime: z.number(),
 
     /**
-     * Remove referrer for third-party requests.
+     * Should the application hide the origin referrer in third-party requests
+     * by replacing the referrer url with the request url.
      */
     hideReferrer: z.boolean(),
 
     /**
-     * Hide referrer in case of search engine is referrer.
+     * Should the application hide the original referrer from the search page
+     * containing the search query in third-party queries, replacing
+     * the referrer url with the request url.
      */
     hideSearchQueries: z.boolean(),
 
     /**
-     * Remove X-Client-Data header.
+     * For Google Chrome, it removes the 'X-Client-Data' header from
+     * the requests, which contains information about the browser version
+     * and modifications.
      */
     blockChromeClientData: z.boolean(),
 
     /**
-     * Adding Do-Not-Track (DNT) header.
+     * Includes HTTP headers 'DNT' and 'Sec-GPC' in all requests.
+     *
+     * @see https://en.wikipedia.org/wiki/Do_Not_Track
+     * @see https://globalprivacycontrol.org
      */
     sendDoNotTrack: z.boolean(),
 
     /**
-     * Is WebRTC blocking enabled.
+     * Blocks the possibility of leaking your IP address through WebRTC, even if
+     * you use a proxy server or VPN.
      */
     blockWebRTC: z.boolean(),
 }).strict();
 
+/**
+ * Stealth mode configuration type.
+ * This type is inferred from the {@link stealthConfigValidator} schema.
+ */
 export type StealthConfig = z.infer<typeof stealthConfigValidator>;
 
+/**
+ * Settings configuration schema.
+ */
 export const settingsConfigValidator = z.object({
     /**
-     * Flag specifying if ads for sites would be blocked or allowed.
+     * If this flag is true, the application will work ONLY with domains
+     * from the {@link Configuration.allowlist},
+     * otherwise it will work everywhere EXCLUDING domains from the list.
      */
     allowlistInverted: z.boolean(),
 
     /**
-     * Flag specifying allowlist enable state.
+     * Flag specifying {@link Configuration.allowlist} enable state.
      * We don't use allowlist array length condition for calculate enable state,
      * because it's not cover case with empty list in inverted mode.
      */
@@ -97,17 +119,20 @@ export const settingsConfigValidator = z.object({
     stealth: stealthConfigValidator,
 });
 
-// TODO seems like is not used anywhere
+/**
+ * Settings configuration type.
+ * This type is inferred from the {@link settingsConfigValidator} schema.
+ */
 export type SettingsConfig = z.infer<typeof settingsConfigValidator>;
 
 /**
- * App configuration data schema.
+ * Generic app configuration schema.
  */
 export const configurationValidator = z.object({
     /**
      * List of hostnames or domains of sites, which should be excluded
      * from blocking or which should be included in blocking
-     * depending on the value of allowlistInverted setting value.
+     * depending on the value of {@link SettingsConfig.allowlistInverted} setting value.
      */
     allowlist: z.string().array(),
 
@@ -130,13 +155,8 @@ export const configurationValidator = z.object({
 
 }).strict();
 
-export type Configuration = z.infer<typeof configurationValidator>;
-
 /**
- * Current configuration data, stored in app context.
- *
- * We don't save whole {@link Configuration} object, because filter rule strings are heavyweight.
+ * Generic app configuration type.
+ * This type is inferred from the {@link configurationValidator} schema.
  */
-export type ConfigurationContext =
-    & Omit<Configuration, 'filters' | 'allowlist' | 'userrules' | 'trustedDomains'>
-    & { filters: number[] };
+export type Configuration = z.infer<typeof configurationValidator>;

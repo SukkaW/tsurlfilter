@@ -1,5 +1,4 @@
 /* eslint-disable class-methods-use-this */
-import merge from 'deepmerge';
 
 import { appContext } from './context';
 import { WebRequestApi } from './web-request-api';
@@ -9,7 +8,12 @@ import { resourcesService } from './services/resources-service';
 import { redirectsService } from './services/redirects/redirects-service';
 
 import { messagesApi } from './messages-api';
-import { AppInterface, defaultFilteringLog, logger } from '../../common';
+import {
+    type AppInterface,
+    defaultFilteringLog,
+    logger,
+} from '../../common';
+
 import {
     ConfigurationMV2,
     ConfigurationMV2Context,
@@ -21,16 +25,32 @@ import { RequestEvents } from './request';
 import { TabsCosmeticInjector } from './tabs/tabs-cosmetic-injector';
 
 export interface ManifestV2AppInterface extends AppInterface<ConfigurationMV2, ConfigurationMV2Context, void> {
-    getMessageHandler: () => typeof messagesApi.handleMessage
+    /**
+     * Returns message handler.
+     */
+    getMessageHandler: () => typeof messagesApi.handleMessage;
+
+    /**
+     * Sets prebuild local script rules.
+     *
+     * @see {@link LocalScriptRulesService}
+     * @param localScriptRules JSON object with pre-build JS rules.
+     */
+    setLocalScriptRules: (rules: LocalScriptRules) => void;
 }
 
 /**
  * App implementation for MV2.
  */
 export class TsWebExtension implements ManifestV2AppInterface {
+    /**
+     * Fires on filtering log event.
+     */
     public onFilteringLogEvent = defaultFilteringLog.onLogEvent;
 
-    // TODO add comment when this is used.
+    /**
+     * Fires when a rule has been created from the helper.
+     */
     public onAssistantCreateRule = Assistant.onCreateRule;
 
     /**
@@ -183,27 +203,6 @@ export class TsWebExtension implements ManifestV2AppInterface {
      */
     public setLocalScriptRules(localScriptRules: LocalScriptRules): void {
         localScriptRulesService.setLocalScriptRules(localScriptRules);
-    }
-
-    // TODO check why this is not used or described in the interface?
-    /**
-     * Recursively merges changes to passed {@link ConfigurationMV2}.
-     *
-     * @param configuration Current app configuration.
-     * @param changes Partial configuration data, which will be merged.
-     * @returns New merged configuration.
-     *
-     * Using for immutably update the config object and pass it to {@link configure} or {@link start} method which will
-     * validate the configuration.
-     */
-    static mergeConfigurationMV2(
-        configuration: ConfigurationMV2,
-        changes: Partial<ConfigurationMV2>,
-    ): ConfigurationMV2 {
-        return merge<ConfigurationMV2>(configuration, changes, {
-            // Arrays will be replaced
-            arrayMerge: (_, source) => source,
-        });
     }
 
     /**

@@ -84,7 +84,6 @@
     "@adguard/scriptlets": "^1.9.1",
     "bowser": "2.11.0",
     "commander": "9.4.1",
-    "deepmerge": "4.2.2",
     "fs-extra": "10.1.0",
     "lru_map": "0.4.1",
     "nanoid": "4.0.0",
