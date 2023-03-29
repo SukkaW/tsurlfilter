@@ -36,9 +36,6 @@ This is a TypeScript library that implements AdGuard's content blocking rules.
       - [ DeclarativeConverter](#-declarativeconverter)
         - [Public methods](#public-methods-2)
         - [Problems](#problems)
-      - [ Content script classes](#-content-script-classes)
-      - [ CssHitsCounter](#-csshitscounter)
-        - [Initialization:](#initialization)
   - [Development](#development)
     - [ NPM scripts](#-npm-scripts)
     - [ Excluding peerDependencies](#-excluding-peerdependencies)
@@ -361,37 +358,23 @@ Failed  ||testcases.adguard.com$removeparam=p1case6
 Works   ||testcases.adguard.com$removeparam=p2case6
 ```
 
-#### <a id="content-script-classes"></a> Content script classes
-Classes provided for page context:
-
-#### <a id="css-hits-counter"></a> CssHitsCounter
-Class represents collecting css style hits process.
-
-##### Initialization:
-```
-    const cssHitsCounter = new CssHitsCounter((stats) => {
-        chrome.runtime.sendMessage({type: "saveCssHitStats", stats: JSON.stringify(stats)});
-    });
-```
-Works   ||testcases.adguard.com$removeparam=p1case6|p2case6
-
-Failed  ||testcases.adguard.com$removeparam=p1case6
-Works   ||testcases.adguard.com$removeparam=p2case6
-```
-
 ## Development
+
+This project is part of the `tsurlfilter` monorepo.
+It is highly recommended to use both `lerna` and `nx` for commands, as it will execute scripts in the correct order and can cache dependencies.
+
+```sh
+npx nx run @adguard/tsurlfilter:<script>
+```
 
 ### <a id="npm-scripts"></a> NPM scripts
 
--   `npm t`: Run test suite
--   `npm start`: Run `npm run build` in watch mode
--   `npm run test:watch`: Run test suite in [interactive watch mode](https://jestjs.io/docs/en/cli#--watch)
--   `npm run test:prod`: Run linting and generate coverage
--   `npm run test:benchmarks`: Run benchmark tests, inspect in `chrome://inspect`
--   `npm run build`: Generate bundles and typings, create docs
--   `npm run lint`: Lints code
--   `npm run commit`: Commit using conventional commit style ([husky](https://github.com/typicode/husky) will tell you to use it if you haven't :wink:)
--   `npm run build-extension`: Build sample chrome extension
+-   `t`: Run test suite
+-   `start`: Run `build` in watch mode
+-   `test:watch`: Run test suite in [interactive watch mode](https://jestjs.io/docs/en/cli#--watch)
+-   `test:prod`: Run linting and generate coverage
+-   `build`: Generate bundles and typings, create docs
+-   `lint`: Lints code
 
 ### <a id="excluding-peer-dependencies"></a> Excluding peerDependencies
 

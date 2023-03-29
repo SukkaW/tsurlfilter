@@ -9,12 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [BREAKING CHANGE] Assistant script is separated and dynamically injected. You need to provide it in your project.
 - Update `@adguard/tswebextension` to `v0.0.62`
 
-## [1.2.1]
+
+## [1.2.2] - 2022-12-02
 ### Added
 - Add source maps for bundles
 
 ### Changed
 - Fix filter version comparison bug
+
+
 ## [1.2.0] - 2022-11-25
 ### Added
 - `AdguardApi.create` static method for creating new `AdguardApi` instance.
@@ -22,11 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [BREAKING CHANGE] Global `adguardApi` instance was deleted. Export `AdguardApi` class instead and create new instance by `AdguardApi.create` static method
-  
+
+
 ## [1.1.0] - 2022-11-12
 
 ### Changed
 - Add js rules execution guard for firefox
+
 
 ## [1.0.0] - 2022-11-03
 ### Added
