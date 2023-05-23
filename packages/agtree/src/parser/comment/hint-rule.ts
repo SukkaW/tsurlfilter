@@ -1,10 +1,19 @@
 import {
-    BACKSLASH, CLOSE_PARENTHESIS, HINT_MARKER, HINT_MARKER_LEN, OPEN_PARENTHESIS, SPACE,
+    BACKSLASH,
+    CLOSE_PARENTHESIS,
+    HINT_MARKER,
+    HINT_MARKER_LEN,
+    OPEN_PARENTHESIS,
+    SPACE,
 } from '../../utils/constants';
 import { StringUtils } from '../../utils/string';
 import {
     CommentRuleType,
-    Hint, HintCommentRule, Location, RuleCategory, defaultLocation,
+    Hint,
+    HintCommentRule,
+    Location,
+    RuleCategory,
+    defaultLocation,
 } from '../common';
 import { HintParser } from './hint';
 import { locRange, shiftLoc } from '../../utils/location';

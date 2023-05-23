@@ -24,7 +24,12 @@ import {
 import { StringUtils } from '../../utils/string';
 import {
     AnyExpressionNode,
-    CommentRuleType, Location, PreProcessorCommentRule, RuleCategory, Value, defaultLocation,
+    CommentRuleType,
+    Location,
+    PreProcessorCommentRule,
+    RuleCategory,
+    Value,
+    defaultLocation,
 } from '../common';
 import { LogicalExpressionParser } from '../misc/logical-expression';
 import { AdblockSyntaxError } from '../errors/adblock-syntax-error';

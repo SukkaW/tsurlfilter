@@ -2,9 +2,7 @@
  * @file Element hiding rule body parser
  */
 
-import {
-    fromPlainObject, SelectorList, SelectorListPlain,
-} from '@adguard/ecss-tree';
+import { fromPlainObject, SelectorList, SelectorListPlain } from '@adguard/ecss-tree';
 import { CssTree } from '../../../utils/csstree';
 import { CssTreeParserContext } from '../../../utils/csstree-constants';
 import { defaultLocation, ElementHidingRuleBody } from '../../common';

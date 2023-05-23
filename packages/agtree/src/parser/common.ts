@@ -5,10 +5,7 @@ import {
     SelectorListPlain,
 } from '@adguard/ecss-tree';
 import { AdblockSyntax } from '../utils/adblockers';
-import {
-    CLASSIC_DOMAIN_SEPARATOR,
-    MODIFIER_DOMAIN_SEPARATOR,
-} from '../utils/constants';
+import { CLASSIC_DOMAIN_SEPARATOR, MODIFIER_DOMAIN_SEPARATOR } from '../utils/constants';
 
 /**
  * Represents possible logical expression operators.

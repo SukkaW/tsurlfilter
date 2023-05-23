@@ -5,11 +5,19 @@
 
 import { locRange, shiftLoc } from '../../utils/location';
 import {
-    CLOSE_PARENTHESIS, COMMA, EMPTY, OPEN_PARENTHESIS, SPACE, UNDERSCORE,
+    CLOSE_PARENTHESIS,
+    COMMA,
+    EMPTY,
+    OPEN_PARENTHESIS,
+    SPACE,
+    UNDERSCORE,
 } from '../../utils/constants';
 import { StringUtils } from '../../utils/string';
 import {
-    Hint, Location, Value, defaultLocation,
+    Hint,
+    Location,
+    Value,
+    defaultLocation,
 } from '../common';
 import { AdblockSyntaxError } from '../errors/adblock-syntax-error';
 import { ParameterListParser } from '../misc/parameter-list';

@@ -4,7 +4,10 @@ import { locRange } from '../../utils/location';
 import { EMPTY, SPACE } from '../../utils/constants';
 import { StringUtils } from '../../utils/string';
 import {
-    Agent, Location, Value, defaultLocation,
+    Agent,
+    Location,
+    Value,
+    defaultLocation,
 } from '../common';
 import { AdblockSyntaxError } from '../errors/adblock-syntax-error';
 

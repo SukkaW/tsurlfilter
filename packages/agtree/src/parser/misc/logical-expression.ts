@@ -4,10 +4,17 @@ import {
     AnyOperator,
     ExpressionParenthesisNode,
     ExpressionVariableNode,
-    Location, LocationRange, defaultLocation,
+    Location,
+    LocationRange,
+    defaultLocation,
 } from '../common';
 import {
-    AMPERSAND, CLOSE_PARENTHESIS, EXCLAMATION_MARK, OPEN_PARENTHESIS, PIPE, UNDERSCORE,
+    AMPERSAND,
+    CLOSE_PARENTHESIS,
+    EXCLAMATION_MARK,
+    OPEN_PARENTHESIS,
+    PIPE,
+    UNDERSCORE,
 } from '../../utils/constants';
 import { locRange } from '../../utils/location';
 import { AdblockSyntaxError } from '../errors/adblock-syntax-error';

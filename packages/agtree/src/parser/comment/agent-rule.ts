@@ -1,6 +1,9 @@
 import { locRange, shiftLoc } from '../../utils/location';
 import {
-    CLOSE_SQUARE_BRACKET, OPEN_SQUARE_BRACKET, SEMICOLON, SPACE,
+    CLOSE_SQUARE_BRACKET,
+    OPEN_SQUARE_BRACKET,
+    SEMICOLON,
+    SPACE,
 } from '../../utils/constants';
 import { StringUtils } from '../../utils/string';
 import {

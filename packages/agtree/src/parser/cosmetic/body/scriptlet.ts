@@ -4,7 +4,14 @@
 
 import { AdblockSyntax } from '../../../utils/adblockers';
 import {
-    ADG_SCRIPTLET_MASK, CLOSE_PARENTHESIS, COMMA, EMPTY, OPEN_PARENTHESIS, SEMICOLON, SPACE, UBO_SCRIPTLET_MASK,
+    ADG_SCRIPTLET_MASK,
+    CLOSE_PARENTHESIS,
+    COMMA,
+    EMPTY,
+    OPEN_PARENTHESIS,
+    SEMICOLON,
+    SPACE,
+    UBO_SCRIPTLET_MASK,
 } from '../../../utils/constants';
 import { locRange, shiftLoc } from '../../../utils/location';
 import { StringUtils } from '../../../utils/string';

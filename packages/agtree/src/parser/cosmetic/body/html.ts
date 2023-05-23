@@ -3,12 +3,14 @@
  */
 
 import {
-    fromPlainObject, FunctionNodePlain, generate, SelectorList, SelectorListPlain,
+    fromPlainObject,
+    FunctionNodePlain,
+    generate,
+    SelectorList,
+    SelectorListPlain,
 } from '@adguard/ecss-tree';
 import { AdblockSyntax } from '../../../utils/adblockers';
-import {
-    EMPTY, ESCAPE_CHARACTER,
-} from '../../../utils/constants';
+import { EMPTY, ESCAPE_CHARACTER } from '../../../utils/constants';
 import { CssTree } from '../../../utils/csstree';
 import { CssTreeParserContext } from '../../../utils/csstree-constants';
 import { DOUBLE_QUOTE_MARKER } from '../../../utils/string';

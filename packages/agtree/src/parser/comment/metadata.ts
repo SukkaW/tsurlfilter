@@ -7,7 +7,13 @@ import { METADATA_HEADERS } from '../../converter/metadata';
 import { AdblockSyntax } from '../../utils/adblockers';
 import { COLON, EMPTY, SPACE } from '../../utils/constants';
 import {
-    CommentMarker, CommentRuleType, Location, MetadataCommentRule, RuleCategory, Value, defaultLocation,
+    CommentMarker,
+    CommentRuleType,
+    Location,
+    MetadataCommentRule,
+    RuleCategory,
+    Value,
+    defaultLocation,
 } from '../common';
 import { locRange } from '../../utils/location';
 
