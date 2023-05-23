@@ -3,7 +3,11 @@
  * @see {@link https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/62536}
  */
 
-/** @see {@link https://github.com/csstree/csstree/blob/master/docs/ast.md#node-types} */
+/**
+ * CSSTree node types.
+ *
+ * @see {@link https://github.com/csstree/csstree/blob/master/docs/ast.md#node-types}
+ */
 export enum CssTreeNodeType {
     AnPlusB = 'AnPlusB',
     Atrule = 'Atrule',
@@ -48,42 +52,70 @@ export enum CssTreeNodeType {
     WhiteSpace = 'WhiteSpace',
 }
 
-/** @see {@link https://github.com/csstree/csstree/blob/master/docs/parsing.md#context} */
+/**
+ * Parser context for CSSTree.
+ *
+ * @see {@link https://github.com/csstree/csstree/blob/master/docs/parsing.md#context}
+ */
 export enum CssTreeParserContext {
-    /** Regular stylesheet, should be suitable in most cases (default) */
+    /**
+     * Regular stylesheet, should be suitable in most cases (default)
+     */
     stylesheet = 'stylesheet',
 
-    /** at-rule (e.g. `@media screen`, `print { ... }`) */
+    /**
+     * at-rule (e.g. `@media screen`, `print { ... }`)
+     */
     atrule = 'atrule',
 
-    /** at-rule prelude (screen, print for example above) */
+    /**
+     * at-rule prelude (screen, print for example above)
+     */
     atrulePrelude = 'atrulePrelude',
 
-    /** used to parse comma separated media query list */
+    /**
+     * used to parse comma separated media query list
+     */
     mediaQueryList = 'mediaQueryList',
 
-    /** used to parse media query */
+    /**
+     * used to parse media query
+     */
     mediaQuery = 'mediaQuery',
 
-    /** rule (e.g. `.foo`, `.bar:hover { color: red; border: 1px solid black; }`) */
+    /**
+     * rule (e.g. `.foo`, `.bar:hover { color: red; border: 1px solid black; }`)
+     */
     rule = 'rule',
 
-    /** selector group (`.foo`, `.bar:hover` for rule example) */
+    /**
+     * selector group (`.foo`, `.bar:hover` for rule example)
+     */
     selectorList = 'selectorList',
 
-    /** selector (`.foo` or `.bar:hover` for rule example) */
+    /**
+     * selector (`.foo` or `.bar:hover` for rule example)
+     */
     selector = 'selector',
 
-    /** block with curly braces ({ color: red; border: 1px solid black; } for rule example) */
+    /**
+     * block with curly braces ({ color: red; border: 1px solid black; } for rule example)
+     */
     block = 'block',
 
-    // eslint-disable-next-line max-len
-    /** block content w/o curly braces (`color: red; border: 1px solid black;` for rule example), useful for parsing HTML style attribute value */
+    /**
+     * block content w/o curly braces (`color: red; border: 1px solid black;` for rule example),
+     * useful for parsing HTML style attribute value
+     */
     declarationList = 'declarationList',
 
-    /** declaration (`color: red` or `border: 1px solid black` for rule example) */
+    /**
+     * declaration (`color: red` or `border: 1px solid black` for rule example)
+     */
     declaration = 'declaration',
 
-    /** declaration value (`red` or `1px solid black` for rule example) */
+    /**
+     * declaration value (`red` or `1px solid black` for rule example)
+     */
     value = 'value',
 }

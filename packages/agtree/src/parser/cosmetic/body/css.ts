@@ -53,11 +53,15 @@ const SPECIAL_PSEUDO_CLASSES = [
     REMOVE,
 ];
 
-/** selectorList:style(declarations) or selectorList:remove() */
+/**
+ * `selectorList:style(declarations)` or `selectorList:remove()`
+ */
 // eslint-disable-next-line max-len
 const UBO_CSS_INJECTION_PATTERN = /^(?<selectors>.+)(?:(?<style>:style\()(?<declarations>.+)\)|(?<remove>:remove\(\)))$/;
 
-/** selectorList { declarations } */
+/**
+ * `selectorList { declarations }`
+ */
 const ADG_CSS_INJECTION_PATTERN = /^(?:.+){(?:.+)}$/;
 
 /**
