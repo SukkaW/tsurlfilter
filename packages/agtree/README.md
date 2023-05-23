@@ -5,12 +5,12 @@
     <source
       media="(prefers-color-scheme: dark)"
       srcset="
-        https://cdn.adguard.com/website/github.com/AGLint/aglint_logo_darkmode.svg
+        https://cdn.adtidy.org/website/github.com/AGTree/agtree_darkmode.svg
       "
     />
     <img
       alt="AGTree"
-      src="https://cdn.adguard.com/website/github.com/AGLint/aglint_logo_lightmode.svg"
+      src="https://cdn.adtidy.org/website/github.com/AGTree/agtree_lightmode.svg"
       width="350px"
     />
   </picture>
