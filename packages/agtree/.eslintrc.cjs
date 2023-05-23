@@ -5,6 +5,8 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { join } = require('path');
 
+const MAX_LINE_LENGTH = 120;
+
 module.exports = {
     root: true,
     extends: [
@@ -19,13 +21,13 @@ module.exports = {
         tsconfigRootDir: join(__dirname),
         project: 'tsconfig.eslint.json',
     },
-    plugins: ['import', '@typescript-eslint'],
+    plugins: ['import', '@typescript-eslint', 'import-newlines'],
     rules: {
         'max-len': [
             'error',
             {
-                code: 120,
-                comments: 120,
+                code: MAX_LINE_LENGTH,
+                comments: MAX_LINE_LENGTH,
                 tabWidth: 4,
                 ignoreUrls: true,
                 ignoreTrailingComments: false,
@@ -40,6 +42,7 @@ module.exports = {
             },
         ],
         'import/prefer-default-export': 'off',
+        'import-newlines/enforce': ['error', { items: 3, 'max-len': MAX_LINE_LENGTH }],
         'no-restricted-syntax': ['error', 'LabeledStatement', 'WithStatement'],
         'no-continue': 'off',
         'jsdoc/require-param-type': 'off',
