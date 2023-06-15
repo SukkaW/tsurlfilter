@@ -744,6 +744,7 @@ export class NetworkRule implements rule.IRule {
      * @param pattern
      * @private
      */
+    // FIXME: Why here? Move it to string utils?
     private static hasSpaces(pattern: string): boolean {
         return pattern.indexOf(SPACE) > -1;
     }
@@ -758,8 +759,10 @@ export class NetworkRule implements rule.IRule {
      *
      * @throws error if it fails to parse the rule.
      */
-    // FIXME: accept both string and AST? For example: ruleText: string | NetworkRule
+    // FIXME: accept both string and AST? For example: ruleText: string | NetworkRule. Or string is enough?
+    // FIXME: add some default dummy filter list ID?
     constructor(ruleText: string, filterListId: number) {
+        // FIXME: If we accept AST, we can re-generate ruleText from AST in some cases.
         this.ruleText = ruleText;
         this.filterListId = filterListId;
 
