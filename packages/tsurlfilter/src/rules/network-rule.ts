@@ -4,7 +4,7 @@ import * as rule from './rule';
 import { SimpleRegex } from './simple-regex';
 import { Request } from '../request';
 import { DomainModifier, PIPE_SEPARATOR } from '../modifiers/domain-modifier';
-import { stringArraysEquals, stringArraysHaveIntersection } from '../utils/string-utils';
+import { hasSpaces, stringArraysEquals, stringArraysHaveIntersection } from '../utils/string-utils';
 import { IAdvancedModifier } from '../modifiers/advanced-modifier';
 import { ReplaceModifier } from '../modifiers/replace-modifier';
 import { CspModifier } from '../modifiers/csp-modifier';
@@ -27,7 +27,7 @@ import { DnsTypeModifier } from '../modifiers/dns/dnstype-modifier';
 import { CtagModifier } from '../modifiers/dns/ctag-modifier';
 import { Pattern } from './pattern';
 import { countEnabledBits, getBitCount } from '../utils/bit-utils';
-import { EMPTY_STRING, EQUALS_SIGN, SPACE } from '../common/constants';
+import { EMPTY_STRING, EQUALS_SIGN } from '../common/constants';
 
 /**
  * NetworkRuleOption is the enumeration of various rule options.
@@ -739,17 +739,6 @@ export class NetworkRule implements rule.IRule {
     }
 
     /**
-     * Checks if pattern has spaces
-     * Used in order to do not create network rules from host rules
-     * @param pattern
-     * @private
-     */
-    // FIXME: Why here? Move it to string utils?
-    private static hasSpaces(pattern: string): boolean {
-        return pattern.indexOf(SPACE) > -1;
-    }
-
-    /**
      * Creates an instance of the {@link NetworkRule}.
      * It parses this rule and extracts the rule pattern (see {@link SimpleRegex}),
      * and rule modifiers.
@@ -770,7 +759,7 @@ export class NetworkRule implements rule.IRule {
         this.allowlist = ast.exception;
 
         const pattern = ast.pattern.value;
-        if (pattern && NetworkRule.hasSpaces(pattern)) {
+        if (pattern && hasSpaces(pattern)) {
             throw new SyntaxError('Rule has spaces, seems to be an host rule');
         }
 
