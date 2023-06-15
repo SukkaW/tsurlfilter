@@ -6,4 +6,8 @@ export enum ErrorStatusCodes {
     RemoveparamInversionIsNotSupported = 1005,
 }
 
+// Please keep the variable names in alphabetical order
+export const EMPTY_STRING = '';
+export const EQUALS_SIGN = '=';
 export const SEPARATOR = '|';
+export const SPACE = ' ';

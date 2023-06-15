@@ -6,113 +6,6 @@ import {
     RequestType,
 } from '../../src';
 
-describe('NetworkRule.parseRuleText', () => {
-    it('works when it parses the basic rules properly', () => {
-        let parts = NetworkRule.parseRuleText('||example.org^');
-        expect(parts.pattern).toEqual('||example.org^');
-        expect(parts.options).toBeUndefined();
-        expect(parts.allowlist).toEqual(false);
-
-        parts = NetworkRule.parseRuleText('||example.org^$third-party');
-        expect(parts.pattern).toEqual('||example.org^');
-        expect(parts.options).toEqual('third-party');
-        expect(parts.allowlist).toEqual(false);
-
-        parts = NetworkRule.parseRuleText('@@||example.org^$third-party');
-        expect(parts.pattern).toEqual('||example.org^');
-        expect(parts.options).toEqual('third-party');
-        expect(parts.allowlist).toEqual(true);
-
-        parts = NetworkRule.parseRuleText('@@||example.org/this$is$path$third-party');
-        expect(parts.pattern).toEqual('||example.org/this$is$path');
-        expect(parts.options).toEqual('third-party');
-        expect(parts.allowlist).toEqual(true);
-
-        parts = NetworkRule.parseRuleText('||example.org/this$is$path$third-party');
-        expect(parts.pattern).toEqual('||example.org/this$is$path');
-        expect(parts.options).toEqual('third-party');
-        expect(parts.allowlist).toEqual(false);
-    });
-
-    it('works when it handles regex rules properly', () => {
-        let parts = NetworkRule.parseRuleText('/regex/');
-        expect(parts.pattern).toEqual('/regex/');
-        expect(parts.options).toBeUndefined();
-        expect(parts.allowlist).toEqual(false);
-
-        parts = NetworkRule.parseRuleText('@@/regex/');
-        expect(parts.pattern).toEqual('/regex/');
-        expect(parts.options).toBeUndefined();
-        expect(parts.allowlist).toEqual(true);
-
-        parts = NetworkRule.parseRuleText('@@/regex/$third-party');
-        expect(parts.pattern).toEqual('/regex/');
-        expect(parts.options).toEqual('third-party');
-        expect(parts.allowlist).toEqual(true);
-    });
-
-    it('works when it handles $replace properly', () => {
-        let parts = NetworkRule.parseRuleText('@@/regex/$replace=/test/test2/');
-        expect(parts.pattern).toEqual('/regex/');
-        expect(parts.options).toEqual('replace=/test/test2/');
-        expect(parts.allowlist).toEqual(true);
-
-        parts = NetworkRule.parseRuleText('/regex/$replace=/test/test2/');
-        expect(parts.pattern).toEqual('/regex/');
-        expect(parts.options).toEqual('replace=/test/test2/');
-        expect(parts.allowlist).toEqual(false);
-    });
-
-    it('works when it handles delimiter in $removeparam rules properly', () => {
-        let parts = NetworkRule.parseRuleText('||example.com$removeparam=/regex/');
-        expect(parts.pattern).toEqual('||example.com');
-        expect(parts.options).toEqual('removeparam=/regex/');
-
-        parts = NetworkRule.parseRuleText('||example.com$removeparam=/regex\\$/');
-        expect(parts.pattern).toEqual('||example.com');
-        expect(parts.options).toEqual('removeparam=/regex\\$/');
-
-        /*
-         It looks like '$/',
-         There is another slash character (/) to the left of it,
-         There is another unescaped $ character to the left of that slash character.
-        */
-        parts = NetworkRule.parseRuleText('||example.com$removeparam=/regex$/');
-        expect(parts.pattern).toEqual('||example.com');
-        expect(parts.options).toEqual('removeparam=/regex$/');
-    });
-
-    it('works when it handles escaped delimiter properly', () => {
-        let parts = NetworkRule.parseRuleText('||example.org\\$smth');
-        expect(parts.pattern).toEqual('||example.org\\$smth');
-        expect(parts.options).toBeUndefined();
-        expect(parts.allowlist).toEqual(false);
-
-        parts = NetworkRule.parseRuleText('/regex/$replace=/test\\$/test2/');
-        expect(parts.pattern).toEqual('/regex/');
-        expect(parts.options).toEqual('replace=/test\\$/test2/');
-        expect(parts.allowlist).toEqual(false);
-    });
-
-    it('works when it handles $all modifier', () => {
-        let parts = NetworkRule.parseRuleText('||example.org^$all');
-        expect(parts.pattern).toEqual('||example.org^');
-        expect(parts.options).toEqual('all');
-        expect(parts.allowlist).toEqual(false);
-
-        parts = NetworkRule.parseRuleText('@@||example.com^$all');
-        expect(parts.pattern).toEqual('||example.com^');
-        expect(parts.options).toEqual('all');
-        expect(parts.allowlist).toEqual(true);
-    });
-
-    it('works when it handles incorrect rules properly', () => {
-        expect(() => {
-            NetworkRule.parseRuleText('@@');
-        }).toThrow(new SyntaxError('Rule is too short'));
-    });
-});
-
 describe('NetworkRule constructor', () => {
     it('works when it creates simple rules properly', () => {
         const rule = new NetworkRule('||example.org^', 0);
@@ -172,7 +65,7 @@ describe('NetworkRule constructor', () => {
     it('works when it handles empty $domain modifier', () => {
         expect(() => {
             new NetworkRule('||example.org^$domain=', 0);
-        }).toThrow(new Error('Modifier $domain cannot be empty'));
+        }).toThrow(new Error('Modifier value can\'t be empty'));
     });
 
     it('works when it handles empty domain inside a $domain modifier', () => {
