@@ -124,7 +124,7 @@ describe('NetworkRule constructor', () => {
 
         expect(() => {
             new NetworkRule('||baddomain.com^$method=', 0);
-        }).toThrow(new SyntaxError('$method modifier value cannot be empty'));
+        }).toThrow(new SyntaxError('Modifier value can\'t be empty'));
 
         expect(() => {
             new NetworkRule('||baddomain.com^$method=invalid', 0);
