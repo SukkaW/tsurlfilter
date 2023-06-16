@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- TODO: manually add compare links for version to the end of the file -->
 <!-- e.g. [1.0.77]: https://github.com/AdguardTeam/tsurlfilter/compare/tsurlfilter-v1.0.76...tsurlfilter-v1.0.77 -->
 
+## [2.1.1] - 2023-06-16
+
+### Added
+
+- new `$method` modifier to match requests by HTTP method.
+- new `NetworkRule` method `isFilteringDisabled` to check if rule is completely disabled filtering.
+
 
 ## [2.1.0] - 2023-06-14
 
@@ -27,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `$redirect` rules are higher in priority than blocking rules.
 - Exceptions are higher in priority than `$redirect` and blocking rules.
 - `$important` is higher than all others.
+
 
 ## [2.0.7] - 2023-06-14
 
