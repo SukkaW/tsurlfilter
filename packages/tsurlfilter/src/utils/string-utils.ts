@@ -1,4 +1,4 @@
-import { SPACE } from "../common/constants";
+import { SPACE } from '../common/constants';
 
 /**
  * Splits the string by the delimiter, ignoring escaped delimiters
