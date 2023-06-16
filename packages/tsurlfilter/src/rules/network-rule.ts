@@ -18,6 +18,7 @@ import {
     ESCAPE_CHARACTER,
     MASK_ALLOWLIST,
     NETWORK_RULE_OPTIONS,
+    NOT_MARK,
     OPTIONS_DELIMITER,
 } from './network-rule-options';
 import { RequestType } from '../request-type';
@@ -1031,439 +1032,297 @@ export class NetworkRule implements rule.IRule {
             }
         }
 
-        if (exception) {
-            // Exceptional modifiers
-            switch (optionName) {
-                // General modifiers
-                // --------------------
-                // $~first-party
-                case OPTIONS.FIRST_PARTY:
-                    this.setOptionEnabled(NetworkRuleOption.ThirdParty, true);
-                    break;
-
-                // $~third-party
-                case OPTIONS.THIRD_PARTY:
-                    this.setOptionEnabled(NetworkRuleOption.ThirdParty, false);
-                    break;
-
-                // $~match-case
-                case OPTIONS.MATCH_CASE:
-                    this.setOptionEnabled(NetworkRuleOption.MatchCase, false);
-                    break;
-
-                // $~document, $~doc
-                case OPTIONS.DOCUMENT:
-                case OPTIONS.DOC:
+        switch (optionName) {
+            // General options
+            // $first-party, $~first-party
+            case OPTIONS.FIRST_PARTY:
+                this.setOptionEnabled(NetworkRuleOption.ThirdParty, exception);
+                break;
+            // $third-party, $~third-party
+            case OPTIONS.THIRD_PARTY:
+                this.setOptionEnabled(NetworkRuleOption.ThirdParty, !exception);
+                break;
+            // $match-case, $~match-case
+            case OPTIONS.MATCH_CASE:
+                this.setOptionEnabled(NetworkRuleOption.MatchCase, !exception);
+                break;
+            // $important
+            case OPTIONS.IMPORTANT:
+                this.setOptionEnabled(NetworkRuleOption.Important, true);
+                break;
+            // $domain
+            case OPTIONS.DOMAIN:
+                // eslint-disable-next-line no-case-declarations
+                const domainModifier = new DomainModifier(optionValue, PIPE_SEPARATOR);
+                this.permittedDomains = domainModifier.permittedDomains;
+                this.restrictedDomains = domainModifier.restrictedDomains;
+                break;
+            // $denyallow
+            case OPTIONS.DENYALLOW:
+                this.setDenyAllowDomains(optionValue);
+                break;
+            // $method modifier
+            case OPTIONS.METHOD: {
+                this.setOptionEnabled(NetworkRuleOption.Method, true);
+                this.methodModifier = new MethodModifier(optionValue);
+                break;
+            }
+            // Document-level allowlist rules
+            // $elemhide
+            case OPTIONS.ELEMHIDE:
+                this.setOptionEnabled(NetworkRuleOption.Elemhide, true);
+                this.setRequestType(RequestType.Document, true);
+                this.setRequestType(RequestType.SubDocument, true);
+                break;
+            // $generichide
+            case OPTIONS.GENERICHIDE:
+                this.setOptionEnabled(NetworkRuleOption.Generichide, true);
+                this.setRequestType(RequestType.Document, true);
+                this.setRequestType(RequestType.SubDocument, true);
+                break;
+            // $specifichide
+            case OPTIONS.SPECIFICHIDE:
+                this.setOptionEnabled(NetworkRuleOption.Specifichide, true);
+                this.setRequestType(RequestType.Document, true);
+                this.setRequestType(RequestType.SubDocument, true);
+                break;
+            // $genericblock
+            case OPTIONS.GENERICBLOCK:
+                this.setOptionEnabled(NetworkRuleOption.Genericblock, true);
+                this.setRequestType(RequestType.Document, true);
+                this.setRequestType(RequestType.SubDocument, true);
+                break;
+            // $jsinject
+            case OPTIONS.JSINJECT:
+                this.setOptionEnabled(NetworkRuleOption.Jsinject, true);
+                this.setRequestType(RequestType.Document, true);
+                this.setRequestType(RequestType.SubDocument, true);
+                break;
+            // $urlblock
+            case OPTIONS.URLBLOCK:
+                this.setOptionEnabled(NetworkRuleOption.Urlblock, true);
+                this.setRequestType(RequestType.Document, true);
+                this.setRequestType(RequestType.SubDocument, true);
+                break;
+            // $content
+            case OPTIONS.CONTENT:
+                this.setOptionEnabled(NetworkRuleOption.Content, true);
+                this.setRequestType(RequestType.Document, true);
+                this.setRequestType(RequestType.SubDocument, true);
+                break;
+            // $document, $doc
+            case OPTIONS.DOCUMENT:
+            case OPTIONS.DOC:
+                if (exception) {
                     this.setRequestType(RequestType.Document, false);
                     break;
-
-                // Content type modifiers
-                // --------------------
-                // $~script
-                case OPTIONS.SCRIPT:
-                    this.setRequestType(RequestType.Script, false);
-                    break;
-
-                // $~stylesheet
-                case OPTIONS.STYLESHEET:
-                    this.setRequestType(RequestType.Stylesheet, false);
-                    break;
-
-                // $~subdocument
-                case OPTIONS.SUBDOCUMENT:
-                    this.setRequestType(RequestType.SubDocument, false);
-                    break;
-
-                // $~object
-                case OPTIONS.OBJECT:
-                    this.setRequestType(RequestType.Object, false);
-                    break;
-
-                // $~image
-                case OPTIONS.IMAGE:
-                    this.setRequestType(RequestType.Image, false);
-                    break;
-
-                // $~xmlhttprequest
-                case OPTIONS.XMLHTTPREQUEST:
-                    this.setRequestType(RequestType.XmlHttpRequest, false);
-                    break;
-
-                // $~media
-                case OPTIONS.MEDIA:
-                    this.setRequestType(RequestType.Media, false);
-                    break;
-
-                // $~font
-                case OPTIONS.FONT:
-                    this.setRequestType(RequestType.Font, false);
-                    break;
-
-                // $~websocket
-                case OPTIONS.WEBSOCKET:
-                    this.setRequestType(RequestType.WebSocket, false);
-                    break;
-
-                // $~other
-                case OPTIONS.OTHER:
-                    this.setRequestType(RequestType.Other, false);
-                    break;
-
-                // $~ping
-                case OPTIONS.PING:
-                    this.setRequestType(RequestType.Ping, false);
-                    break;
-
-                // Special modifiers
-                // --------------------
-                // $~extension
-                case OPTIONS.EXTENSION:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension doesn\'t support $extension modifier');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.Extension, false);
-                    break;
-
-                default: {
-                    // Clear empty values
-                    const modifierView = [optionName, optionValue]
-                        .filter((i) => i)
-                        .join(EQUALS_SIGN);
-                    throw new SyntaxError(`Unknown modifier: ${modifierView}`);
                 }
-            }
-        } else {
-            // Regular modifiers
-            switch (optionName) {
-                // General modifiers
-                // --------------------
-                // $third-party
-                case OPTIONS.THIRD_PARTY:
-                    this.setOptionEnabled(NetworkRuleOption.ThirdParty, true);
-                    break;
 
-                // $first-party
-                case OPTIONS.FIRST_PARTY:
-                    this.setOptionEnabled(NetworkRuleOption.ThirdParty, false);
-                    break;
-
-                // $match-case
-                case OPTIONS.MATCH_CASE:
-                    this.setOptionEnabled(NetworkRuleOption.MatchCase, true);
-                    break;
-
-                // $important
-                case OPTIONS.IMPORTANT:
-                    this.setOptionEnabled(NetworkRuleOption.Important, true);
-                    break;
-
-                // $domain
-                case OPTIONS.DOMAIN:
-                    // eslint-disable-next-line no-case-declarations
-                    const domainModifier = new DomainModifier(optionValue, PIPE_SEPARATOR);
-                    this.permittedDomains = domainModifier.permittedDomains;
-                    this.restrictedDomains = domainModifier.restrictedDomains;
-                    break;
-
-                // $denyallow
-                case OPTIONS.DENYALLOW:
-                    this.setDenyAllowDomains(optionValue);
-                    break;
-
-                // Document-level allowlist rules
-                // --------------------
-                // $elemhide
-                case OPTIONS.ELEMHIDE:
-                    this.setOptionEnabled(NetworkRuleOption.Elemhide, true);
-                    this.setRequestType(RequestType.Document, true);
-                    this.setRequestType(RequestType.SubDocument, true);
-                    break;
-
-                // $generichide
-                case OPTIONS.GENERICHIDE:
-                    this.setOptionEnabled(NetworkRuleOption.Generichide, true);
-                    this.setRequestType(RequestType.Document, true);
-                    this.setRequestType(RequestType.SubDocument, true);
-                    break;
-
-                // $specifichide
-                case OPTIONS.SPECIFICHIDE:
-                    this.setOptionEnabled(NetworkRuleOption.Specifichide, true);
-                    this.setRequestType(RequestType.Document, true);
-                    this.setRequestType(RequestType.SubDocument, true);
-                    break;
-
-                // $genericblock
-                case OPTIONS.GENERICBLOCK:
-                    this.setOptionEnabled(NetworkRuleOption.Genericblock, true);
-                    this.setRequestType(RequestType.Document, true);
-                    this.setRequestType(RequestType.SubDocument, true);
-                    break;
-
-                // $jsinject
-                case OPTIONS.JSINJECT:
-                    this.setOptionEnabled(NetworkRuleOption.Jsinject, true);
-                    this.setRequestType(RequestType.Document, true);
-                    this.setRequestType(RequestType.SubDocument, true);
-                    break;
-
-                // $urlblock
-                case OPTIONS.URLBLOCK:
-                    this.setOptionEnabled(NetworkRuleOption.Urlblock, true);
-                    this.setRequestType(RequestType.Document, true);
-                    this.setRequestType(RequestType.SubDocument, true);
-                    break;
-
-                // $content
-                case OPTIONS.CONTENT:
-                    this.setOptionEnabled(NetworkRuleOption.Content, true);
-                    this.setRequestType(RequestType.Document, true);
-                    this.setRequestType(RequestType.SubDocument, true);
-                    break;
-
-                // $document, $doc
-                case OPTIONS.DOCUMENT:
-                case OPTIONS.DOC:
-                    this.setRequestType(RequestType.Document, true);
-                    // In the case of allowlist rules $document implicitly includes
-                    // all these modifiers: `$content`, `$elemhide`, `$jsinject`,
-                    // `$urlblock`.
-                    if (this.isAllowlist()) {
-                        this.setOptionEnabled(NetworkRuleOption.Elemhide, true, true);
-                        this.setOptionEnabled(NetworkRuleOption.Jsinject, true, true);
-                        this.setOptionEnabled(NetworkRuleOption.Urlblock, true, true);
-                        this.setOptionEnabled(NetworkRuleOption.Content, true, true);
-                    }
-                    break;
-
-                // $stealh
-                case OPTIONS.STEALTH:
-                    this.setOptionEnabled(NetworkRuleOption.Stealth, true);
-                    break;
-
-                // $popup
-                case OPTIONS.POPUP:
-                    this.setRequestType(RequestType.Document, true);
-                    this.setOptionEnabled(NetworkRuleOption.Popup, true);
-                    break;
-
-                // Content type modifiers
-                // --------------------
-                // $script
-                case OPTIONS.SCRIPT:
-                    this.setRequestType(RequestType.Script, true);
-                    break;
-
-                // $stylesheet
-                case OPTIONS.STYLESHEET:
-                    this.setRequestType(RequestType.Stylesheet, true);
-                    break;
-
-                // $subdocument
-                case OPTIONS.SUBDOCUMENT:
-                    this.setRequestType(RequestType.SubDocument, true);
-                    break;
-
-                // $object
-                case OPTIONS.OBJECT:
-                    this.setRequestType(RequestType.Object, true);
-                    break;
-
-                // $image
-                case OPTIONS.IMAGE:
-                    this.setRequestType(RequestType.Image, true);
-                    break;
-
-                // $xmlhttprequest
-                case OPTIONS.XMLHTTPREQUEST:
-                    this.setRequestType(RequestType.XmlHttpRequest, true);
-                    break;
-
-                // $media
-                case OPTIONS.MEDIA:
-                    this.setRequestType(RequestType.Media, true);
-                    break;
-
-                // $font
-                case OPTIONS.FONT:
-                    this.setRequestType(RequestType.Font, true);
-                    break;
-
-                // $websocket
-                case OPTIONS.WEBSOCKET:
-                    this.setRequestType(RequestType.WebSocket, true);
-                    break;
-
-                // $other
-                case OPTIONS.OTHER:
-                    this.setRequestType(RequestType.Other, true);
-                    break;
-
-                // $ping
-                case OPTIONS.PING:
-                    this.setRequestType(RequestType.Ping, true);
-                    break;
-
-                // Special modifiers
-                // --------------------
-                // $badfilter
-                case OPTIONS.BADFILTER:
-                    this.setOptionEnabled(NetworkRuleOption.Badfilter, true);
-                    break;
-
-                // $csp
-                case OPTIONS.CSP:
-                    this.setOptionEnabled(NetworkRuleOption.Csp, true);
-                    this.advancedModifier = new CspModifier(optionValue, this.isAllowlist());
-                    break;
-
-                // $replace
-                case OPTIONS.REPLACE:
-                    this.setOptionEnabled(NetworkRuleOption.Replace, true);
-                    this.advancedModifier = new ReplaceModifier(optionValue);
-                    break;
-
-                // $cookie
-                case OPTIONS.COOKIE:
-                    this.setOptionEnabled(NetworkRuleOption.Cookie, true);
-                    this.advancedModifier = new CookieModifier(optionValue);
-                    break;
-
-                // $redirect
-                case OPTIONS.REDIRECT:
-                    this.setOptionEnabled(NetworkRuleOption.Redirect, true);
-                    this.advancedModifier = new RedirectModifier(optionValue, this.ruleText, this.isAllowlist());
-                    break;
-
-                // $redirect-rule
-                case OPTIONS.REDIRECTRULE:
-                    this.setOptionEnabled(NetworkRuleOption.Redirect, true);
-                    this.advancedModifier = new RedirectModifier(optionValue, this.ruleText, this.isAllowlist(), true);
-                    break;
-
-                // $removeparam
-                case OPTIONS.REMOVEPARAM:
-                    this.setOptionEnabled(NetworkRuleOption.RemoveParam, true);
-                    this.advancedModifier = new RemoveParamModifier(optionValue);
-                    break;
-
-                // $removeheader
-                case OPTIONS.REMOVEHEADER:
-                    this.setOptionEnabled(NetworkRuleOption.RemoveHeader, true);
-                    this.advancedModifier = new RemoveHeaderModifier(optionValue, this.isAllowlist());
-                    break;
-
-                // $jsonprune
-                // simple validation of jsonprune rules for compiler
-                // https://github.com/AdguardTeam/FiltersCompiler/issues/168
-                case OPTIONS.JSONPRUNE:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension does not support $jsonprune modifier yet');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.JsonPrune, true);
-                    // TODO: should be properly implemented later
-                    // https://github.com/AdguardTeam/tsurlfilter/issues/71
-                    break;
-
-                // $hls
-                // simple validation of hls rules for compiler
-                // https://github.com/AdguardTeam/FiltersCompiler/issues/169
-                case OPTIONS.HLS:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension does not support $hls modifier yet');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.Hls, true);
-                    // TODO: should be properly implemented later
-                    // https://github.com/AdguardTeam/tsurlfilter/issues/72
-                    break;
-
-                // Dns modifiers
-                // --------------------
-                // $client
-                case OPTIONS.CLIENT:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension doesn\'t support $client modifier');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.Client, true);
-                    this.advancedModifier = new ClientModifier(optionValue);
-                    break;
-
-                // $dnsrewrite
-                case OPTIONS.DNSREWRITE:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension doesn\'t support $dnsrewrite modifier');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.DnsRewrite, true);
-                    this.advancedModifier = new DnsRewriteModifier(optionValue);
-                    break;
-
-                // $dnstype
-                case OPTIONS.DNSTYPE:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension doesn\'t support $dnstype modifier');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.DnsType, true);
-                    this.advancedModifier = new DnsTypeModifier(optionValue);
-                    break;
-
-                // $ctag
-                case OPTIONS.CTAG:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension doesn\'t support $ctag modifier');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.Ctag, true);
-                    this.advancedModifier = new CtagModifier(optionValue);
-                    break;
-
-                // $app
-                case OPTIONS.APP:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension doesn\'t support $app modifier');
-                    }
-                    this.appModifier = new AppModifier(optionValue);
-                    break;
-
-                // $network
-                case OPTIONS.NETWORK:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension doesn\'t support $network modifier');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.Network, true);
-                    break;
-
-                // $extension
-                case OPTIONS.EXTENSION:
-                    if (isCompatibleWith(CompatibilityTypes.Extension)) {
-                        throw new SyntaxError('Extension doesn\'t support $extension modifier');
-                    }
-                    this.setOptionEnabled(NetworkRuleOption.Extension, true);
-                    break;
-
-                // $all
-                case OPTIONS.ALL:
-                    if (this.isAllowlist()) {
-                        throw new SyntaxError('Rule with $all modifier can not be allowlist rule');
-                    }
-                    // Set all request types
-                    Object.values(RequestType).forEach((type) => {
-                        this.setRequestType(type, true);
-                    });
-                    this.setOptionEnabled(NetworkRuleOption.Popup, true);
-                    break;
-
-                // $empty and $mp4
-                // Deprecated in favor of $redirect
-                case OPTIONS.EMPTY:
-                case OPTIONS.MP4:
-                    // Do nothing.
-                    break;
-                default: {
-                    // Clear empty values
-                    const modifierView = [optionName, optionValue]
-                        .filter((i) => i)
-                        .join(EQUALS_SIGN);
-                    throw new SyntaxError(`Unknown modifier: ${modifierView}`);
+                this.setRequestType(RequestType.Document, true);
+                // In the case of allowlist rules $document implicitly includes
+                // all these modifiers: `$content`, `$elemhide`, `$jsinject`,
+                // `$urlblock`.
+                if (this.isAllowlist()) {
+                    this.setOptionEnabled(NetworkRuleOption.Elemhide, true, true);
+                    this.setOptionEnabled(NetworkRuleOption.Jsinject, true, true);
+                    this.setOptionEnabled(NetworkRuleOption.Urlblock, true, true);
+                    this.setOptionEnabled(NetworkRuleOption.Content, true, true);
                 }
+                break;
+            // $stealh
+            case OPTIONS.STEALTH:
+                this.setOptionEnabled(NetworkRuleOption.Stealth, true);
+                break;
+            // $popup
+            case OPTIONS.POPUP:
+                this.setRequestType(RequestType.Document, true);
+                this.setOptionEnabled(NetworkRuleOption.Popup, true);
+                break;
+            // Content type options
+            // $script, $~script
+            case OPTIONS.SCRIPT:
+                this.setRequestType(RequestType.Script, !exception);
+                break;
+            // $stylesheet, $~stylesheet
+            case OPTIONS.STYLESHEET:
+                this.setRequestType(RequestType.Stylesheet, !exception);
+                break;
+            // $subdocument, $~subdocument
+            case OPTIONS.SUBDOCUMENT:
+                this.setRequestType(RequestType.SubDocument, !exception);
+                break;
+            // $object, $~object
+            case OPTIONS.OBJECT:
+                this.setRequestType(RequestType.Object, !exception);
+                break;
+            // $image, $~image
+            case OPTIONS.IMAGE:
+                this.setRequestType(RequestType.Image, !exception);
+                break;
+            // $xmlhttprequest, $~xmlhttprequest
+            case OPTIONS.XMLHTTPREQUEST:
+                this.setRequestType(RequestType.XmlHttpRequest, !exception);
+                break;
+            // $media, $~media
+            case OPTIONS.MEDIA:
+                this.setRequestType(RequestType.Media, !exception);
+                break;
+            // $font, $~font
+            case OPTIONS.FONT:
+                this.setRequestType(RequestType.Font, !exception);
+                break;
+            // $websocket, $~websocket
+            case OPTIONS.WEBSOCKET:
+                this.setRequestType(RequestType.WebSocket, !exception);
+                break;
+            // $other, $~other
+            case OPTIONS.OTHER:
+                this.setRequestType(RequestType.Other, !exception);
+                break;
+            // $ping, $~ping
+            case OPTIONS.PING:
+                this.setRequestType(RequestType.Ping, !exception);
+                break;
+            // Special modifiers
+            // $badfilter
+            case OPTIONS.BADFILTER:
+                this.setOptionEnabled(NetworkRuleOption.Badfilter, true);
+                break;
+            // $csp
+            case OPTIONS.CSP:
+                this.setOptionEnabled(NetworkRuleOption.Csp, true);
+                this.advancedModifier = new CspModifier(optionValue, this.isAllowlist());
+                break;
+            // $replace
+            case OPTIONS.REPLACE:
+                this.setOptionEnabled(NetworkRuleOption.Replace, true);
+                this.advancedModifier = new ReplaceModifier(optionValue);
+                break;
+            // $cookie
+            case OPTIONS.COOKIE:
+                this.setOptionEnabled(NetworkRuleOption.Cookie, true);
+                this.advancedModifier = new CookieModifier(optionValue);
+                break;
+            // $redirect
+            case OPTIONS.REDIRECT:
+                this.setOptionEnabled(NetworkRuleOption.Redirect, true);
+                this.advancedModifier = new RedirectModifier(optionValue, this.ruleText, this.isAllowlist());
+                break;
+            // $redirect-rule
+            case OPTIONS.REDIRECTRULE:
+                this.setOptionEnabled(NetworkRuleOption.Redirect, true);
+                this.advancedModifier = new RedirectModifier(optionValue, this.ruleText, this.isAllowlist(), true);
+                break;
+            // $removeparam
+            case OPTIONS.REMOVEPARAM:
+                this.setOptionEnabled(NetworkRuleOption.RemoveParam, true);
+                this.advancedModifier = new RemoveParamModifier(optionValue);
+                break;
+            // $removeheader
+            case OPTIONS.REMOVEHEADER:
+                this.setOptionEnabled(NetworkRuleOption.RemoveHeader, true);
+                this.advancedModifier = new RemoveHeaderModifier(optionValue, this.isAllowlist());
+                break;
+            // $jsonprune
+            // simple validation of jsonprune rules for compiler
+            // https://github.com/AdguardTeam/FiltersCompiler/issues/168
+            case OPTIONS.JSONPRUNE:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension does not support $jsonprune modifier yet');
+                }
+                this.setOptionEnabled(NetworkRuleOption.JsonPrune, true);
+                // TODO: should be properly implemented later
+                // https://github.com/AdguardTeam/tsurlfilter/issues/71
+                break;
+            // $hls
+            // simple validation of hls rules for compiler
+            // https://github.com/AdguardTeam/FiltersCompiler/issues/169
+            case OPTIONS.HLS:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension does not support $hls modifier yet');
+                }
+                this.setOptionEnabled(NetworkRuleOption.Hls, true);
+                // TODO: should be properly implemented later
+                // https://github.com/AdguardTeam/tsurlfilter/issues/72
+                break;
+            // Dns modifiers
+            // $client
+            case OPTIONS.CLIENT:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension doesn\'t support $client modifier');
+                }
+                this.setOptionEnabled(NetworkRuleOption.Client, true);
+                this.advancedModifier = new ClientModifier(optionValue);
+                break;
+            // $dnsrewrite
+            case OPTIONS.DNSREWRITE:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension doesn\'t support $dnsrewrite modifier');
+                }
+                this.setOptionEnabled(NetworkRuleOption.DnsRewrite, true);
+                this.advancedModifier = new DnsRewriteModifier(optionValue);
+                break;
+            // $dnstype
+            case OPTIONS.DNSTYPE:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension doesn\'t support $dnstype modifier');
+                }
+                this.setOptionEnabled(NetworkRuleOption.DnsType, true);
+                this.advancedModifier = new DnsTypeModifier(optionValue);
+                break;
+            // $ctag
+            case OPTIONS.CTAG:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension doesn\'t support $ctag modifier');
+                }
+                this.setOptionEnabled(NetworkRuleOption.Ctag, true);
+                this.advancedModifier = new CtagModifier(optionValue);
+                break;
+            // $app
+            case OPTIONS.APP:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension doesn\'t support $app modifier');
+                }
+                this.appModifier = new AppModifier(optionValue);
+                break;
+            // $network
+            case OPTIONS.NETWORK:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension doesn\'t support $network modifier');
+                }
+                this.setOptionEnabled(NetworkRuleOption.Network, true);
+                break;
+            // $extension, $~extension
+            case OPTIONS.EXTENSION:
+                if (isCompatibleWith(CompatibilityTypes.Extension)) {
+                    throw new SyntaxError('Extension doesn\'t support $extension modifier');
+                }
+                this.setOptionEnabled(NetworkRuleOption.Extension, !exception);
+                break;
+            // $all
+            case OPTIONS.ALL:
+                if (this.isAllowlist()) {
+                    throw new SyntaxError('Rule with $all modifier can not be allowlist rule');
+                }
+                // Set all request types
+                Object.values(RequestType).forEach((type) => {
+                    this.setRequestType(type, true);
+                });
+                this.setOptionEnabled(NetworkRuleOption.Popup, true);
+                break;
+            // $empty and $mp4
+            // Deprecated in favor of $redirect
+            case OPTIONS.EMPTY:
+            case OPTIONS.MP4:
+                // Do nothing.
+                break;
+            default: {
+                // clear empty values
+                let modifierView = exception ? `${NOT_MARK}${optionName}` : optionName;
+                if (optionValue && optionValue.length > 0) {
+                    modifierView += `${EQUALS_SIGN}${optionValue}`;
+                }
+                throw new SyntaxError(`Unknown modifier: ${modifierView}`);
             }
         }
     }
