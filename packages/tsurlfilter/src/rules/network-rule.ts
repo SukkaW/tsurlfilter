@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { NetworkRuleParser, ModifierList } from '@adguard/agtree';
+import { NetworkRuleParser, ModifierList, NetworkRule as NetworkRuleNode } from '@adguard/agtree';
 import * as rule from './rule';
 import { SimpleRegex } from './simple-regex';
 import { Request } from '../request';
@@ -819,19 +819,34 @@ export class NetworkRule implements rule.IRule {
      * It parses this rule and extracts the rule pattern (see {@link SimpleRegex}),
      * and rule modifiers.
      *
-     * @param ruleText - original rule text.
+     * @param inputRule - String or AST of the rule.
      * @param filterListId - ID of the filter list this rule belongs to.
      *
      * @throws error if it fails to parse the rule.
      */
-    // FIXME: accept both string and AST? For example: ruleText: string | NetworkRule. Or string is enough?
     // FIXME: add some default dummy filter list ID?
-    constructor(ruleText: string, filterListId: number) {
-        // FIXME: If we accept AST, we can re-generate ruleText from AST in some cases.
-        this.ruleText = ruleText;
-        this.filterListId = filterListId;
+    constructor(inputRule: string | NetworkRuleNode, filterListId: number) {
+        let ast: NetworkRuleNode;
 
-        const ast = NetworkRuleParser.parse(ruleText);
+        if (typeof inputRule === 'string') {
+            this.ruleText = inputRule;
+
+            // Parse the rule with AGTree
+            ast = NetworkRuleParser.parse(inputRule);
+        } else {
+            // Don't use the input AST directly
+            ast = { ...inputRule };
+
+            // Check if the rule has a raw text representation
+            // If not, we should generate it from the AST (serialization)
+            if (ast.raws && ast.raws.text) {
+                this.ruleText = ast.raws.text;
+            } else {
+                this.ruleText = NetworkRuleParser.generate(ast);
+            }
+        }
+
+        this.filterListId = filterListId;
         this.allowlist = ast.exception;
 
         const pattern = ast.pattern.value;
