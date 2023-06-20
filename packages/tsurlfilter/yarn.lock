@@ -2,8 +2,9 @@
 # yarn lockfile v1
 
 
-"@adguard/agtree@../agtree":
+"@adguard/agtree@file:./agtree.tgz":
   version "1.0.1"
+  resolved "file:./agtree.tgz#74ea23b51b567a2c168185009b7947445c3817cd"
   dependencies:
     "@adguard/ecss-tree" "^1.0.8"
     clone-deep "^4.0.1"
