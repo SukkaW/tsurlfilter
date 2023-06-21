@@ -4,7 +4,12 @@ import * as rule from './rule';
 import { SimpleRegex } from './simple-regex';
 import { Request } from '../request';
 import { DomainModifier, PIPE_SEPARATOR } from '../modifiers/domain-modifier';
-import { hasSpaces, stringArraysEquals, stringArraysHaveIntersection } from '../utils/string-utils';
+import {
+    hasSpaces,
+    isString,
+    stringArraysEquals,
+    stringArraysHaveIntersection,
+} from '../utils/string-utils';
 import { IAdvancedModifier } from '../modifiers/advanced-modifier';
 import { IValueListModifier } from '../modifiers/value-list-modifier';
 import { ReplaceModifier } from '../modifiers/replace-modifier';
@@ -828,7 +833,7 @@ export class NetworkRule implements rule.IRule {
     constructor(inputRule: string | NetworkRuleNode, filterListId: number) {
         let ast: NetworkRuleNode;
 
-        if (typeof inputRule === 'string') {
+        if (isString(inputRule)) {
             this.ruleText = inputRule;
 
             // Parse the rule with AGTree

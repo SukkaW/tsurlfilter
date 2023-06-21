@@ -267,3 +267,13 @@ export function stringArraysHaveIntersection(left: string[] | null, right: strin
 export function hasSpaces(str: string): boolean {
     return str.includes(SPACE);
 }
+
+/**
+ * Check if the given value is a string
+ *
+ * @param value Value to check
+ * @returns `true` if value is a string, `false` otherwise
+ */
+export function isString(value: unknown): value is string {
+    return typeof value === 'string';
+}
