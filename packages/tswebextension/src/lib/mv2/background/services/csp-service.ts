@@ -1,7 +1,13 @@
 import { getDomain } from 'tldts';
+import { nanoid } from 'nanoid';
 
-import { ContentType, defaultFilteringLog, FilteringEventType } from '..';
-import { RequestBlockingApi, RequestContext, requestContextStorage } from '../request';
+import { ContentType } from '../../../common/request-type';
+import { defaultFilteringLog, FilteringEventType } from '../../../common/filtering-log';
+import {
+    type RequestContext,
+    requestContextStorage,
+} from '../request/request-context-storage';
+import { RequestBlockingApi } from '../request/request-blocking-api';
 
 const CSP_HEADER_NAME = 'Content-Security-Policy';
 
@@ -50,10 +56,10 @@ export class CspService {
                         type: FilteringEventType.ApplyCspRule,
                         data: {
                             tabId,
-                            eventId: requestId,
+                            eventId: nanoid(),
                             requestUrl,
                             frameUrl: referrerUrl,
-                            frameDomain: getDomain(referrerUrl) as string,
+                            frameDomain: getDomain(referrerUrl),
                             requestType: ContentType.Csp,
                             rule,
                             timestamp: Date.now(),

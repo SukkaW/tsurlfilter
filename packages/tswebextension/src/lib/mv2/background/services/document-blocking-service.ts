@@ -4,7 +4,7 @@ import type { NetworkRule } from '@adguard/tsurlfilter';
 
 import { defaultFilteringLog, FilteringEventType } from '../../../common/filtering-log';
 import { logger } from '../../../common/utils/logger';
-import { isChromium, isFirefox } from '../utils/browser-detector';
+import { isChromium } from '../utils/browser-detector';
 import { tabsApi } from '../api';
 import type { ConfigurationMV2 } from '../configuration';
 import type { WebRequestBlockingResponse } from '../request/request-blocking-api';
@@ -48,14 +48,14 @@ export class DocumentBlockingService {
     /**
      * Processes $document modifier rule matched request in {@link RequestBlockingApi.getBlockingResponse}.
      *
-     * @param requestId Request id.
+     * @param eventId Request event id.
      * @param requestUrl Url of processed request.
      * @param rule {@link NetworkRule} Instance of matched rule.
      * @param tabId TabId of processed request.
      * @returns Blocking response or null {@link WebRequestApi.onBeforeRequest}.
      */
     public getDocumentBlockingResponse(
-        requestId: string,
+        eventId: string,
         requestUrl: string,
         rule: NetworkRule,
         tabId: number,
@@ -69,7 +69,7 @@ export class DocumentBlockingService {
         defaultFilteringLog.publishEvent({
             type: FilteringEventType.ApplyBasicRule,
             data: {
-                eventId: requestId,
+                eventId,
                 tabId,
                 rule,
             },
@@ -87,12 +87,8 @@ export class DocumentBlockingService {
             rule.getText(),
         );
 
-        // Firefox doesn't allow redirects to extension pages
-        // We set blocking page url via browser.tabs api for bypassing this limitation
-        if (isFirefox) {
-            DocumentBlockingService.reloadTabWithBlockingPage(tabId, blockingUrl);
         // Chrome doesn't allow to show extension pages in incognito mode
-        } else if (isChromium && tabsApi.isIncognitoTab(tabId)) {
+        if (isChromium && tabsApi.isIncognitoTab(tabId)) {
             // Closing tab before opening a new one may lead to browser crash (Chromium)
             browser.tabs.create({ url: blockingUrl })
                 .then(() => {
@@ -101,9 +97,14 @@ export class DocumentBlockingService {
                 .catch((e) => {
                     logger.warn(`Can't open info page about blocked domain. Err: ${e}`);
                 });
+        } else {
+            // Browser doesn't allow redirects to extension pages which are not listed in web
+            // accessible resources. We set blocking page url via browser.tabs
+            // api for bypassing this limitation.
+            DocumentBlockingService.reloadTabWithBlockingPage(tabId, blockingUrl);
         }
 
-        return { redirectUrl: blockingUrl };
+        return { cancel: true };
     }
 
     /**

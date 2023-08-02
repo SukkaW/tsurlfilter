@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- TODO: manually add compare links for version to the end of the file -->
 <!-- e.g. [0.1.2]: https://github.com/AdguardTeam/tsurlfilter/compare/tswebextension-v0.1.1...tswebextension-v0.1.2 -->
 
+
+## [0.3.7] - 2023-07-21
+
+### Changed
+- Updated `@adguard/tsurlfilter` to `v2.1.5`.
+- Updated `@adguard/scriptlets` to `v1.9.57`.
+
+## Fixed
+- Duplicate `eventId` of filtering events.
+
+
+## [0.3.6] - 2023-07-11
+
+### Fixed
+- Rules with the `$popup` modifier were ignored and showed an incorrect dummy
+  page instead of closing the tab.
+- In some cases, rules with the `$document` modifier did not show the dummy page.
+
+## [0.3.5] - 2023-07-11
+
+### Fixed
+- Cosmetic rule logging
+
+
+## [0.3.4] - 2023-07-11
+
+### Added
+- Support of $elemhide, $specifichide and $generichide modifiers.
+
+### Fixed
+- Cosmetic rule matching for frames loaded from the service worker cache.
+
+
 ## [0.3.3] - 2023-06-19
 
 ### Changed

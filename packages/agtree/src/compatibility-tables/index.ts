@@ -2,6 +2,10 @@
  * @file Compatibility tables variables and types reexport.
  */
 
-export { rawModifiersData } from './modifiers';
+export { getModifiersData } from './modifiers-data';
 
-export type { ModifierData, RawModifierData } from './types';
+export type {
+    ModifierData,
+    ModifierDataMap,
+    SpecificPlatformModifierData,
+} from './types';

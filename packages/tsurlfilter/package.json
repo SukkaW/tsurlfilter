@@ -1,6 +1,6 @@
 {
   "name": "@adguard/tsurlfilter",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "This is a TypeScript library that implements AdGuard's content blocking rules",
   "main": "dist/es/index.js",
   "module": "dist/es/index.js",
@@ -71,8 +71,7 @@
     "start": "rollup -c rollup.config.ts -w",
     "test": "jest --coverage",
     "test:watch": "jest --coverage --watch",
-    "test:smoke": "cd test/builders/rollup-ts && yarn test",
-    "test:prod": "yarn lint && yarn test:smoke && yarn test --no-cache --runInBand",
+    "test:prod": "yarn lint && yarn test --no-cache --runInBand",
     "test:debug": "node --inspect node_modules/.bin/jest --watch --runInBand",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "precommit": "lint-staged",
@@ -88,7 +87,7 @@
   "dependencies": {
     "@adguard/agtree": "git+https://github.com/scripthunter7/agtree-temp",
     "@adguard/ecss-tree": "^1.0.8",
-    "@adguard/scriptlets": "^1.9.37",
+    "@adguard/scriptlets": "^1.9.57",
     "commander": "9.4.1",
     "ip6addr": "0.2.3",
     "is-cidr": "4.0.2",

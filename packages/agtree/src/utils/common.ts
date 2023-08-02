@@ -1,5 +1,5 @@
 /**
- * Checks whether the given value is defined.
+ * Checks whether the given value is undefined.
  *
  * @param value Value to check.
  *

@@ -1,10 +1,7 @@
-import {
-    NetworkRule,
-    CosmeticRule,
-} from '@adguard/tsurlfilter';
+import type { NetworkRule, CosmeticRule } from '@adguard/tsurlfilter';
 
-import { ContentType } from './request-type';
-import { EventChannel, EventChannelInterface } from './utils';
+import type { ContentType } from './request-type';
+import { EventChannel, type EventChannelInterface } from './utils';
 
 /**
  * Types of filtering events that can occur during request processing.
@@ -16,6 +13,7 @@ export enum FilteringEventType {
     ApplyCosmeticRule = 'applyCosmeticRule',
     // TODO: Doesn't look like it's being used.
     ApplyCspRule = 'applyCspRule',
+    ApplyPermissionsRule = 'applyPermissionsRule',
     ReceiveResponse = 'receiveResponse',
     Cookie = 'cookie',
     RemoveHeader = 'removeHeader',
@@ -44,9 +42,9 @@ export type SendRequestEventData = {
     tabId: number,
     eventId: string,
     requestUrl: string,
-    requestDomain: string,
+    requestDomain: string | null,
     frameUrl: string,
-    frameDomain: string,
+    frameDomain: string | null,
     requestType: ContentType,
     timestamp: number,
     requestThirdParty: boolean,
@@ -103,7 +101,7 @@ export type ApplyCspRuleEventData = {
     rule: NetworkRule,
     requestUrl: string,
     frameUrl: string,
-    frameDomain: string,
+    frameDomain: string | null,
     requestType: ContentType,
     timestamp: number,
 };
@@ -114,6 +112,13 @@ export type ApplyCspRuleEventData = {
 export type ApplyCspRuleEvent = {
     type: FilteringEventType.ApplyCspRule,
     data: ApplyCspRuleEventData,
+};
+
+export type ApplyPermissionsRuleEventData = ApplyCspRuleEventData;
+
+export type ApplyPermissionsRuleEvent = {
+    type: FilteringEventType.ApplyPermissionsRule,
+    data: ApplyPermissionsRuleEventData,
 };
 
 /**
@@ -338,6 +343,7 @@ export type FilteringLogEvent =
     | TabReloadEvent
     | ApplyBasicRuleEvent
     | ApplyCspRuleEvent
+    | ApplyPermissionsRuleEvent
     | ApplyCosmeticRuleEvent
     | ReceiveResponseEvent
     | JsInjectEvent;

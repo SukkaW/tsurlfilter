@@ -2,58 +2,211 @@
  * @file Validator for modifiers.
  */
 
-import { type ModifierData, rawModifiersData } from '../compatibility-tables';
+import {
+    type ModifierData,
+    type ModifierDataMap,
+    type SpecificPlatformModifierData,
+    getModifiersData,
+} from '../compatibility-tables';
 import { Modifier } from '../parser/common';
-import { ModifierParser } from '../parser/misc/modifier';
-import { isUndefined } from '../utils/common';
-import { StringUtils } from '../utils/string';
+import { AdblockSyntax } from '../utils/adblockers';
+import { INVALID_ERROR_PREFIX } from './constants';
+
+const BLOCKER_PREFIX = {
+    [AdblockSyntax.Adg]: 'adg_',
+    [AdblockSyntax.Ubo]: 'ubo_',
+    [AdblockSyntax.Abp]: 'abp_',
+};
 
 /**
- * Modifier data map prepared from raw modifiers data.
+ * Result of modifier validation:
+ * - `{ ok: true }` for valid and _fully supported_ modifier;
+ * - `{ ok: true, warn: <deprecation notice> }` for valid
+ *   and _still supported but deprecated_ modifier;
+ * - otherwise `{ ok: true, error: <invalidity reason> }`
  */
-type ModifierDataMap = Map<string, ModifierData>;
-
-/**
- * Prepares raw modifiers data into a data map.
- *
- * @returns Map of parsed modifiers data.
- */
-const getModifiersData = (): ModifierDataMap => {
-    const dataMap = new Map<string, ModifierData>();
-
-    Object.keys(rawModifiersData).forEach((modifierId: string) => {
-        const modifierData = rawModifiersData[modifierId];
-        dataMap.set(modifierId, modifierData);
-    });
-
-    return dataMap;
+type ValidationResult = {
+    ok: boolean,
+    error?: string,
+    warn?: string,
 };
 
 /**
  * Collects names and aliases for all supported modifiers.
- * Deprecated modifiers are not included.
+ * Deprecated and removed modifiers are included because they are known and existent
+ * and they should be validated properly.
  *
  * @param dataMap Parsed all modifiers data.
  *
- * @returns Set of supported modifier names (and their aliases).
+ * @returns Set of all modifier names (and their aliases).
  */
-const getAllSupportedModifierNames = (dataMap: ModifierDataMap): Set<string> => {
+const getAllModifierNames = (dataMap: ModifierDataMap): Set<string> => {
     const names = new Set<string>();
     dataMap.forEach((modifierData: ModifierData) => {
         Object.keys(modifierData).forEach((blockerId) => {
             const blockerData = modifierData[blockerId];
-            // do not include deprecated modifiers
-            if (blockerData.deprecated) {
-                return;
-            }
             names.add(blockerData.name);
-            if (isUndefined(blockerData.aliases)) {
+            if (!blockerData.aliases) {
                 return;
             }
             blockerData.aliases.forEach((alias) => names.add(alias));
         });
     });
     return names;
+};
+
+/**
+ * Returns modifier data for given modifier name and adblocker.
+ *
+ * @param modifiersData Parsed all modifiers data map.
+ * @param blockerPrefix Prefix of the adblocker, e.g. 'adg_', 'ubo_', or 'abp_'.
+ * @param modifierName Modifier name.
+ *
+ * @returns Modifier data or `null` if not found.
+ */
+const getSpecificBlockerData = (
+    modifiersData: ModifierDataMap,
+    blockerPrefix: string,
+    modifierName: string,
+): SpecificPlatformModifierData | null => {
+    let specificBlockerData: SpecificPlatformModifierData | null = null;
+
+    modifiersData.forEach((modifierData: ModifierData) => {
+        Object.keys(modifierData).forEach((blockerId) => {
+            const blockerData = modifierData[blockerId];
+            if (blockerData.name === modifierName
+                || (blockerData.aliases && blockerData.aliases.includes(modifierName))) {
+                // modifier is found by name or alias
+                // so its support by specific adblocker should be checked
+                if (blockerId.startsWith(blockerPrefix)) {
+                    // so maybe other data objects should be checked as well (not sure)
+                    specificBlockerData = blockerData;
+                }
+            }
+        });
+    });
+
+    return specificBlockerData;
+};
+
+/**
+ * Returns invalid validation result with given error message.
+ *
+ * @param error Error message.
+ *
+ * @returns Validation result `{ ok: false, error }`.
+ */
+const getInvalidValidationResult = (error: string): ValidationResult => {
+    return {
+        ok: false,
+        error,
+    };
+};
+
+/**
+ * Fully checks whether the given `modifier` valid for given blocker `syntax`:
+ * is it supported by the blocker, deprecated, assignable, negatable, etc.
+ *
+ * @param modifiersData Parsed all modifiers data map.
+ * @param syntax Adblock syntax to check the modifier for.
+ * 'Common' is not supported, it should be specific — 'AdGuard', 'uBlockOrigin', or 'AdblockPlus'.
+ * @param modifier Parsed modifier AST node.
+ * @param isException Whether the modifier is used in exception rule.
+ * Needed to check whether the modifier is allowed only in blocking or exception rules.
+ *
+ * @returns Result of modifier validation.
+ */
+const validateForSpecificSyntax = (
+    modifiersData: ModifierDataMap,
+    syntax: AdblockSyntax,
+    modifier: Modifier,
+    isException: boolean,
+): ValidationResult => {
+    if (syntax === AdblockSyntax.Common) {
+        throw new Error(`Syntax should be specific, '${AdblockSyntax.Common}' is not supported`);
+    }
+
+    const modifierName = modifier.modifier.value;
+
+    const blockerPrefix = BLOCKER_PREFIX[syntax];
+    if (!blockerPrefix) {
+        throw new Error(`Unknown syntax: ${syntax}`);
+    }
+
+    // needed for validation of negation, assignment, etc.
+    const specificBlockerData = getSpecificBlockerData(modifiersData, blockerPrefix, modifierName);
+
+    // if no specific blocker data is found
+    if (!specificBlockerData) {
+        return getInvalidValidationResult(`${INVALID_ERROR_PREFIX.NOT_SUPPORTED}: '${modifierName}'`);
+    }
+
+    // e.g. 'object-subrequest'
+    if (specificBlockerData.removed) {
+        return getInvalidValidationResult(`${INVALID_ERROR_PREFIX.REMOVED}: '${modifierName}'`);
+    }
+
+    if (specificBlockerData.deprecated) {
+        if (!specificBlockerData.deprecation_message) {
+            throw new Error('Deprecation notice is required for deprecated modifier');
+        }
+        return {
+            ok: true,
+            warn: specificBlockerData.deprecation_message,
+        };
+    }
+
+    if (specificBlockerData.block_only && isException) {
+        return getInvalidValidationResult(`${INVALID_ERROR_PREFIX.BLOCK_ONLY}: '${modifierName}'`);
+    }
+
+    if (specificBlockerData.exception_only && !isException) {
+        return getInvalidValidationResult(`${INVALID_ERROR_PREFIX.EXCEPTION_ONLY}: '${modifierName}'`);
+    }
+
+    // e.g. '~domain=example.com'
+    if (!specificBlockerData.negatable && modifier.exception) {
+        return getInvalidValidationResult(`${INVALID_ERROR_PREFIX.NOT_NEGATABLE}: '${modifierName}'`);
+    }
+
+    // e.g. 'domain'
+    if (specificBlockerData.assignable) {
+        /**
+         * exception_only modifier 'stealth' is assignable
+         * but it also may be used without value as well -- `$stealth` or `$stealth=dpi`
+         */
+        if (!modifier.value
+            /**
+             * TODO: consider to return `{ ok: true, warn: 'Modifier value may be specified' }` (???)
+             * after the extension will support stealth mode with value
+             * https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2107
+             */
+            && !specificBlockerData.exception_only) {
+            return getInvalidValidationResult(`${INVALID_ERROR_PREFIX.VALUE_REQUIRED}: '${modifierName}'`);
+        }
+    } else if (modifier?.value) {
+        return getInvalidValidationResult(`${INVALID_ERROR_PREFIX.VALUE_FORBIDDEN}: '${modifierName}'`);
+    }
+
+    return { ok: true };
+};
+
+/**
+ * Returns documentation URL for given modifier and adblocker.
+ *
+ * @param modifiersData Parsed all modifiers data map.
+ * @param blockerPrefix Prefix of the adblocker, e.g. 'adg_', 'ubo_', or 'abp_'.
+ * @param modifier Parsed modifier AST node.
+ *
+ * @returns Documentation URL or `null` if not found.
+ */
+const getBlockerDocumentationLink = (
+    modifiersData: ModifierDataMap,
+    blockerPrefix: string,
+    modifier: Modifier,
+): string | null => {
+    const specificBlockerData = getSpecificBlockerData(modifiersData, blockerPrefix, modifier.modifier.value);
+    return specificBlockerData?.docs || null;
 };
 
 /**
@@ -66,39 +219,96 @@ export class ModifierValidator {
     private modifiersData: ModifierDataMap;
 
     /**
-     * List of all currently supported modifier names for any adblocker.
-     * Deprecated modifiers are not included.
+     * List of all modifier names for any adblocker.
+     *
+     * Please note that **deprecated** modifiers are **included** as well.
      */
-    private supportedModifierNames: Set<string>;
+    private allModifierNames: Set<string>;
 
     constructor() {
         // data map based on yaml files
         this.modifiersData = getModifiersData();
 
-        this.supportedModifierNames = getAllSupportedModifierNames(this.modifiersData);
+        this.allModifierNames = getAllModifierNames(this.modifiersData);
     }
 
     /**
      * Simply checks whether the modifier exists in any adblocker.
      *
-     * @param rawModifier Modifier as string OR already parsed modifier AST node.
+     * **Deprecated** and **removed** modifiers are considered as **existent**.
+     *
+     * @param modifier Already parsed modifier AST node.
      *
      * @returns True if modifier exists, false otherwise.
-     * If given modifier is a string and it cannot be parsed as a valid modifier,
-     * e.g. 'domain=', false is returned.
      */
-    public exists = (rawModifier: string | Modifier): boolean => {
-        let modifier: Modifier;
-        if (StringUtils.isString(rawModifier)) {
-            try {
-                modifier = ModifierParser.parse(rawModifier);
-            } catch (e) {
-                return false;
-            }
-        } else {
-            modifier = rawModifier;
-        }
+    public exists = (modifier: Modifier): boolean => {
+        return this.allModifierNames.has(modifier.modifier.value);
+    };
 
-        return this.supportedModifierNames.has(modifier.modifier.value);
+    /**
+     * Checks whether the given `modifier` is valid for specified `syntax`.
+     *
+     * For `Common` syntax it simply checks whether the modifier exists.
+     * For specific syntax the validation is more complex —
+     * deprecated, assignable, negatable and other requirements are checked.
+     *
+     * @param syntax Adblock syntax to check the modifier for.
+     * @param modifier Modifier AST node.
+     * @param isException Whether the modifier is used in exception rule, default to false.
+     * Needed to check whether the modifier is allowed only in blocking or exception rules.
+     *
+     * @returns Result of modifier validation.
+     */
+    public validate = (syntax: AdblockSyntax, modifier: Modifier, isException = false): ValidationResult => {
+        if (!this.exists(modifier)) {
+            return getInvalidValidationResult(`${INVALID_ERROR_PREFIX.NOT_EXISTENT}: '${modifier.modifier.value}'`);
+        }
+        // for 'Common' syntax we cannot check something more
+        if (syntax === AdblockSyntax.Common) {
+            return { ok: true };
+        }
+        return validateForSpecificSyntax(this.modifiersData, syntax, modifier, isException);
+    };
+
+    /**
+     * Returns AdGuard documentation URL for given modifier.
+     *
+     * @param modifier Parsed modifier AST node.
+     *
+     * @returns AdGuard documentation URL or `null` if not found.
+     */
+    public getAdgDocumentationLink = (modifier: Modifier): string | null => {
+        if (!this.exists(modifier)) {
+            return null;
+        }
+        return getBlockerDocumentationLink(this.modifiersData, BLOCKER_PREFIX[AdblockSyntax.Adg], modifier);
+    };
+
+    /**
+     * Returns Ublock Origin documentation URL for given modifier.
+     *
+     * @param modifier Parsed modifier AST node.
+     *
+     * @returns Ublock Origin documentation URL or `null` if not found.
+     */
+    public getUboDocumentationLink = (modifier: Modifier): string | null => {
+        if (!this.exists(modifier)) {
+            return null;
+        }
+        return getBlockerDocumentationLink(this.modifiersData, BLOCKER_PREFIX[AdblockSyntax.Ubo], modifier);
+    };
+
+    /**
+     * Returns AdBlock Plus documentation URL for given modifier.
+     *
+     * @param modifier Parsed modifier AST node.
+     *
+     * @returns AdBlock Plus documentation URL or `null` if not found.
+     */
+    public getAbpDocumentationLink = (modifier: Modifier): string | null => {
+        if (!this.exists(modifier)) {
+            return null;
+        }
+        return getBlockerDocumentationLink(this.modifiersData, BLOCKER_PREFIX[AdblockSyntax.Abp], modifier);
     };
 }

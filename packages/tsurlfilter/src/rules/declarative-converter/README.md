@@ -5,6 +5,7 @@
     1. [$document](#mv3_specific_limitations__$document)
     1. [$removeparam](#mv3_specific_limitations__$removeparam)
     1. [$removeheader](#mv3_specific_limitations__$removeheader)
+    1. [$csp](#mv3_specific_limitations__$csp)
     1. [$redirect-rule](#mv3_specific_limitations__$redirect-rule)
 1. [Basic examples](#basic_examples)
 1. [Basic modifiers](#basic_modifiers)
@@ -69,10 +70,11 @@ rules and describes some MV3-specific limitations of the converted rules.
 <a name="mv3_specific_limitations__allowrules"></a>
 ## allowrules
 Allowrules currently are not supported for these modifiers:
-1. all specific exceptions: '$elemhide', '$generichide', '$specifichide', '$genericblock', '$jsinject', '$urlblock', '$content', '$stealth'.
+1. some specific exceptions: '$genericblock', '$jsinject', '$urlblock', '$content', '$stealth'.
 1. `$redirect`
 1. `$removeparam`
 1. `$removeheader`
+1. `$csp`
 
 <a name="mv3_specific_limitations__$document"></a>
 ## $document
@@ -93,6 +95,11 @@ rule only within one filter.
 <a name="mv3_specific_limitations__$removeheader"></a>
 ## $removeheader
 Groups of $removeheader rules with the same conditions are combined into one
+rule only within one filter.
+
+<a name="mv3_specific_limitations__$csp"></a>
+## $csp
+Groups of $csp rules with the same conditions are combined into one
 rule only within one filter.
 
 <a name="mv3_specific_limitations__$redirect-rule"></a>
@@ -1421,11 +1428,11 @@ example 2
 # Exception rules modifiers
 <a name="exception_rules_modifiers__$elemhide"></a>
 ## $elemhide
-<b>Status</b>: not implemented yet
+<b>Status</b>: is supported but not converted.
 <br/>
 <b>MV3 limitations:</b>
 <br/>
-Not convertible to DNR in MV3, but uses tsurlfilter's [CosmeticEngine](https://github.com/AdguardTeam/tsurlfilter/blob/epic/tswebextension/packages/tsurlfilter/src/engine/cosmetic-engine/cosmetic-engine.ts#L15) for work
+Not convertible to DNR in MV3, but in MV3 [tswebextension](https://github.com/AdguardTeam/tsurlfilter/tree/master/packages/tswebextension) uses content-script to request cosmetic rules from tsurlfilter's with [MatchingResult.getCosmeticOption](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tsurlfilter/src/engine/matching-result.ts#L235), where $elemhide, $specifichide and $generichide will be applied.
 <br/>
 <b>Examples:</b>
 <br/>
@@ -1535,7 +1542,11 @@ example 2
 ```
 <a name="exception_rules_modifiers__$generichide"></a>
 ## $generichide
-<b>Status</b>: not implemented yet
+<b>Status</b>: is supported but not converted.
+<br/>
+<b>MV3 limitations:</b>
+<br/>
+Not convertible to DNR in MV3, but in MV3 [tswebextension](https://github.com/AdguardTeam/tsurlfilter/tree/master/packages/tswebextension) uses content-script to request cosmetic rules from tsurlfilter's with [MatchingResult.getCosmeticOption](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tsurlfilter/src/engine/matching-result.ts#L235), where $elemhide, $specifichide and $generichide will be applied.
 <br/>
 <b>Examples:</b>
 <br/>
@@ -1569,7 +1580,11 @@ example 2
 ```
 <a name="exception_rules_modifiers__$specifichide"></a>
 ## $specifichide
-<b>Status</b>: not implemented yet
+<b>Status</b>: is supported but not converted.
+<br/>
+<b>MV3 limitations:</b>
+<br/>
+Not convertible to DNR in MV3, but in MV3 [tswebextension](https://github.com/AdguardTeam/tsurlfilter/tree/master/packages/tswebextension) uses content-script to request cosmetic rules from tsurlfilter's with [MatchingResult.getCosmeticOption](https://github.com/AdguardTeam/tsurlfilter/blob/master/packages/tsurlfilter/src/engine/matching-result.ts#L235), where $elemhide, $specifichide and $generichide will be applied.
 <br/>
 <b>Examples:</b>
 <br/>
@@ -1971,7 +1986,13 @@ example 4
 ```
 <a name="advanced_capabilities__$csp"></a>
 ## $csp
-<b>Status</b>: not implemented yet
+<b>Status</b>: supported
+<br/>
+Allowlist rules are not supported
+<br/>
+Rules with the same matching condition are combined into one, but only within
+the scope of one static filter or within the scope of all dynamic rules
+(custom filters and user rules).
 <br/>
 <b>Examples:</b>
 <br/>
@@ -1984,7 +2005,40 @@ example 1
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "append",
+					"header": "Content-Security-Policy",
+					"value": "frame-src 'none'"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "||example.org^",
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 1
+	}
+]
 
 ```
 example 2
@@ -2020,7 +2074,40 @@ example 4
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "append",
+					"header": "Content-Security-Policy",
+					"value": "script-src 'self' 'unsafe-eval' http: https:"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "||example.org^",
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 1
+	}
+]
 
 ```
 example 5
@@ -2047,6 +2134,38 @@ example 5
 			"isUrlFilterCaseSensitive": false
 		},
 		"priority": 140101
+	},
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "append",
+					"header": "Content-Security-Policy",
+					"value": "script-src 'self' 'unsafe-eval' http: https:"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "||example.org^",
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 1
 	}
 ]
 
@@ -2529,11 +2648,32 @@ example 11
 	{
 		"id": 2,
 		"action": {
-			"type": "block"
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "append",
+					"header": "Content-Security-Policy",
+					"value": "script-src 'self'"
+				}
+			]
 		},
 		"condition": {
 			"urlFilter": "*/redirect-priority-test.js",
-			"isUrlFilterCaseSensitive": false
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
 		},
 		"priority": 1000001
 	}
@@ -3009,11 +3149,8 @@ example 1
 				"object",
 				"xmlhttprequest",
 				"ping",
-				"csp_report",
 				"media",
 				"websocket",
-				"webtransport",
-				"webbundle",
 				"other"
 			]
 		},
@@ -3056,11 +3193,8 @@ example 2
 				"object",
 				"xmlhttprequest",
 				"ping",
-				"csp_report",
 				"media",
 				"websocket",
-				"webtransport",
-				"webbundle",
 				"other"
 			]
 		},
@@ -3127,11 +3261,8 @@ example 5
 				"object",
 				"xmlhttprequest",
 				"ping",
-				"csp_report",
 				"media",
 				"websocket",
-				"webtransport",
-				"webbundle",
 				"other"
 			]
 		},
@@ -3174,11 +3305,8 @@ example 6
 				"object",
 				"xmlhttprequest",
 				"ping",
-				"csp_report",
 				"media",
 				"websocket",
-				"webtransport",
-				"webbundle",
 				"other"
 			]
 		},
@@ -3223,11 +3351,8 @@ $removeheader=location,domain=example.com
 				"object",
 				"xmlhttprequest",
 				"ping",
-				"csp_report",
 				"media",
 				"websocket",
-				"webtransport",
-				"webbundle",
 				"other"
 			]
 		},

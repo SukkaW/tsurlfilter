@@ -182,6 +182,7 @@ import { paramsService } from './services/params-service';
 import { cookieFiltering } from './services/cookie-filtering/cookie-filtering';
 import { ContentFiltering } from './services/content-filtering/content-filtering';
 import { CspService } from './services/csp-service';
+import { permissionsPolicyService } from './services/permissions-policy-service';
 import {
     hideRequestInitiatorElement,
     RequestEvents,
@@ -274,6 +275,7 @@ export class WebRequestApi {
             frameId,
             requestUrl,
             referrerUrl,
+            eventId,
             requestId,
             contentType,
             timestamp,
@@ -290,11 +292,11 @@ export class WebRequestApi {
             type: FilteringEventType.SendRequest,
             data: {
                 tabId,
-                eventId: requestId,
+                eventId,
                 requestUrl,
-                requestDomain: getDomain(requestUrl) as string,
+                requestDomain: getDomain(requestUrl),
                 frameUrl: referrerUrl,
-                frameDomain: getDomain(referrerUrl) as string,
+                frameDomain: getDomain(referrerUrl),
                 requestType: contentType,
                 timestamp,
                 requestThirdParty: thirdParty,
@@ -325,19 +327,6 @@ export class WebRequestApi {
 
             const cosmeticResult = engineApi.getCosmeticResult(requestUrl, cosmeticOption);
 
-            /**
-             * We log js rules before injecting them to avoid duplicate logs,
-             * as they can be applied multiple times but only executed once.
-             * See {@link buildScriptText} for details.
-             */
-            CosmeticApi.logScriptRules({
-                tabId,
-                cosmeticResult,
-                url: requestUrl,
-                contentType,
-                timestamp,
-            });
-
             tabsApi.handleFrameCosmeticResult(tabId, frameId, cosmeticResult);
 
             requestContextStorage.update(requestId, {
@@ -351,7 +340,7 @@ export class WebRequestApi {
         // the response in order to actually apply $replace rules to it.
         const response = RequestBlockingApi.getBlockingResponse(
             basicResult,
-            requestId,
+            eventId,
             requestUrl,
             requestType,
             tabId,
@@ -451,11 +440,15 @@ export class WebRequestApi {
         context,
         details,
     }: RequestData<WebRequest.OnHeadersReceivedDetailsType>): WebRequestEventResponse {
+        if (!context) {
+            return undefined;
+        }
+
         defaultFilteringLog.publishEvent({
             type: FilteringEventType.ReceiveResponse,
             data: {
-                tabId: details.tabId,
-                eventId: details.requestId,
+                tabId: context.tabId,
+                eventId: context.eventId,
                 statusCode: details.statusCode,
             },
         });
@@ -481,6 +474,9 @@ export class WebRequestApi {
 
         if (requestUrl && (requestType === RequestType.Document || requestType === RequestType.SubDocument)) {
             if (CspService.onHeadersReceived(context)) {
+                responseHeadersModified = true;
+            }
+            if (permissionsPolicyService.onHeadersReceived(context)) {
                 responseHeadersModified = true;
             }
         }
@@ -577,6 +573,8 @@ export class WebRequestApi {
             frameId,
             requestUrl,
             timestamp,
+            contentType,
+            cosmeticResult,
         } = context;
 
         /**
@@ -589,6 +587,17 @@ export class WebRequestApi {
                 tabId,
                 timestamp,
                 url: requestUrl,
+            });
+        }
+
+        if (cosmeticResult
+            && (requestType === RequestType.Document || requestType === RequestType.SubDocument)) {
+            CosmeticApi.logScriptRules({
+                tabId,
+                cosmeticResult,
+                url: requestUrl,
+                contentType,
+                timestamp,
             });
         }
 
@@ -638,14 +647,32 @@ export class WebRequestApi {
         const {
             frameId,
             tabId,
+            url,
         } = params;
 
-        const frame = tabsApi.getTabFrame(tabId, frameId);
+        const tabContext = tabsApi.getTabContext(tabId);
 
-        if (!frame
-            || !frame.cosmeticResult
-            || !frame.requestId) {
+        if (!tabContext) {
             return;
+        }
+
+        const frame = tabContext.frames.get(frameId);
+
+        if (!frame) {
+            return;
+        }
+
+        /**
+         * Cosmetic result may not be committed to frame context during worker request processing.
+         * We use engine request as a fallback for this case.
+         */
+        if (!frame.cosmeticResult) {
+            frame.cosmeticResult = engineApi.matchCosmetic({
+                requestUrl: url,
+                frameUrl: url,
+                requestType: frameId === MAIN_FRAME_ID ? RequestType.Document : RequestType.SubDocument,
+                frameRule: tabContext.mainFrameRule,
+            });
         }
 
         const { cosmeticResult } = frame;
@@ -712,7 +739,6 @@ export class WebRequestApi {
 
         if (!mainFrame
             || !mainFrame.cosmeticResult
-            || !mainFrame.requestId
             || !WebRequestApi.isLocalFrame(url, frameId, mainFrame.url)) {
             return;
         }

@@ -67,9 +67,8 @@ export class RequestBlockingApi {
      * Processes rule applying for request and compute response for {@link WebRequestApi.onBeforeRequest} listener.
      *
      * @param rule Matched rule.
-     * @param requestId Request id.
+     * @param eventId Request event id.
      * @param requestUrl Request url.
-     * @param method Request method.
      * @param requestType Request type.
      * @param tabId Tab id.
      *
@@ -77,7 +76,7 @@ export class RequestBlockingApi {
      */
     public static getBlockingResponse(
         rule: NetworkRule | null,
-        requestId: string,
+        eventId: string,
         requestUrl: string,
         requestType: RequestType,
         tabId: number,
@@ -87,62 +86,69 @@ export class RequestBlockingApi {
         }
 
         if (rule.isAllowlist()) {
-            RequestBlockingApi.logRuleApplying(requestId, rule, tabId);
+            RequestBlockingApi.logRuleApplying(eventId, rule, tabId);
             return undefined;
         }
 
+        // If the request is a document request.
         if (requestType === RequestType.Document) {
-            if ((rule.getPermittedRequestTypes() & RequestType.Document) === RequestType.Document) {
-                return documentBlockingService.getDocumentBlockingResponse(
-                    requestId,
-                    requestUrl,
-                    rule,
-                    tabId,
-                );
+            // First, make sure that the content-types of the matching rule include
+            // the content-type of the document.
+            if ((rule.getPermittedRequestTypes() & RequestType.Document) !== RequestType.Document) {
+                return undefined;
             }
 
+            // Blocking rule can be with $popup modifier - in this case we need
+            // to close the tab as soon as possible.
+            // https://adguard.com/kb/ru/general/ad-filtering/create-own-filters/#popup-modifier
             if (rule.isOptionEnabled(NetworkRuleOption.Popup)) {
                 const isNewTab = tabsApi.isNewPopupTab(tabId);
 
                 if (isNewTab) {
-                    RequestBlockingApi.logRuleApplying(requestId, rule, tabId);
+                    RequestBlockingApi.logRuleApplying(eventId, rule, tabId);
                     browser.tabs.remove(tabId);
                     return { cancel: true };
                 }
             }
 
-            // Other url blocking rules are not applicable to main frame
-            return undefined;
+            // For all other blocking rules, we return our dummy page with the
+            // option to temporarily disable blocking for the specified domain.
+            return documentBlockingService.getDocumentBlockingResponse(
+                eventId,
+                requestUrl,
+                rule,
+                tabId,
+            );
         }
 
         if (rule.isOptionEnabled(NetworkRuleOption.Redirect)) {
             const redirectUrl = redirectsService.createRedirectUrl(rule.getAdvancedModifierValue(), requestUrl);
             if (redirectUrl) {
-                RequestBlockingApi.logRuleApplying(requestId, rule, tabId);
+                RequestBlockingApi.logRuleApplying(eventId, rule, tabId);
                 return { redirectUrl };
             }
         }
 
-        RequestBlockingApi.logRuleApplying(requestId, rule, tabId);
+        RequestBlockingApi.logRuleApplying(eventId, rule, tabId);
         return { cancel: true };
     }
 
     /**
      * Creates {@link FilteringLog} event of rule applying for processed request.
      *
-     * @param requestId Request id.
+     * @param eventId Request event id.
      * @param requestRule Request rule.
      * @param tabId Tab id.
      */
     private static logRuleApplying(
-        requestId: string,
+        eventId: string,
         requestRule: NetworkRule,
         tabId: number,
     ): void {
         defaultFilteringLog.publishEvent({
             type: FilteringEventType.ApplyBasicRule,
             data: {
-                eventId: requestId,
+                eventId,
                 tabId,
                 rule: requestRule,
             },

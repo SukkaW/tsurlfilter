@@ -3,30 +3,63 @@ adg_os_any:
   description: |-
     This modifier limits the rule scope to requests that use the specified set of HTTP methods.
     Negated methods are allowed.
+  docs: https://adguard.app/kb/general/ad-filtering/create-own-filters/#method-modifier
   negatable: false
   assignable: true
-  # TODO: implement validation
-  # value_format:
-  docs: https://adguard.com/kb/general/ad-filtering/create-own-filters/#method-modifier
+  value_format: |-
+    (?xi)
+      ^(?!\|)(?:\b(
+        get|
+        head|
+        post|
+        put|
+        delete|
+        connect|
+        options|
+        trace|
+        patch
+      )\b|(\|?|~?))+(?<!\|)$
 
 adg_ext_any:
   name: method
   description: |-
     This modifier limits the rule scope to requests that use the specified set of HTTP methods.
     Negated methods are allowed.
+  docs: https://adguard.app/kb/general/ad-filtering/create-own-filters/#method-modifier
   negatable: false
   assignable: true
-  # TODO: implement validation
-  # value_format:
-  docs: https://adguard.com/kb/general/ad-filtering/create-own-filters/#method-modifier
+  value_format: |-
+    (?xi)
+      ^(?!\|)(?:\b(
+        get|
+        head|
+        post|
+        put|
+        delete|
+        connect|
+        options|
+        trace|
+        patch
+      )\b|(\|?|~?))+(?<!\|)$
 
 ubo_ext_any:
   name: method
   description: |-
     This modifier limits the rule scope to requests that use the specified set of HTTP methods.
     Negated methods are allowed.
+  docs: https://github.com/gorhill/uBlock/wiki/Static-filter-syntax#method
   negatable: false
   assignable: true
-  # TODO: implement validation
-  # value_format:
-  docs: https://github.com/gorhill/uBlock/wiki/Static-filter-syntax#method
+  value_format: |-
+    (?xi)
+      ^(?!\|)(?:\b(
+        get|
+        head|
+        post|
+        put|
+        delete|
+        connect|
+        options|
+        trace|
+        patch
+      )\b|(\|?|~?))+(?<!\|)$
