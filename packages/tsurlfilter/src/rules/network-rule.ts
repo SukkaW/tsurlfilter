@@ -233,6 +233,11 @@ export class NetworkRule implements rule.IRule {
     private priorityWeight = 1;
 
     /**
+     * Options used by the rule, regardless of whether they are enabled or disabled.
+     */
+    private usedOptionNames: Set<string> = new Set();
+
+    /**
      * Rules with base modifiers, from category 1, each of them adds 1
      * to the weight of the rule.
      *
@@ -976,6 +981,7 @@ export class NetworkRule implements rule.IRule {
             }
 
             this.loadOption(option.modifier.value, value, option.exception);
+            this.usedOptionNames.add(option.modifier.value);
         }
 
         this.validateOptions();
@@ -1018,6 +1024,16 @@ export class NetworkRule implements rule.IRule {
      */
     isOptionDisabled(option: NetworkRuleOption): boolean {
         return (this.disabledOptions & option) === option;
+    }
+
+    /**
+     * Returns all options that are used in the rule, regardless of whether they are
+     * enabled or disabled.
+     *
+     * @return Set of option names
+     */
+    getUsedOptionNames(): Set<string> {
+        return this.usedOptionNames;
     }
 
     /**
@@ -1282,7 +1298,7 @@ export class NetworkRule implements rule.IRule {
                 this.setRequestType(RequestType.Document, true);
                 this.setRequestType(RequestType.SubDocument, true);
                 break;
-            // $document, $doc
+            // $document, $doc / $~document, $~doc
             case OPTIONS.DOCUMENT:
             case OPTIONS.DOC:
                 if (exception) {

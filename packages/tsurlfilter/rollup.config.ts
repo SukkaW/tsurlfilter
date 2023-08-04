@@ -116,6 +116,8 @@ const cliConfig = {
     ],
     external: [
         '@adguard/scriptlets',
+        '@adguard/agtree',
+        '@adguard/ecss-tree',
         'is-ip',
         'punycode/',
         'tldts',

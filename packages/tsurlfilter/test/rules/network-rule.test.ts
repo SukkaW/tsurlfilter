@@ -142,7 +142,7 @@ describe('NetworkRule constructor', () => {
 
         expect(() => {
             new NetworkRule('||baddomain.com^$to=', 0);
-        }).toThrow(new SyntaxError('$to modifier value cannot be empty'));
+        }).toThrow(new SyntaxError("Modifier value can't be empty"));
 
         expect(() => {
             new NetworkRule('||baddomain.com^$to=example.org|', 0);
@@ -183,7 +183,7 @@ describe('NetworkRule constructor', () => {
 
         expect(() => {
             new NetworkRule('|*/ads^$to=', 0);
-        }).toThrow(new SyntaxError('$to modifier value cannot be empty'));
+        }).toThrow(new SyntaxError("Modifier value can't be empty"));
 
         expect(() => {
             new NetworkRule('|*/ads^$to=evil.com|', 0);
@@ -1312,6 +1312,35 @@ describe('NetworkRule.isFilteringDisabled', () => {
 
     it.each(cases)('should return $expected for rule $rule', ({ rule, expected }) => {
         expect((new NetworkRule(rule, 0)).isFilteringDisabled()).toBe(expected);
+    });
+});
+
+describe('NetworkRule.getUsedOptionNames', () => {
+    it.each([
+        // No options
+        {
+            rule: '||example.org^',
+            expected: [],
+        },
+        // 1 option
+        {
+            rule: '||example.org^$important',
+            expected: ['important'],
+        },
+        // Multiple options
+        {
+            rule: '||example.org^$important,script,important',
+            expected: ['important', 'script'],
+        },
+        // Options with values
+        {
+            rule: '||example.org^$important,script,important,domain=example.com',
+            expected: ['important', 'script', 'domain'],
+        },
+    ])('should return $expected for rule $rule', ({ rule, expected }) => {
+        expect(
+            [...(new NetworkRule(rule, 0)).getUsedOptionNames()],
+        ).toEqual(expected);
     });
 });
 
