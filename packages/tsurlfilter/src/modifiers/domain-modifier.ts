@@ -1,5 +1,6 @@
 import { getPublicSuffix } from 'tldts';
-
+import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
+import { SimpleRegex } from '../rules/simple-regex';
 /**
  * This is a helper class that is used specifically to work
  * with domains restrictions.
@@ -42,7 +43,7 @@ export class DomainModifier {
         const permittedDomains: string[] = [];
         const restrictedDomains: string[] = [];
 
-        const parts = domainsStr.toLowerCase().split(separator);
+        const parts = splitByDelimiterWithEscapeCharacter(domainsStr.toLowerCase(), separator, '\\', true);
         for (let i = 0; i < parts.length; i += 1) {
             let domain = parts[i].trim();
             let restricted = false;
@@ -76,6 +77,20 @@ export class DomainModifier {
     public static isDomainOrSubdomainOfAny(domain: string, domains: string[]): boolean {
         for (let i = 0; i < domains.length; i += 1) {
             const d = domains[i];
+            if (d.startsWith('/') && d.endsWith('/')) {
+                /**
+                 * The pattern is being created here because there is a lot of logic
+                 * that is tied to permittedDomains, restrictedDomains, and other
+                 * domains lists being arrays of strings, such as hashing for lookup tables
+                 * or applying $badfilter.
+                 */
+                const domainPattern = SimpleRegex.patternFromString(d);
+                if (domainPattern.test(domain)) {
+                    return true;
+                }
+                continue;
+            }
+
             if (DomainModifier.isWildcardDomain(d)) {
                 if (DomainModifier.matchAsWildcard(d, domain)) {
                     return true;
