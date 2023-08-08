@@ -77,7 +77,7 @@ export class DomainModifier {
     public static isDomainOrSubdomainOfAny(domain: string, domains: string[]): boolean {
         for (let i = 0; i < domains.length; i += 1) {
             const d = domains[i];
-            if (d.startsWith('/') && d.endsWith('/')) {
+            if (SimpleRegex.isRegexPattern(d)) {
                 /**
                  * The pattern is being created here because there is a lot of logic
                  * that is tied to permittedDomains, restrictedDomains, and other

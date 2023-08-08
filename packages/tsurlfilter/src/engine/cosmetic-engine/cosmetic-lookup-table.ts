@@ -4,6 +4,7 @@ import { DomainModifier } from '../../modifiers/domain-modifier';
 import { fastHash } from '../../utils/string-utils';
 import { RuleStorage } from '../../filterlist/rule-storage';
 import { Request } from '../../request';
+import { SimpleRegex } from '../../rules/simple-regex';
 
 /**
  * CosmeticLookupTable lets quickly lookup cosmetic rules for the specified hostname.
@@ -17,9 +18,9 @@ export class CosmeticLookupTable {
 
     /**
      * Collection of domain specific rules, those could not be grouped by domain name
-     * For instance, wildcard domain rules.
+     * For instance, wildcard domain rules and regexp domain rules.
      */
-    public wildcardRules: CosmeticRule[];
+    public domainMatchRules: CosmeticRule[];
 
     /**
      * Collection of generic rules.
@@ -47,7 +48,7 @@ export class CosmeticLookupTable {
      */
     constructor(storage: RuleStorage) {
         this.byHostname = new Map();
-        this.wildcardRules = [] as CosmeticRule[];
+        this.domainMatchRules = [] as CosmeticRule[];
         this.genericRules = [] as CosmeticRule[];
         this.allowlist = new Map();
         this.ruleStorage = storage;
@@ -74,9 +75,11 @@ export class CosmeticLookupTable {
 
         const domains = rule.getPermittedDomains();
         if (domains) {
-            const hasWildcardDomain = domains.some((d) => DomainModifier.isWildcardDomain(d));
-            if (hasWildcardDomain) {
-                this.wildcardRules.push(rule);
+            const hasWildcardOrRegexpDomain = domains.some((d) => {
+                return DomainModifier.isWildcardDomain(d) || SimpleRegex.isRegexPattern(d);
+            });
+            if (hasWildcardOrRegexpDomain) {
+                this.domainMatchRules.push(rule);
                 return;
             }
 
@@ -117,7 +120,7 @@ export class CosmeticLookupTable {
             }
         }
 
-        result.push(...this.wildcardRules.filter((r) => r.match(request)));
+        result.push(...this.domainMatchRules.filter((r) => r.match(request)));
 
         return result.filter((rule) => !rule.isAllowlist());
     }
