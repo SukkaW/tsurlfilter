@@ -80,6 +80,7 @@ describe('Element hiding rules constructor', () => {
         checkRuleIsValid('example.org##:contains(@import)');
         checkRuleIsValid('example.org##:contains(@font-face)');
         checkRuleIsValid('example.org##:contains(@color-profile)');
+        checkRuleIsValid(String.raw`[$domain=/example\.org/|~/good/]##.banner`);
 
         checkRuleIsInvalid('example.org##img[title|={]');
         checkRuleIsInvalid('example.org##body { background: red!important; }');
@@ -151,6 +152,18 @@ describe('Element hiding rules constructor', () => {
         expect(rule.getRestrictedDomains()).toBeUndefined();
     });
 
+    it('parses regexp value domains', () => {
+        const rule = new CosmeticRule(String.raw`[$domain=example.org|/evil\.(org\|com)/|~/good/]##banner`, 0);
+        expect(rule.getType()).toEqual(CosmeticRuleType.ElementHiding);
+        expect(rule.getContent()).toEqual('banner');
+
+        const permittedDomains = rule.getPermittedDomains()!;
+        const restrictedDomains = rule.getRestrictedDomains()!;
+        expect(permittedDomains[0]).toEqual('example.org');
+        expect(permittedDomains[1]).toEqual('/evil\\.(org|com)/');
+        expect(restrictedDomains[0]).toEqual('/good/');
+    });
+
     it('works if it correctly parses rule modifiers', () => {
         let rule = new CosmeticRule('[$path=page.html]###banner', 0);
         expect(rule.pathModifier?.pattern).toEqual('page.html');
@@ -218,6 +231,21 @@ describe('CosmeticRule match', () => {
     it('works if it matches wide rules', () => {
         const rule = new CosmeticRule('##banner', 0);
         expect(rule.match(createRequest('example.org'))).toEqual(true);
+    });
+
+    it('matches requsts by regexp pattern of domain', () => {
+        let rule: CosmeticRule;
+        // Simple case
+        rule = new CosmeticRule(String.raw`[$domain=/example\.(org\|com)/]##banner`, 0);
+        expect(rule.match(createRequest('example.org'))).toEqual(true);
+        expect(rule.match(createRequest('example.com'))).toEqual(true);
+        expect(rule.match(createRequest('example.net'))).toEqual(false);
+
+        // Multiple patterns, inverted value
+        rule = new CosmeticRule(String.raw`[$domain=/example/|~/org/]##banner`, 0);
+        expect(rule.match(createRequest('example.org'))).toEqual(false);
+        expect(rule.match(createRequest('example.com'))).toEqual(true);
+        expect(rule.match(createRequest('example.net'))).toEqual(true);
     });
 
     it('works if it matches domain restrictions properly', () => {

@@ -127,6 +127,16 @@ describe('NetworkRule constructor', () => {
         expect(rule.isGeneric()).toEqual(true);
     });
 
+    it('construct $domain rules with regexp values', () => {
+        let rule: NetworkRule;
+        rule = new NetworkRule(String.raw`||example.org$domain=/example\.(org\|com)/|evil.com`, 0);
+        expect(rule.getPermittedDomains()).toEqual(['/example\\.(org|com)/', 'evil.com']);
+        expect(rule.getRestrictedDomains()).toEqual(null);
+        rule = new NetworkRule(String.raw`||example.org$domain=~/good\.evil\.com/|/evil\.com/`, 0);
+        expect(rule.getPermittedDomains()).toEqual(['/evil\\.com/']);
+        expect(rule.getRestrictedDomains()).toEqual(['/good\\.evil\\.com/']);
+    });
+
     it('works when it creates rule with $all', () => {
         const rule = new NetworkRule('||example.org^$all', 0);
         expect(rule.getFilterListId()).toEqual(0);
@@ -766,8 +776,8 @@ describe('NetworkRule.match', () => {
 
     describe('$domain modifier semantics', () => {
         it('matches target domain only if rule has excluded domains', () => {
-            let request;
-            let rule;
+            let request: Request;
+            let rule: NetworkRule;
 
             // rule only with excluded domains
             rule = new NetworkRule('||example.*^$domain=~example.org|~example.com', 0);
@@ -798,7 +808,7 @@ describe('NetworkRule.match', () => {
         });
 
         it('matches target domain only for document type requests', () => {
-            let request;
+            let request: Request;
 
             const rule = new NetworkRule('||example.*^$domain=~example.com', 0);
 
@@ -813,7 +823,7 @@ describe('NetworkRule.match', () => {
         });
 
         it('matches target domain if pattern is not domain specific and not regex', () => {
-            let request;
+            let request: Request;
             const rule = new NetworkRule('com$domain=example.com', 0);
 
             request = new Request('https://example.com', null, RequestType.Document);
@@ -822,6 +832,15 @@ describe('NetworkRule.match', () => {
             request = new Request('https://example.org/com', null, RequestType.Document);
             expect(rule.match(request)).toBeFalsy();
         });
+
+
+        // it('matches target domain with regexp pattern', () => { FIXME not working
+        //     let request: Request;
+        //     const rule = new NetworkRule('com$script,domain=example.com', 0);
+
+        //     request = new Request('https://example.com', null, RequestType.Script);
+        //     expect(rule.match(request)).toBeTruthy();
+        // });
     });
 
     it('works $removeparam modifier with content types logic', () => {
