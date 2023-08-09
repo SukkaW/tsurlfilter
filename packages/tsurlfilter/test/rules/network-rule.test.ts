@@ -832,15 +832,6 @@ describe('NetworkRule.match', () => {
             request = new Request('https://example.org/com', null, RequestType.Document);
             expect(rule.match(request)).toBeFalsy();
         });
-
-
-        // it('matches target domain with regexp pattern', () => { FIXME not working
-        //     let request: Request;
-        //     const rule = new NetworkRule('com$script,domain=example.com', 0);
-
-        //     request = new Request('https://example.com', null, RequestType.Script);
-        //     expect(rule.match(request)).toBeTruthy();
-        // });
     });
 
     it('works $removeparam modifier with content types logic', () => {
