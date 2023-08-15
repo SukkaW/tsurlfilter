@@ -12,8 +12,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 - New `$permissions` modifier to set Permissions-Policy response header.
+- New `$header` modifier to match requests by response headers.
+- Support conversion to DNR for `$permissions` modifier.
 - Support conversion to DNR for `$cookie` modifier.
-- `$url` modifier support for non-basic rules
+- `$url` modifier support for non-basic rules.
+
+
+## [2.1.7] - 2023-08-10
+
+### Added
+- Support for `$to` modifier in the MV3 converter.
+- Support for `$method` modifier in the MV3 converter.
+
+### Changed
+- Replace the `ip6addr` and `netmask` dependencies with the platform-independent `cidr-tool'.
+- Remove Node Api polyfills from the bundle.
+
+### Fixed
+- Bad conversion of `allowAllRequests` rules.
+
+
+## [2.1.6] - 2023-08-04
+
+### Changed
+- Updated `@adguard/scriptlets` to `v1.9.62`.
+- Esm module now imports external dependencies instead of bundling.
+
 
 ## [2.1.5] - 2023-07-21
 
@@ -24,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.4] - 2023-07-13
 
 ### Added
-- Support for $csp modifier in the MV3 converter.
+- Support for `$csp` modifier in the MV3 converter.
 - Scheme for converting network rules into declarative rules.
 
 ### Changed
