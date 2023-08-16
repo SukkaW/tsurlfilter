@@ -1,6 +1,5 @@
 import { parse } from 'tldts';
 import { CosmeticRule } from '../../rules/cosmetic-rule';
-import { DomainModifier } from '../../modifiers/domain-modifier';
 import { fastHash } from '../../utils/string-utils';
 import { RuleStorage } from '../../filterlist/rule-storage';
 import { Request } from '../../request';
@@ -72,14 +71,15 @@ export class CosmeticLookupTable {
             return;
         }
 
+        const permittedWildcardDomains = rule.getPermittedWildcardDomains();
+        if (permittedWildcardDomains && permittedWildcardDomains.length > 0) {
+            this.wildcardRules.push(rule);
+            return;
+        }
+
+        // FIXME this should be fixed (domain lookup table prob too)
         const domains = rule.getPermittedDomains();
         if (domains) {
-            const hasWildcardDomain = domains.some((d) => DomainModifier.isWildcardDomain(d));
-            if (hasWildcardDomain) {
-                this.wildcardRules.push(rule);
-                return;
-            }
-
             for (const domain of domains) {
                 const tldResult = parse(domain);
                 // tldResult.domain equals to eTLD domain,

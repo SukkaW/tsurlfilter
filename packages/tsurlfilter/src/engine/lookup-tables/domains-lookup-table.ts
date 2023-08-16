@@ -40,11 +40,13 @@ export class DomainsLookupTable implements ILookupTable {
      * @param storageIdx
      */
     addRule(rule: NetworkRule, storageIdx: number): boolean {
+        // FIXME this should be tweaked
         const permittedDomains = rule.getPermittedDomains();
         if (!permittedDomains || permittedDomains.length === 0) {
             return false;
         }
 
+        // FIXME is not needed anymore?
         const hasWildcardDomain = permittedDomains.some((d) => DomainModifier.isWildcardDomain(d));
         if (hasWildcardDomain) {
             return false;

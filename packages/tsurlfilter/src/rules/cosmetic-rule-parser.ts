@@ -177,10 +177,12 @@ export class CosmeticRuleParser {
      * or url modifier string value
      */
     static parseRulePattern(rulePattern: string): {
-        url?: string,
-        path?: string,
+        url?: string;
+        path?: string;
         permittedDomains?: string[];
         restrictedDomains?: string[];
+        permittedWildcardDomains?: string[];
+        restrictedWildcardDomains?: string[];
     } {
         const {
             domainsText,
@@ -225,6 +227,9 @@ export class CosmeticRuleParser {
         let permittedDomains;
         let restrictedDomains;
 
+        let permittedWildcardDomains;
+        let restrictedWildcardDomains;
+
         // Skip wildcard domain
         if (domains && domains !== SimpleRegex.MASK_ANY_CHARACTER) {
             const separator = modifiers?.domain ? PIPE_SEPARATOR : COMMA_SEPARATOR;
@@ -237,12 +242,22 @@ export class CosmeticRuleParser {
             if (domainModifier.restrictedDomains) {
                 restrictedDomains = domainModifier.restrictedDomains;
             }
+
+            if (domainModifier.permittedWildcardDomains) {
+                permittedWildcardDomains = domainModifier.permittedWildcardDomains;
+            }
+
+            if (domainModifier.restrictedWildcardDomains) {
+                restrictedWildcardDomains = domainModifier.restrictedWildcardDomains;
+            }
         }
 
         return {
             path,
             permittedDomains,
             restrictedDomains,
+            permittedWildcardDomains,
+            restrictedWildcardDomains,
         };
     }
 }

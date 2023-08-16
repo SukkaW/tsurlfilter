@@ -1,4 +1,5 @@
 import { getPublicSuffix } from 'tldts';
+import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
 
 /**
  * This is a helper class that is used specifically to work
@@ -27,6 +28,16 @@ export class DomainModifier {
     public readonly restrictedDomains: string[] | null;
 
     /**
+     * List of permitted wildcard domains or null.
+     */
+    public readonly permittedWildcardDomains: string[] | null;
+
+    /**
+     * List of restricted wildcard domains or null.
+     */
+    public readonly restrictedWildcardDomains: string[] | null;
+
+    /**
      * Parses the `domains` string and initializes the object.
      *
      * @param domainsStr Domains string.
@@ -35,6 +46,8 @@ export class DomainModifier {
      * @throws An error if the domains string is empty or invalid
      */
     constructor(domainsStr: string, separator: string) {
+        // FIXME consider if regexp domains should be converted to RegExp here
+        // or immediately before matching
         if (!domainsStr) {
             throw new SyntaxError('Modifier $domain cannot be empty');
         }
@@ -42,12 +55,16 @@ export class DomainModifier {
         const permittedDomains: string[] = [];
         const restrictedDomains: string[] = [];
 
-        const parts = domainsStr.toLowerCase().split(separator);
+        const permittedWildcardDomains: string[] = [];
+        const restrictedWildcardDomains: string[] = [];
+
+        const parts = splitByDelimiterWithEscapeCharacter(domainsStr.toLowerCase(), separator, '\\', true);
         for (let i = 0; i < parts.length; i += 1) {
             let domain = parts[i].trim();
-            let restricted = false;
+            let isRestricted = false;
+            let isWildcard = false;
             if (domain.startsWith('~')) {
-                restricted = true;
+                isRestricted = true;
                 domain = domain.substring(1);
             }
 
@@ -55,15 +72,29 @@ export class DomainModifier {
                 throw new SyntaxError(`Empty domain specified in "${domainsStr}"`);
             }
 
-            if (restricted) {
+            if (DomainModifier.isWildcardDomain(domain)) {
+                isWildcard = true;
+            }
+
+            // FIXME improve this
+            if (isWildcard) {
+                if (isRestricted) {
+                    restrictedWildcardDomains.push(domain);
+                } else {
+                    permittedWildcardDomains.push(domain);
+                }
+            } else if (isRestricted) {
                 restrictedDomains.push(domain);
             } else {
                 permittedDomains.push(domain);
             }
         }
 
+        // FIXME improve this
         this.restrictedDomains = restrictedDomains.length > 0 ? restrictedDomains : null;
         this.permittedDomains = permittedDomains.length > 0 ? permittedDomains : null;
+        this.restrictedWildcardDomains = restrictedWildcardDomains.length > 0 ? restrictedWildcardDomains : null;
+        this.permittedWildcardDomains = permittedWildcardDomains.length > 0 ? permittedWildcardDomains : null;
     }
 
     /**
