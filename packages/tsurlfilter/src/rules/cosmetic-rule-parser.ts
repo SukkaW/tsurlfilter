@@ -183,6 +183,8 @@ export class CosmeticRuleParser {
         restrictedDomains?: string[];
         permittedWildcardDomains?: string[];
         restrictedWildcardDomains?: string[];
+        permittedRegexDomains?: RegExp[];
+        restrictedRegexDomains?: RegExp[];
     } {
         const {
             domainsText,
@@ -230,11 +232,15 @@ export class CosmeticRuleParser {
         let permittedWildcardDomains;
         let restrictedWildcardDomains;
 
+        let permittedRegexDomains;
+        let restrictedRegexDomains;
+
         // Skip wildcard domain
         if (domains && domains !== SimpleRegex.MASK_ANY_CHARACTER) {
             const separator = modifiers?.domain ? PIPE_SEPARATOR : COMMA_SEPARATOR;
             const domainModifier = new DomainModifier(domains, separator);
 
+            // FIXME refactor?
             if (domainModifier.permittedDomains) {
                 permittedDomains = domainModifier.permittedDomains;
             }
@@ -250,6 +256,14 @@ export class CosmeticRuleParser {
             if (domainModifier.restrictedWildcardDomains) {
                 restrictedWildcardDomains = domainModifier.restrictedWildcardDomains;
             }
+
+            if (domainModifier.permittedRegexDomains) {
+                permittedRegexDomains = domainModifier.permittedRegexDomains;
+            }
+
+            if (domainModifier.restrictedRegexDomains) {
+                restrictedRegexDomains = domainModifier.restrictedRegexDomains;
+            }
         }
 
         return {
@@ -258,6 +272,8 @@ export class CosmeticRuleParser {
             restrictedDomains,
             permittedWildcardDomains,
             restrictedWildcardDomains,
+            permittedRegexDomains,
+            restrictedRegexDomains,
         };
     }
 }

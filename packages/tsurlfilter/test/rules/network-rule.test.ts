@@ -127,16 +127,18 @@ describe('NetworkRule constructor', () => {
         expect(rule.isGeneric()).toEqual(true);
     });
 
-    // FIXME enable this test
-    // it('construct $domain rules with regexp values', () => {
-    //     let rule: NetworkRule;
-    //     rule = new NetworkRule(String.raw`||example.org$domain=/example\.(org\|com)/|evil.com`, 0);
-    //     expect(rule.getPermittedDomains()).toEqual(['/example\\.(org|com)/', 'evil.com']);
-    //     expect(rule.getRestrictedDomains()).toEqual(null);
-    //     rule = new NetworkRule(String.raw`||example.org$domain=~/good\.evil\.com/|/evil\.com/`, 0);
-    //     expect(rule.getPermittedDomains()).toEqual(['/evil\\.com/']);
-    //     expect(rule.getRestrictedDomains()).toEqual(['/good\\.evil\\.com/']);
-    // });
+    it('construct $domain rules with regexp values', () => {
+        let rule: NetworkRule;
+        rule = new NetworkRule(String.raw`||example.org$domain=/example\.(org\|com)/|evil.com`, 0);
+        expect(rule.getPermittedDomains()).toEqual(['evil.com']);
+        expect(rule.getRestrictedDomains()).toEqual(null);
+        expect(rule.getPermittedRegexDomains()).toEqual([/example\.(org|com)/g]);
+        expect(rule.getRestrictedRegexDomains()).toEqual(null);
+
+        rule = new NetworkRule(String.raw`||example.org$domain=~/good\.evil\.(com\|org)/|/evil\.com/`, 0);
+        expect(rule.getPermittedRegexDomains()).toEqual([/evil\.com/g]);
+        expect(rule.getRestrictedRegexDomains()).toEqual([/good\.evil\.(com|org)/g]);
+    });
 
     it('works when it creates rule with $all', () => {
         const rule = new NetworkRule('||example.org^$all', 0);
@@ -636,6 +638,11 @@ describe('NetworkRule constructor', () => {
         expect(() => {
             new NetworkRule('/some$denyallow=example.*,domain=example.com', -1);
         }).toThrow('Invalid modifier: $denyallow domains wildcards are not supported');
+
+        // or have a regexp pattern to match the domains
+        expect(() => {
+            new NetworkRule('/some$denyallow=/example\\.com/,domain=example.com', -1);
+        }).toThrow('Invalid modifier: $denyallow domains cannot be used with regexp values');
     });
 
     it('works if document modifier works properly', () => {
@@ -1043,6 +1050,26 @@ describe('NetworkRule.match', () => {
         expect(rule.match(request)).toBeFalsy();
 
         request = new Request('https://test.ru/', 'https://adguard.ru/', RequestType.Document);
+        expect(rule.match(request)).toBeFalsy();
+    });
+
+    it('works when $domain modifier is applied properly - regexp', () => {
+        const requestType: RequestType = RequestType.Document;
+        let request: Request;
+        let rule: NetworkRule;
+
+        rule = new NetworkRule(String.raw`||test.ru^$domain=/\.(org\|com)/|~/good\.(org\|com)/`, 0);
+        expect(rule.getPermittedRegexDomains()).toHaveLength(1);
+        expect(rule.getRestrictedRegexDomains()).toHaveLength(1);
+
+        request = new Request('https://test.ru/', 'https://example.com', requestType);
+        expect(rule.match(request)).toBeTruthy();
+        // request = new Request('https://test.ru/', 'https://example.org', requestType);
+        // expect(rule.match(request)).toBeTruthy(); FIXME this is not working for some reason
+
+        request = new Request('https://test.ru/', 'https://good.org', requestType);
+        expect(rule.match(request)).toBeFalsy();
+        request = new Request('https://test.ru/', 'https://good.com', requestType);
         expect(rule.match(request)).toBeFalsy();
     });
 

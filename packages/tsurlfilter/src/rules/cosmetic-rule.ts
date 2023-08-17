@@ -156,6 +156,10 @@ export class CosmeticRule implements rule.IRule {
 
     private readonly restrictedWildcardDomains: string[] | undefined = undefined;
 
+    private readonly permittedRegexDomains: RegExp[] | undefined = undefined;
+
+    private readonly restrictedRegexDomains: RegExp[] | undefined = undefined;
+
     /**
      * $path modifier pattern. It is only set if $path modifier is specified for this rule.
      */
@@ -354,6 +358,14 @@ export class CosmeticRule implements rule.IRule {
         return this.restrictedWildcardDomains;
     }
 
+    getPermittedRegexDomains(): RegExp[] | undefined {
+        return this.permittedRegexDomains;
+    }
+
+    getRestrictedRegexDomains(): RegExp[] | undefined {
+        return this.restrictedRegexDomains;
+    }
+
     /**
      * Returns true if the rule is considered "generic"
      * "generic" means that the rule is not restricted to a limited set of domains
@@ -362,7 +374,9 @@ export class CosmeticRule implements rule.IRule {
      * @return {boolean}
      */
     isGeneric(): boolean {
-        return !this.hasPermittedDomains() && !this.hasPermittedWildcardDomains();
+        return !this.hasPermittedDomains()
+            && !this.hasPermittedWildcardDomains()
+            && !this.hasPermittedRegexDomains();
     }
 
     isExtendedCss(): boolean {
@@ -420,6 +434,8 @@ export class CosmeticRule implements rule.IRule {
                 restrictedDomains,
                 permittedWildcardDomains,
                 restrictedWildcardDomains,
+                permittedRegexDomains,
+                restrictedRegexDomains,
             } = CosmeticRuleParser.parseRulePattern(pattern);
 
             if (url) {
@@ -445,6 +461,14 @@ export class CosmeticRule implements rule.IRule {
                 if (restrictedWildcardDomains) {
                     this.restrictedWildcardDomains = restrictedWildcardDomains;
                 }
+
+                if (permittedRegexDomains) {
+                    this.permittedRegexDomains = permittedRegexDomains;
+                }
+
+                if (restrictedRegexDomains) {
+                    this.restrictedRegexDomains = restrictedRegexDomains;
+                }
             }
         }
 
@@ -458,11 +482,13 @@ export class CosmeticRule implements rule.IRule {
      * @param request - request to check
      */
     match(request: Request): boolean {
-        // FIXME this should prob be refactored
+        // FIXME another case for lists-checking helper
         if (!this.permittedDomains
             && !this.restrictedDomains
             && !this.permittedWildcardDomains
             && !this.restrictedWildcardDomains
+            && !this.permittedRegexDomains
+            && !this.restrictedRegexDomains
             && !this.pathModifier
             && !this.urlModifier
         ) {
@@ -474,7 +500,8 @@ export class CosmeticRule implements rule.IRule {
         }
 
         if (this.matchesRestrictedDomains(request.hostname)
-            || this.matchesRestrictedWildcardDomains(request.hostname)) {
+            || this.matchesRestrictedWildcardDomains(request.hostname)
+            || this.matchesRestrictedRegexDomains(request.hostname)) {
             /**
              * Domain or host is restricted
              * i.e. ~example.org##rule
@@ -491,8 +518,16 @@ export class CosmeticRule implements rule.IRule {
                  */
                 return false;
             }
-        } else if (this.hasPermittedWildcardDomains()) {
+        }
+
+        if (this.hasPermittedWildcardDomains()) {
             if (!DomainModifier.isDomainOrSubdomainOfAny(request.hostname, this.permittedWildcardDomains!)) {
+                return false;
+            }
+        }
+
+        if (this.hasPermittedRegexDomains()) {
+            if (!DomainModifier.isDomainOrSubdomainOfAny(request.hostname, this.permittedRegexDomains!)) {
                 return false;
             }
         }
@@ -644,6 +679,7 @@ export class CosmeticRule implements rule.IRule {
         return !!this.restrictedDomains && this.restrictedDomains.length > 0;
     }
 
+    // FIXME check if this is used
     private hasPermittedWildcardDomains(): boolean {
         return !!this.permittedWildcardDomains && this.permittedWildcardDomains.length > 0;
     }
@@ -653,9 +689,19 @@ export class CosmeticRule implements rule.IRule {
         return !!this.restrictedWildcardDomains && this.restrictedWildcardDomains.length > 0;
     }
 
-    // FIXME following 4(6 with regex domains) matching funcs should probably be merged into
-    // matchesPermittedDomains && matchesRestrictedDomains
+    // FIXME check if this is used
+    private hasPermittedRegexDomains(): boolean {
+        return !!this.permittedRegexDomains && this.permittedRegexDomains.length > 0;
+    }
+
+    // FIXME check if this is used
+    private hasRestrictedRegexDomains(): boolean {
+        return !!this.restrictedRegexDomains && this.restrictedRegexDomains.length > 0;
+    }
+
+    // FIXME check this funcs usage and if they can/should be merged in some kind of helper
     // to check matching between all permitted or all restricted domains
+    // this fixme has counterpart in network rule
     /**
      * Checks if the hostname matches permitted domains
      * @param hostname
@@ -682,6 +728,16 @@ export class CosmeticRule implements rule.IRule {
     public matchesRestrictedWildcardDomains(hostname: string): boolean {
         return this.hasRestrictedWildcardDomains()
             && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.restrictedWildcardDomains!);
+    }
+
+    public matchesPermittedRegexDomains(hostname: string): boolean {
+        return this.hasPermittedRegexDomains()
+            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedRegexDomains!);
+    }
+
+    public matchesRestrictedRegexDomains(hostname: string): boolean {
+        return this.hasRestrictedRegexDomains()
+            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.restrictedRegexDomains!);
     }
 
     /**

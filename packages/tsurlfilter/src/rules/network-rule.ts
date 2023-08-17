@@ -207,6 +207,10 @@ export class NetworkRule implements rule.IRule {
 
     private restrictedWildcardDomains: string[] | null = null;
 
+    private permittedRegexDomains: RegExp[] | null = null;
+
+    private restrictedRegexDomains: RegExp[] | null = null;
+
     /**
      * Domains in denyallow modifier providing exceptions for permitted domains
      * https://github.com/AdguardTeam/CoreLibs/issues/1304
@@ -503,6 +507,22 @@ export class NetworkRule implements rule.IRule {
         return this.restrictedWildcardDomains;
     }
 
+    /** FIXME update readme wit hthese public methods
+     * Gets list of permitted regex domains.
+     * See https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#domain-modifier
+     */
+    getPermittedRegexDomains(): RegExp[] | null {
+        return this.permittedRegexDomains;
+    }
+
+    /**
+     * Gets list of restricted regex domains.
+     * See https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#domain-modifier
+     */
+    getRestrictedRegexDomains(): RegExp[] | null {
+        return this.restrictedRegexDomains;
+    }
+
     /**
      * Gets list of denyAllow domains.
      * See https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#denyallow-modifier
@@ -628,9 +648,27 @@ export class NetworkRule implements rule.IRule {
         );
     }
 
+    // FIXME check this funcs usage and if they can/need to be merged in one helper
+    // this fixme has counterpart in cosmetic rule
     public matchesPermittedDomains(hostname: string): boolean {
         if (this.hasPermittedDomains()
             && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedDomains!)) {
+            return true;
+        }
+        return false;
+    }
+
+    public matchesPermittedWildcardDomains(hostname: string): boolean {
+        if (this.hasPermittedWildcardDomains()
+            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedWildcardDomains!)) {
+            return true;
+        }
+        return false;
+    }
+
+    public matchesPermittedRegexDomains(hostname: string): boolean {
+        if (this.hasPermittedRegexDomains()
+            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedRegexDomains!)) {
             return true;
         }
         return false;
@@ -712,7 +750,8 @@ export class NetworkRule implements rule.IRule {
      * @param domain - domain to check.
      */
     private matchDomain(domain: string): boolean {
-        // FIXME these block should be refactored
+        // FIXME these blocks could be refactored, some kind of helper could be used
+        // should it?
         if (this.hasRestrictedDomains()) {
             if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.restrictedDomains!)) {
                 // Domain or host is restricted
@@ -727,6 +766,12 @@ export class NetworkRule implements rule.IRule {
             }
         }
 
+        if (this.hasRestrictedRegexDomains()) {
+            if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.restrictedRegexDomains!)) {
+                return false;
+            }
+        }
+
         if (this.hasPermittedDomains()) {
             if (!DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedDomains!)) {
                 // Domain is not among permitted
@@ -737,6 +782,12 @@ export class NetworkRule implements rule.IRule {
 
         if (this.hasPermittedWildcardDomains()) {
             if (!DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedWildcardDomains!)) {
+                return false;
+            }
+        }
+
+        if (this.hasPermittedRegexDomains()) {
+            if (!DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedRegexDomains!)) {
                 return false;
             }
         }
@@ -760,11 +811,13 @@ export class NetworkRule implements rule.IRule {
      * @param request
      */
     matchDomainModifier(request: Request): boolean {
-        // FIXME helper could also be used here
+        // FIXME another case for lists-checking helper
         if (!this.permittedDomains
             && !this.restrictedDomains
             && !this.permittedWildcardDomains
             && !this.restrictedWildcardDomains
+            && !this.permittedRegexDomains
+            && !this.restrictedRegexDomains
         ) {
             return true;
         }
@@ -775,8 +828,10 @@ export class NetworkRule implements rule.IRule {
         // FIXME another case for lists-checking helper
         const hasOnlyExcludedDomains = (!this.permittedDomains || this.permittedDomains.length === 0)
             && (!this.permittedWildcardDomains || this.permittedWildcardDomains.length === 0)
+            && (!this.permittedRegexDomains || this.permittedRegexDomains.length === 0)
             && ((this.restrictedDomains && this.restrictedDomains.length > 0)
-                || (this.restrictedWildcardDomains && this.restrictedWildcardDomains.length > 0));
+                || (this.restrictedWildcardDomains && this.restrictedWildcardDomains.length > 0)
+                || (this.restrictedRegexDomains && this.restrictedRegexDomains.length > 0));
 
         const patternIsRegex = this.isRegexRule();
         const patternIsDomainSpecific = this.pattern.isPatternDomainSpecific();
@@ -907,18 +962,32 @@ export class NetworkRule implements rule.IRule {
         return !!this.restrictedDomains && this.restrictedDomains.length > 0;
     }
 
-    /** FIXME check that these two are used
+    /** FIXME check that these are used
      * Checks if rule has permitted wildcard domains
      */
     private hasPermittedWildcardDomains(): boolean {
         return !!this.permittedWildcardDomains && this.permittedWildcardDomains.length > 0;
     }
 
-    /** FIXME check that these two are used
+    /** FIXME check that these are used
      * Checks if rule has restricted wildcard domains
      */
     private hasRestrictedWildcardDomains(): boolean {
         return !!this.restrictedWildcardDomains && this.restrictedWildcardDomains.length > 0;
+    }
+
+    /** FIXME check that these are used
+     * Checks if rule has permitted regex domains
+     */
+    private hasPermittedRegexDomains(): boolean {
+        return !!this.permittedRegexDomains && this.permittedRegexDomains.length > 0;
+    }
+
+    /** FIXME check that these are used
+     * Checks if rule has restricted regex domains
+     */
+    private hasRestrictedRegexDomains(): boolean {
+        return !!this.restrictedRegexDomains && this.restrictedRegexDomains.length > 0;
     }
 
     /**
@@ -1092,10 +1161,13 @@ export class NetworkRule implements rule.IRule {
             const isDnsCompatible = isCompatibleWith(CompatibilityTypes.Dns);
 
             if (!hasCookieModifier && !hasRemoveParamModifier && !isDnsCompatible) {
+                // FIXME
                 if (!(this.hasPermittedDomains()
                     || this.hasPermittedApps()
                     || this.hasPermittedWildcardDomains()
                     || this.hasRestrictedWildcardDomains()
+                    || this.hasPermittedRegexDomains()
+                    || this.hasRestrictedRegexDomains()
                 )) {
                     // Rule matches too much and does not have any domain restriction
                     // We should not allow this kind of rules
@@ -1198,7 +1270,9 @@ export class NetworkRule implements rule.IRule {
      * @return {boolean}
      */
     isGeneric(): boolean {
-        return !this.hasPermittedDomains() && !this.hasPermittedWildcardDomains();
+        return !this.hasPermittedDomains()
+            && !this.hasPermittedWildcardDomains()
+            && !this.hasPermittedRegexDomains();
     }
 
     /**
@@ -1246,6 +1320,24 @@ export class NetworkRule implements rule.IRule {
             return false;
         }
 
+        // FIXME refactor this abomination
+        // Regexp values have to be converted back to strings to be compared
+        const restrictedRegexDomainsAreEqual = stringArraysEquals(
+            this.restrictedRegexDomains?.map((reg) => reg.source) || null,
+            specifiedRule.restrictedRegexDomains?.map((reg) => reg.source) || null,
+        );
+        if (!restrictedRegexDomainsAreEqual) {
+            return false;
+        }
+
+        const permittedRegexpDomainsHaveIntersection = stringArraysEquals(
+            this.permittedRegexDomains?.map((reg) => reg.source) || null,
+            specifiedRule.permittedRegexDomains?.map((reg) => reg.source) || null,
+        );
+        if (!permittedRegexpDomainsHaveIntersection) {
+            return false;
+        }
+
         return true;
     }
 
@@ -1253,11 +1345,14 @@ export class NetworkRule implements rule.IRule {
      * Checks if this rule can be used for hosts-level blocking
      */
     isHostLevelNetworkRule(): boolean {
+        // FIXME another case for lists-checking helper
         if (this.hasPermittedDomains()
             || this.hasRestrictedDomains()
-            // FIXME these should somehow make single helper with asPermittedDomains & hasRestrictedWildcardDomains
             || this.hasPermittedWildcardDomains()
-            || this.hasRestrictedWildcardDomains()) {
+            || this.hasRestrictedWildcardDomains()
+            || this.hasPermittedRegexDomains()
+            || this.hasRestrictedRegexDomains()
+        ) {
             return false;
         }
 
@@ -1333,9 +1428,19 @@ export class NetworkRule implements rule.IRule {
             restrictedDomains,
             permittedWildcardDomains,
             restrictedWildcardDomains,
+            permittedRegexDomains,
+            restrictedRegexDomains,
         } = domainModifier;
 
-        // FIXME consider adding helper to use in such conditions (more than 2 cases)
+        if ((permittedRegexDomains && permittedRegexDomains.length > 0)
+            || (restrictedRegexDomains && restrictedRegexDomains.length > 0)) {
+            // FIXME such behaviour is valid, update kb, add testcase
+            throw new SyntaxError(
+                'Invalid modifier: $denyallow domains cannot be used with regexp values',
+            );
+        }
+
+        // FIXME another case for lists-checking helpers
         if ((restrictedDomains && restrictedDomains.length > 0)
             || (restrictedWildcardDomains && restrictedWildcardDomains.length > 0)
         ) {
@@ -1416,6 +1521,8 @@ export class NetworkRule implements rule.IRule {
                 this.restrictedDomains = domainModifier.restrictedDomains;
                 this.permittedWildcardDomains = domainModifier.permittedWildcardDomains;
                 this.restrictedWildcardDomains = domainModifier.restrictedWildcardDomains;
+                this.permittedRegexDomains = domainModifier.permittedRegexDomains;
+                this.restrictedRegexDomains = domainModifier.restrictedRegexDomains;
                 break;
             // $denyallow
             case OPTIONS.DENYALLOW:
@@ -1794,9 +1901,10 @@ export class NetworkRule implements rule.IRule {
         if (this.denyAllowDomains && this.denyAllowDomains.length > 0) {
             this.priorityWeight += 1;
         }
-
+        // FIXME another case for lists-checking helper
         if ((this.restrictedDomains && this.restrictedDomains.length > 0)
             || (this.restrictedWildcardDomains && this.restrictedWildcardDomains.length > 0)
+            || (this.restrictedRegexDomains && this.restrictedRegexDomains.length > 0)
         ) {
             this.priorityWeight += 1;
         }
@@ -1855,15 +1963,26 @@ export class NetworkRule implements rule.IRule {
          * `||example.com^$app=org.example.app1|org.example.app2`
          * will add `100 + 100 / 2 = 151`.
          */
+        // FIXME should these be merged like this? should calc helper be used?
+        // const permittedDomains = [
+        //     ...(this.permittedDomains || []),
+        //     ...(this.permittedWildcardDomains || []),
+        //     ...(this.permittedRegexDomains || []),
+        // ];
+        // FIXME another case for lists-checking helper
         if (this.permittedDomains && this.permittedDomains.length > 0) {
             // More permitted domains mean less priority weight.
             const relativeWeight = NetworkRule.CategoryThreeWeight / this.permittedDomains.length;
             this.priorityWeight += NetworkRule.CategoryThreeWeight + relativeWeight;
         }
-        // FIXME merge and improve this with p/rDomains above
         if (this.permittedWildcardDomains && this.permittedWildcardDomains.length > 0) {
             // More permitted wildcard domains mean less priority weight.
             const relativeWeight = NetworkRule.CategoryThreeWeight / this.permittedWildcardDomains.length;
+            this.priorityWeight += NetworkRule.CategoryThreeWeight + relativeWeight;
+        }
+        if (this.permittedRegexDomains && this.permittedRegexDomains.length > 0) {
+            // More permitted regex domains mean less priority weight.
+            const relativeWeight = NetworkRule.CategoryThreeWeight / this.permittedRegexDomains.length;
             this.priorityWeight += NetworkRule.CategoryThreeWeight + relativeWeight;
         }
 

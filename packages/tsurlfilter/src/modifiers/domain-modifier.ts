@@ -1,5 +1,6 @@
 import { getPublicSuffix } from 'tldts';
 import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
+import { SimpleRegex } from '../rules/simple-regex';
 
 /**
  * This is a helper class that is used specifically to work
@@ -38,6 +39,16 @@ export class DomainModifier {
     public readonly restrictedWildcardDomains: string[] | null;
 
     /**
+     * List of permitted regex domains or null.
+     */
+    public readonly permittedRegexDomains: RegExp[] | null;
+
+    /**
+     * List of restricted regex domains or null.
+     */
+    public readonly restrictedRegexDomains: RegExp[] | null;
+
+    /**
      * Parses the `domains` string and initializes the object.
      *
      * @param domainsStr Domains string.
@@ -46,8 +57,6 @@ export class DomainModifier {
      * @throws An error if the domains string is empty or invalid
      */
     constructor(domainsStr: string, separator: string) {
-        // FIXME consider if regexp domains should be converted to RegExp here
-        // or immediately before matching
         if (!domainsStr) {
             throw new SyntaxError('Modifier $domain cannot be empty');
         }
@@ -58,11 +67,13 @@ export class DomainModifier {
         const permittedWildcardDomains: string[] = [];
         const restrictedWildcardDomains: string[] = [];
 
+        const permittedRegexDomains: RegExp[] = [];
+        const restrictedRegexDomains: RegExp[] = [];
+
         const parts = splitByDelimiterWithEscapeCharacter(domainsStr.toLowerCase(), separator, '\\', true);
         for (let i = 0; i < parts.length; i += 1) {
             let domain = parts[i].trim();
             let isRestricted = false;
-            let isWildcard = false;
             if (domain.startsWith('~')) {
                 isRestricted = true;
                 domain = domain.substring(1);
@@ -71,30 +82,41 @@ export class DomainModifier {
             if (domain === '') {
                 throw new SyntaxError(`Empty domain specified in "${domainsStr}"`);
             }
-
-            if (DomainModifier.isWildcardDomain(domain)) {
-                isWildcard = true;
+            if (SimpleRegex.isRegexPattern(domain)) {
+                const regexDomain = SimpleRegex.patternFromString(domain);
+                if (isRestricted) {
+                    restrictedRegexDomains.push(regexDomain);
+                } else {
+                    permittedRegexDomains.push(regexDomain);
+                }
+                continue;
             }
 
-            // FIXME improve this
-            if (isWildcard) {
+            if (DomainModifier.isWildcardDomain(domain)) {
                 if (isRestricted) {
                     restrictedWildcardDomains.push(domain);
                 } else {
                     permittedWildcardDomains.push(domain);
                 }
-            } else if (isRestricted) {
+                continue;
+            }
+
+            if (isRestricted) {
                 restrictedDomains.push(domain);
             } else {
                 permittedDomains.push(domain);
             }
         }
 
-        // FIXME improve this
+        // FIXME improve this?
         this.restrictedDomains = restrictedDomains.length > 0 ? restrictedDomains : null;
         this.permittedDomains = permittedDomains.length > 0 ? permittedDomains : null;
+
         this.restrictedWildcardDomains = restrictedWildcardDomains.length > 0 ? restrictedWildcardDomains : null;
         this.permittedWildcardDomains = permittedWildcardDomains.length > 0 ? permittedWildcardDomains : null;
+
+        this.permittedRegexDomains = permittedRegexDomains.length > 0 ? permittedRegexDomains : null;
+        this.restrictedRegexDomains = restrictedRegexDomains.length > 0 ? restrictedRegexDomains : null;
     }
 
     /**
@@ -104,9 +126,16 @@ export class DomainModifier {
      * @param domain - domain to check
      * @param domains - domains list to check against
      */
-    public static isDomainOrSubdomainOfAny(domain: string, domains: string[]): boolean {
+    public static isDomainOrSubdomainOfAny(domain: string, domains: string[] | RegExp[]): boolean {
         for (let i = 0; i < domains.length; i += 1) {
             const d = domains[i];
+            if (d instanceof RegExp) {
+                if (d.test(domain)) {
+                    return true;
+                }
+                continue;
+            }
+
             if (DomainModifier.isWildcardDomain(d)) {
                 if (DomainModifier.matchAsWildcard(d, domain)) {
                     return true;
