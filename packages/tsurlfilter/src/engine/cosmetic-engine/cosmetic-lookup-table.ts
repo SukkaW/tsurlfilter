@@ -16,9 +16,16 @@ export class CosmeticLookupTable {
 
     /**
      * Collection of domain specific rules, those could not be grouped by domain name
-     * For instance, wildcard domain rules and regexp domain rules.
+     * For instance, wildcard domain rules.
      */
     public wildcardRules: CosmeticRule[];
+
+    /**
+     * Collection of domain specific rules, that could not be grouped by domain name
+     * and have regexp values in the domain modifier.
+     * For instance,  regexp domain rules.
+     */
+    public regexRules: CosmeticRule[];
 
     /**
      * Collection of generic rules.
@@ -47,6 +54,7 @@ export class CosmeticLookupTable {
     constructor(storage: RuleStorage) {
         this.byHostname = new Map();
         this.wildcardRules = [] as CosmeticRule[];
+        this.regexRules = [] as CosmeticRule[];
         this.genericRules = [] as CosmeticRule[];
         this.allowlist = new Map();
         this.ruleStorage = storage;
@@ -77,7 +85,12 @@ export class CosmeticLookupTable {
             return;
         }
 
-        // FIXME this should be fixed (domain lookup table prob too)
+        const permittedRegexDomains = rule.getPermittedRegexDomains();
+        if (permittedRegexDomains && permittedRegexDomains.length > 0) {
+            this.regexRules.push(rule);
+            return;
+        }
+
         const domains = rule.getPermittedDomains();
         if (domains) {
             for (const domain of domains) {
@@ -118,6 +131,7 @@ export class CosmeticLookupTable {
         }
 
         result.push(...this.wildcardRules.filter((r) => r.match(request)));
+        result.push(...this.regexRules.filter((r) => r.match(request)));
 
         return result.filter((rule) => !rule.isAllowlist());
     }
