@@ -1054,11 +1054,10 @@ describe('NetworkRule.match', () => {
     });
 
     it('works when $domain modifier is applied properly - regexp', () => {
-        const requestType: RequestType = RequestType.Script;
         let request: Request;
-        let rule: NetworkRule;
+        const requestType: RequestType = RequestType.Script;
 
-        rule = new NetworkRule(String.raw`||test.ru^$domain=/.(io\|com)/|~/good\.(org\|com)/`, 0);
+        const rule = new NetworkRule(String.raw`||test.ru^$domain=/\.(io\|com)/|~/good\.(org\|com)/`, 0);
         expect(rule.getPermittedRegexDomains()).toHaveLength(1);
         expect(rule.getRestrictedRegexDomains()).toHaveLength(1);
 
@@ -1070,6 +1069,37 @@ describe('NetworkRule.match', () => {
         request = new Request('https://test.ru/', 'https://good.org', requestType);
         expect(rule.match(request)).toBeFalsy();
         request = new Request('https://test.ru/', 'https://good.com', requestType);
+        expect(rule.match(request)).toBeFalsy();
+    });
+
+    it('matches by $domain modifier with mixed type values', () => {
+        let request: Request;
+        const requestType: RequestType = RequestType.Script;
+        const rule = new NetworkRule(String.raw`||test.ru^$domain=/\.(io\|com)/|evil.*|ads.net|~/jwt\.io/|~evil.gov`, 0);
+        expect(rule.getPermittedDomains()).toHaveLength(1);
+        expect(rule.getPermittedWildcardDomains()).toHaveLength(1);
+        expect(rule.getPermittedRegexDomains()).toHaveLength(1);
+        
+        request = new Request('https://test.ru/', 'https://ads.net', requestType);
+        expect(rule.match(request)).toBeTruthy();
+        request = new Request('https://test.ru/', 'https://another.org', requestType);
+        expect(rule.match(request)).toBeFalsy();
+
+        // Inverted regexp domain '~/jwt\.io/' restricts
+        // regexp domain modifier '/\.(io\|com)/' from matching the request
+        request = new Request('https://test.ru/', 'https://example.com', requestType);
+        expect(rule.match(request)).toBeTruthy();
+
+        request = new Request('https://test.ru/', 'https://jwt.io', requestType);
+        expect(rule.match(request)).toBeFalsy();
+
+        // Inverted plain domain '~evil.gov' restricts
+        // wildcard domain modifier 'evil.*' from matching the request
+        request = new Request('https://test.ru/', 'https://evil.org', requestType);
+        expect(rule.match(request)).toBeTruthy();
+        request = new Request('https://test.ru/', 'https://evil.com', requestType);
+        expect(rule.match(request)).toBeTruthy();
+        request = new Request('https://test.ru/', 'https://evil.gov', requestType);
         expect(rule.match(request)).toBeFalsy();
     });
 

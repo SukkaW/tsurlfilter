@@ -82,6 +82,7 @@ export class DomainModifier {
             if (domain === '') {
                 throw new SyntaxError(`Empty domain specified in "${domainsStr}"`);
             }
+
             if (SimpleRegex.isRegexPattern(domain)) {
                 const regexDomain = new RegExp(domain.slice(1, -1));
                 if (isRestricted) {

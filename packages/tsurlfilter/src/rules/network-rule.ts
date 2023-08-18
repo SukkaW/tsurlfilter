@@ -750,8 +750,6 @@ export class NetworkRule implements rule.IRule {
      * @param domain - domain to check.
      */
     private matchDomain(domain: string): boolean {
-        // FIXME these blocks could be refactored, some kind of helper could be used
-        // should it?
         if (this.hasRestrictedDomains()) {
             if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.restrictedDomains!)) {
                 // Domain or host is restricted
@@ -772,27 +770,24 @@ export class NetworkRule implements rule.IRule {
             }
         }
 
-        if (this.hasPermittedDomains()) {
-            if (!DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedDomains!)) {
-                // Domain is not among permitted
-                // i.e. $domain=example.org and we're checking example.com
-                return false;
-            }
+        if (this.hasPermittedDomains()
+            && DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedDomains!)) {
+            // Domain is not among permitted
+            // i.e. $domain=example.org and we're checking example.com
+            return true;
         }
 
-        if (this.hasPermittedWildcardDomains()) {
-            if (!DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedWildcardDomains!)) {
-                return false;
-            }
+        if (this.hasPermittedWildcardDomains()
+            && DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedWildcardDomains!)) {
+            return true;
         }
 
-        if (this.hasPermittedRegexDomains()) {
-            if (!DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedRegexDomains!)) {
-                return false;
-            }
+        if (this.hasPermittedRegexDomains()
+            && DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedRegexDomains!)) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**

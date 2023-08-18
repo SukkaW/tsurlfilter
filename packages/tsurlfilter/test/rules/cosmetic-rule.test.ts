@@ -248,6 +248,35 @@ describe('CosmeticRule match', () => {
         expect(rule.match(createRequest('example.net'))).toEqual(true);
     });
 
+    it('matches by $domain modifier with mixed type values', () => {
+        let request: Request;
+        const rule = new CosmeticRule(String.raw`[$domain=/\.(io\|com)/|evil.*|ads.net|~/jwt\.io/|~evil.gov]##banner`, 0);
+        expect(rule.getPermittedDomains()).toHaveLength(1);
+        expect(rule.getPermittedWildcardDomains()).toHaveLength(1);
+        expect(rule.getPermittedRegexDomains()).toHaveLength(1);
+
+        request = createRequest('https://ads.net');
+        expect(rule.match(request)).toBeTruthy();
+        request = createRequest('https://another.org');
+        expect(rule.match(request)).toBeFalsy();
+
+        // Inverted regexp domain '~/jwt\.io/' restricts
+        // regexp domain modifier '/\.(io\|com)/' from matching the request
+        request = createRequest('https://example.com');
+        expect(rule.match(request)).toBeTruthy();
+        request = createRequest('https://jwt.io');
+        expect(rule.match(request)).toBeFalsy();
+
+        // Inverted plain domain '~evil.gov' restricts
+        // wildcard domain modifier 'evil.*' from matching the request
+        request = createRequest('https://evil.org');
+        expect(rule.match(request)).toBeTruthy();
+        request = createRequest('https://evil.com');
+        expect(rule.match(request)).toBeTruthy();
+        request = createRequest('https://evil.gov');
+        expect(rule.match(request)).toBeFalsy();
+    });
+
     it('works if it matches domain restrictions properly', () => {
         const rule = new CosmeticRule('example.org,~sub.example.org##banner', 0);
         expect(rule.match(createRequest('example.org'))).toEqual(true);
