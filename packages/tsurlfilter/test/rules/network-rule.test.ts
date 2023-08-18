@@ -1079,7 +1079,7 @@ describe('NetworkRule.match', () => {
         expect(rule.getPermittedDomains()).toHaveLength(1);
         expect(rule.getPermittedWildcardDomains()).toHaveLength(1);
         expect(rule.getPermittedRegexDomains()).toHaveLength(1);
-        
+
         request = new Request('https://test.ru/', 'https://ads.net', requestType);
         expect(rule.match(request)).toBeTruthy();
         request = new Request('https://test.ru/', 'https://another.org', requestType);
