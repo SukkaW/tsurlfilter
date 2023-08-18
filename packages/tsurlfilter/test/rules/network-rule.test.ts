@@ -1054,18 +1054,18 @@ describe('NetworkRule.match', () => {
     });
 
     it('works when $domain modifier is applied properly - regexp', () => {
-        const requestType: RequestType = RequestType.Document;
+        const requestType: RequestType = RequestType.Script;
         let request: Request;
         let rule: NetworkRule;
 
-        rule = new NetworkRule(String.raw`||test.ru^$domain=/\.(org\|com)/|~/good\.(org\|com)/`, 0);
+        rule = new NetworkRule(String.raw`||test.ru^$domain=/.(io\|com)/|~/good\.(org\|com)/`, 0);
         expect(rule.getPermittedRegexDomains()).toHaveLength(1);
         expect(rule.getRestrictedRegexDomains()).toHaveLength(1);
 
         request = new Request('https://test.ru/', 'https://example.com', requestType);
         expect(rule.match(request)).toBeTruthy();
-        // request = new Request('https://test.ru/', 'https://example.org', requestType);
-        // expect(rule.match(request)).toBeTruthy(); FIXME this is not working for some reason
+        request = new Request('https://test.ru/', 'https://example.io', requestType);
+        expect(rule.match(request)).toBeTruthy();
 
         request = new Request('https://test.ru/', 'https://good.org', requestType);
         expect(rule.match(request)).toBeFalsy();

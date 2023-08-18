@@ -233,21 +233,19 @@ describe('CosmeticRule match', () => {
         expect(rule.match(createRequest('example.org'))).toEqual(true);
     });
 
-    it('matches requsts by regexp pattern of domain', () => {
+    it('matches requests by regexp pattern of domain', () => {
         let rule: CosmeticRule;
         // Simple case
         rule = new CosmeticRule(String.raw`[$domain=/example\.(org\|com)/]##banner`, 0);
-        const t = rule.getPermittedRegexDomains();
-        console.log(t);
         expect(rule.match(createRequest('example.org'))).toEqual(true);
         expect(rule.match(createRequest('example.com'))).toEqual(true);
         expect(rule.match(createRequest('example.net'))).toEqual(false);
 
-        // // Multiple patterns, inverted value
-        // rule = new CosmeticRule(String.raw`[$domain=/example/|~/org/]##banner`, 0);
-        // expect(rule.match(createRequest('example.org'))).toEqual(false);
-        // expect(rule.match(createRequest('example.com'))).toEqual(true);
-        // expect(rule.match(createRequest('example.net'))).toEqual(true);
+        // Multiple patterns, inverted value
+        rule = new CosmeticRule(String.raw`[$domain=/example/|~/org/]##banner`, 0);
+        expect(rule.match(createRequest('example.org'))).toEqual(false);
+        expect(rule.match(createRequest('example.com'))).toEqual(true);
+        expect(rule.match(createRequest('example.net'))).toEqual(true);
     });
 
     it('works if it matches domain restrictions properly', () => {
