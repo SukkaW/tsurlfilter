@@ -132,12 +132,12 @@ describe('NetworkRule constructor', () => {
         rule = new NetworkRule(String.raw`||example.org$domain=/example\.(org\|com)/|evil.com`, 0);
         expect(rule.getPermittedDomains()).toEqual(['evil.com']);
         expect(rule.getRestrictedDomains()).toEqual(null);
-        expect(rule.getPermittedRegexDomains()).toEqual([/example\.(org|com)/g]);
+        expect(rule.getPermittedRegexDomains()).toEqual([/example\.(org|com)/]);
         expect(rule.getRestrictedRegexDomains()).toEqual(null);
 
         rule = new NetworkRule(String.raw`||example.org$domain=~/good\.evil\.(com\|org)/|/evil\.com/`, 0);
-        expect(rule.getPermittedRegexDomains()).toEqual([/evil\.com/g]);
-        expect(rule.getRestrictedRegexDomains()).toEqual([/good\.evil\.(com|org)/g]);
+        expect(rule.getPermittedRegexDomains()).toEqual([/evil\.com/]);
+        expect(rule.getRestrictedRegexDomains()).toEqual([/good\.evil\.(com|org)/]);
     });
 
     it('works when it creates rule with $all', () => {

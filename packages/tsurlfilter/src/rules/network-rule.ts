@@ -652,7 +652,7 @@ export class NetworkRule implements rule.IRule {
     // this fixme has counterpart in cosmetic rule
     public matchesPermittedDomains(hostname: string): boolean {
         if (this.hasPermittedDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedDomains!)) {
+        && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedDomains!)) {
             return true;
         }
         return false;
@@ -770,24 +770,36 @@ export class NetworkRule implements rule.IRule {
             }
         }
 
-        if (this.hasPermittedDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedDomains!)) {
-            // Domain is not among permitted
-            // i.e. $domain=example.org and we're checking example.com
-            return true;
+        let ruleWithExplicitDomains = false; // FIXME pick a better name
+
+        if (this.hasPermittedDomains()) {
+            ruleWithExplicitDomains = true;
+            if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedDomains!)) {
+                // Domain is not among permitted
+                // i.e. $domain=example.org and we're checking example.com
+                return true;
+            }
         }
 
-        if (this.hasPermittedWildcardDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedWildcardDomains!)) {
-            return true;
+        if (this.hasPermittedWildcardDomains()) {
+            ruleWithExplicitDomains = true;
+            if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedWildcardDomains!)) {
+                // Domain is not among permitted
+                // i.e. $domain=example.org and we're checking example.com
+                return true;
+            }
         }
 
-        if (this.hasPermittedRegexDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedRegexDomains!)) {
-            return true;
+        if (this.hasPermittedRegexDomains()) {
+            ruleWithExplicitDomains = true;
+            if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedRegexDomains!)) {
+                // Domain is not among permitted
+                // i.e. $domain=example.org and we're checking example.com
+                return true;
+            }
         }
 
-        return false;
+        return !ruleWithExplicitDomains;
     }
 
     /**
@@ -960,7 +972,7 @@ export class NetworkRule implements rule.IRule {
     /** FIXME check that these are used
      * Checks if rule has permitted wildcard domains
      */
-    private hasPermittedWildcardDomains(): boolean {
+    public hasPermittedWildcardDomains(): boolean {
         return !!this.permittedWildcardDomains && this.permittedWildcardDomains.length > 0;
     }
 
@@ -974,7 +986,7 @@ export class NetworkRule implements rule.IRule {
     /** FIXME check that these are used
      * Checks if rule has permitted regex domains
      */
-    private hasPermittedRegexDomains(): boolean {
+    public hasPermittedRegexDomains(): boolean {
         return !!this.permittedRegexDomains && this.permittedRegexDomains.length > 0;
     }
 

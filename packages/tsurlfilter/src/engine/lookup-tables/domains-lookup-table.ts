@@ -33,22 +33,19 @@ export class DomainsLookupTable implements ILookupTable {
         this.ruleStorage = storage;
     }
 
+    // FIXME add tests for lookup-tables
     /**
      * addRule implements the ILookupTable interface for DomainsLookupTable.
      * @param rule
      * @param storageIdx
      */
     addRule(rule: NetworkRule, storageIdx: number): boolean {
-        // FIXME these could be changed by .hasPermittedXXXDomains, but that is private
         const permittedDomains = rule.getPermittedDomains();
         if (!permittedDomains || permittedDomains.length === 0) {
             return false;
         }
-        // FIXME add tests?
-        const permittedWildcardDomains = rule.getPermittedWildcardDomains();
-        const permittedRegexpDomains = rule.getPermittedRegexDomains();
-        if ((permittedWildcardDomains && permittedWildcardDomains.length > 0)
-            || (permittedRegexpDomains && permittedRegexpDomains.length > 0)) {
+
+        if (rule.hasPermittedWildcardDomains() || rule.hasPermittedRegexDomains()) {
             return false;
         }
 

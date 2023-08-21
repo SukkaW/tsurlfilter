@@ -158,10 +158,11 @@ describe('Element hiding rules constructor', () => {
         expect(rule.getContent()).toEqual('banner');
 
         const permittedDomains = rule.getPermittedDomains()!;
-        const restrictedDomains = rule.getRestrictedDomains()!;
+        const permittedRegexDomains = rule.getPermittedRegexDomains()!;
+        const restrictedRegexpDomains = rule.getRestrictedRegexDomains()!;
         expect(permittedDomains[0]).toEqual('example.org');
-        expect(permittedDomains[1]).toEqual('/evil\\.(org|com)/');
-        expect(restrictedDomains[0]).toEqual('/good/');
+        expect(permittedRegexDomains[0]).toEqual(/evil\.(org|com)/);
+        expect(restrictedRegexpDomains[0]).toEqual(/good/);
     });
 
     it('works if it correctly parses rule modifiers', () => {

@@ -345,7 +345,7 @@ export class CosmeticRule implements rule.IRule {
 
     /**
      * Gets list of restricted domains.
-     */
+     */ // FIXME  можно сделать и там и там чтобы были массивами пустыми вместо нулов
     getRestrictedDomains(): string[] | undefined {
         return this.restrictedDomains;
     }
@@ -523,22 +523,9 @@ export class CosmeticRule implements rule.IRule {
             return false;
         }
 
-        if (this.hasPermittedDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedDomains!)) {
-            return true;
-        }
-
-        if (this.hasPermittedWildcardDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedWildcardDomains!)) {
-            return true;
-        }
-
-        if (this.hasPermittedRegexDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedRegexDomains!)) {
-            return true;
-        }
-
-        return false;
+        return this.matchesPermittedDomains(hostname)
+            || this.matchesPermittedWildcardDomains(hostname)
+            || this.matchesPermittedRegexDomains(hostname);
     }
 
     static parseType(marker: string): CosmeticRuleType {
@@ -677,7 +664,7 @@ export class CosmeticRule implements rule.IRule {
     }
 
     // FIXME check if this is used
-    private hasPermittedWildcardDomains(): boolean {
+    public hasPermittedWildcardDomains(): boolean {
         return !!this.permittedWildcardDomains && this.permittedWildcardDomains.length > 0;
     }
 
@@ -687,7 +674,7 @@ export class CosmeticRule implements rule.IRule {
     }
 
     // FIXME check if this is used
-    private hasPermittedRegexDomains(): boolean {
+    public hasPermittedRegexDomains(): boolean {
         return !!this.permittedRegexDomains && this.permittedRegexDomains.length > 0;
     }
 
@@ -717,6 +704,7 @@ export class CosmeticRule implements rule.IRule {
             && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.restrictedDomains!);
     }
 
+    // FIXME check usage
     public matchesPermittedWildcardDomains(hostname: string): boolean {
         return this.hasPermittedWildcardDomains()
             && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedWildcardDomains!);

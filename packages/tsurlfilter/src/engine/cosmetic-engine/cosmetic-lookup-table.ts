@@ -79,14 +79,13 @@ export class CosmeticLookupTable {
             return;
         }
 
-        const permittedWildcardDomains = rule.getPermittedWildcardDomains();
-        if (permittedWildcardDomains && permittedWildcardDomains.length > 0) {
+        // FIXME check that the rules with both wildcard and regexp working correctly
+        if (rule.hasPermittedWildcardDomains()) {
             this.wildcardRules.push(rule);
             return;
         }
 
-        const permittedRegexDomains = rule.getPermittedRegexDomains();
-        if (permittedRegexDomains && permittedRegexDomains.length > 0) {
+        if (rule.hasPermittedRegexDomains()) {
             this.regexRules.push(rule);
             return;
         }
