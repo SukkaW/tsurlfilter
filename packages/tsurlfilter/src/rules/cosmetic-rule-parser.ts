@@ -1,5 +1,6 @@
 import { parseOptionsString } from '../utils/parse-options-string';
 import { COMMA_SEPARATOR, DomainModifier, PIPE_SEPARATOR } from '../modifiers/domain-modifier';
+import type { StringDomainsList, RegexDomainsList } from '../modifiers/domain-modifier';
 import { findCosmeticRuleMarker } from './cosmetic-rule-marker';
 import { CosmeticRuleModifiers, CosmeticRuleModifiersSyntax } from './cosmetic-rule-modifiers';
 import { SimpleRegex } from './simple-regex';
@@ -179,12 +180,12 @@ export class CosmeticRuleParser {
     static parseRulePattern(rulePattern: string): {
         url?: string;
         path?: string;
-        permittedDomains?: string[];
-        restrictedDomains?: string[];
-        permittedWildcardDomains?: string[];
-        restrictedWildcardDomains?: string[];
-        permittedRegexDomains?: RegExp[];
-        restrictedRegexDomains?: RegExp[];
+        permittedDomains: StringDomainsList;
+        restrictedDomains: StringDomainsList;
+        permittedWildcardDomains: StringDomainsList;
+        restrictedWildcardDomains: StringDomainsList;
+        permittedRegexDomains: RegexDomainsList;
+        restrictedRegexDomains: RegexDomainsList;
     } {
         const {
             domainsText,
@@ -226,44 +227,26 @@ export class CosmeticRuleParser {
             }
         }
 
-        let permittedDomains;
-        let restrictedDomains;
+        let permittedDomains: StringDomainsList = null;
+        let restrictedDomains: StringDomainsList = null;
 
-        let permittedWildcardDomains;
-        let restrictedWildcardDomains;
+        let permittedWildcardDomains: StringDomainsList = null;
+        let restrictedWildcardDomains: StringDomainsList = null;
 
-        let permittedRegexDomains;
-        let restrictedRegexDomains;
+        let permittedRegexDomains: RegexDomainsList = null;
+        let restrictedRegexDomains: RegexDomainsList = null;
 
         // Skip wildcard domain
         if (domains && domains !== SimpleRegex.MASK_ANY_CHARACTER) {
             const separator = modifiers?.domain ? PIPE_SEPARATOR : COMMA_SEPARATOR;
             const domainModifier = new DomainModifier(domains, separator);
 
-            // FIXME refactor?
-            if (domainModifier.permittedDomains) {
-                permittedDomains = domainModifier.permittedDomains;
-            }
-
-            if (domainModifier.restrictedDomains) {
-                restrictedDomains = domainModifier.restrictedDomains;
-            }
-
-            if (domainModifier.permittedWildcardDomains) {
-                permittedWildcardDomains = domainModifier.permittedWildcardDomains;
-            }
-
-            if (domainModifier.restrictedWildcardDomains) {
-                restrictedWildcardDomains = domainModifier.restrictedWildcardDomains;
-            }
-
-            if (domainModifier.permittedRegexDomains) {
-                permittedRegexDomains = domainModifier.permittedRegexDomains;
-            }
-
-            if (domainModifier.restrictedRegexDomains) {
-                restrictedRegexDomains = domainModifier.restrictedRegexDomains;
-            }
+            permittedDomains = domainModifier.permittedDomains;
+            restrictedDomains = domainModifier.restrictedDomains;
+            permittedWildcardDomains = domainModifier.permittedWildcardDomains;
+            restrictedWildcardDomains = domainModifier.restrictedWildcardDomains;
+            permittedRegexDomains = domainModifier.permittedRegexDomains;
+            restrictedRegexDomains = domainModifier.restrictedRegexDomains;
         }
 
         return {

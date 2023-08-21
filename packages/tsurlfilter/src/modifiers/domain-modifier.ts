@@ -2,6 +2,9 @@ import { getPublicSuffix } from 'tldts';
 import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
 import { SimpleRegex } from '../rules/simple-regex';
 
+export type StringDomainsList = string[] | null;
+export type RegexDomainsList = RegExp[] | null;
+
 /**
  * This is a helper class that is used specifically to work
  * with domains restrictions.
@@ -21,32 +24,32 @@ export class DomainModifier {
     /**
      * List of permitted domains or null.
      */
-    public readonly permittedDomains: string[] | null;
+    public readonly permittedDomains: StringDomainsList;
 
     /**
      * List of restricted domains or null.
      */
-    public readonly restrictedDomains: string[] | null;
+    public readonly restrictedDomains: StringDomainsList;
 
     /**
      * List of permitted wildcard domains or null.
      */
-    public readonly permittedWildcardDomains: string[] | null;
+    public readonly permittedWildcardDomains: StringDomainsList;
 
     /**
      * List of restricted wildcard domains or null.
      */
-    public readonly restrictedWildcardDomains: string[] | null;
+    public readonly restrictedWildcardDomains: StringDomainsList;
 
     /**
      * List of permitted regex domains or null.
      */
-    public readonly permittedRegexDomains: RegExp[] | null;
+    public readonly permittedRegexDomains: RegexDomainsList;
 
     /**
      * List of restricted regex domains or null.
      */
-    public readonly restrictedRegexDomains: RegExp[] | null;
+    public readonly restrictedRegexDomains: RegexDomainsList;
 
     /**
      * Parses the `domains` string and initializes the object.
@@ -109,7 +112,6 @@ export class DomainModifier {
             }
         }
 
-        // FIXME improve this?
         this.restrictedDomains = restrictedDomains.length > 0 ? restrictedDomains : null;
         this.permittedDomains = permittedDomains.length > 0 ? permittedDomains : null;
 

@@ -2,6 +2,7 @@ import scriptlets, { IConfiguration } from '@adguard/scriptlets';
 import * as rule from './rule';
 import { CosmeticRuleMarker, isExtCssMarker, ADG_SCRIPTLET_MASK } from './cosmetic-rule-marker';
 import { DomainModifier } from '../modifiers/domain-modifier';
+import type { StringDomainsList, RegexDomainsList } from '../modifiers/domain-modifier';
 import { hasUnquotedSubstring, indexOfAny } from '../utils/string-utils';
 import { getRelativeUrl } from '../utils/url';
 import { SimpleRegex } from './simple-regex';
@@ -148,17 +149,17 @@ export class CosmeticRule implements rule.IRule {
 
     private extendedCss = false;
 
-    private readonly permittedDomains: string[] | undefined = undefined;
+    private readonly permittedDomains: StringDomainsList = null;
 
-    private readonly restrictedDomains: string[] | undefined = undefined;
+    private readonly restrictedDomains: StringDomainsList = null;
 
-    private readonly permittedWildcardDomains: string[] | undefined = undefined;
+    private readonly permittedWildcardDomains: StringDomainsList = null;
 
-    private readonly restrictedWildcardDomains: string[] | undefined = undefined;
+    private readonly restrictedWildcardDomains: StringDomainsList = null;
 
-    private readonly permittedRegexDomains: RegExp[] | undefined = undefined;
+    private readonly permittedRegexDomains: RegexDomainsList = null;
 
-    private readonly restrictedRegexDomains: RegExp[] | undefined = undefined;
+    private readonly restrictedRegexDomains: RegexDomainsList = null;
 
     /**
      * $path modifier pattern. It is only set if $path modifier is specified for this rule.
@@ -339,30 +340,30 @@ export class CosmeticRule implements rule.IRule {
     /**
      * Gets list of permitted domains.
      */
-    getPermittedDomains(): string[] | undefined {
+    getPermittedDomains(): StringDomainsList {
         return this.permittedDomains;
     }
 
     /**
      * Gets list of restricted domains.
-     */ // FIXME  можно сделать и там и там чтобы были массивами пустыми вместо нулов
-    getRestrictedDomains(): string[] | undefined {
+     */
+    getRestrictedDomains(): StringDomainsList {
         return this.restrictedDomains;
     }
 
-    getPermittedWildcardDomains(): string[] | undefined {
+    getPermittedWildcardDomains(): StringDomainsList {
         return this.permittedWildcardDomains;
     }
 
-    getRestrictedWildcardDomains(): string[] | undefined {
+    getRestrictedWildcardDomains(): StringDomainsList {
         return this.restrictedWildcardDomains;
     }
 
-    getPermittedRegexDomains(): RegExp[] | undefined {
+    getPermittedRegexDomains(): RegexDomainsList {
         return this.permittedRegexDomains;
     }
 
-    getRestrictedRegexDomains(): RegExp[] | undefined {
+    getRestrictedRegexDomains(): RegexDomainsList {
         return this.restrictedRegexDomains;
     }
 
@@ -444,31 +445,12 @@ export class CosmeticRule implements rule.IRule {
                 if (path || path === '') {
                     this.pathModifier = new Pattern(path);
                 }
-
-                // FIXME this should most probably be refactored
-                if (permittedDomains) {
-                    this.permittedDomains = permittedDomains;
-                }
-
-                if (restrictedDomains) {
-                    this.restrictedDomains = restrictedDomains;
-                }
-
-                if (permittedWildcardDomains) {
-                    this.permittedWildcardDomains = permittedWildcardDomains;
-                }
-
-                if (restrictedWildcardDomains) {
-                    this.restrictedWildcardDomains = restrictedWildcardDomains;
-                }
-
-                if (permittedRegexDomains) {
-                    this.permittedRegexDomains = permittedRegexDomains;
-                }
-
-                if (restrictedRegexDomains) {
-                    this.restrictedRegexDomains = restrictedRegexDomains;
-                }
+                this.permittedDomains = permittedDomains;
+                this.restrictedDomains = restrictedDomains;
+                this.permittedWildcardDomains = permittedWildcardDomains;
+                this.restrictedWildcardDomains = restrictedWildcardDomains;
+                this.permittedRegexDomains = permittedRegexDomains;
+                this.restrictedRegexDomains = restrictedRegexDomains;
             }
         }
 
@@ -663,29 +645,22 @@ export class CosmeticRule implements rule.IRule {
         return !!this.restrictedDomains && this.restrictedDomains.length > 0;
     }
 
-    // FIXME check if this is used
     public hasPermittedWildcardDomains(): boolean {
         return !!this.permittedWildcardDomains && this.permittedWildcardDomains.length > 0;
     }
 
-    // FIXME check if this is used
     private hasRestrictedWildcardDomains(): boolean {
         return !!this.restrictedWildcardDomains && this.restrictedWildcardDomains.length > 0;
     }
 
-    // FIXME check if this is used
     public hasPermittedRegexDomains(): boolean {
         return !!this.permittedRegexDomains && this.permittedRegexDomains.length > 0;
     }
 
-    // FIXME check if this is used
     private hasRestrictedRegexDomains(): boolean {
         return !!this.restrictedRegexDomains && this.restrictedRegexDomains.length > 0;
     }
 
-    // FIXME check this funcs usage and if they can/should be merged in some kind of helper
-    // to check matching between all permitted or all restricted domains
-    // this fixme has counterpart in network rule
     /**
      * Checks if the hostname matches permitted domains
      * @param hostname
