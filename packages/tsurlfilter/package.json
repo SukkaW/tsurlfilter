@@ -85,7 +85,7 @@
     ]
   },
   "dependencies": {
-    "@adguard/agtree": "1.0.2",
+    "@adguard/agtree": "1.1.3",
     "@adguard/ecss-tree": "^1.0.8",
     "@adguard/scriptlets": "^1.9.62",
     "cidr-tools": "^6.4.1",
