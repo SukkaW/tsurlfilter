@@ -9,6 +9,7 @@
 import { z as zod } from 'zod';
 
 import { RequestType } from '../../request-type';
+import { HTTPMethod } from '../../modifiers/method-modifier';
 
 /**
  * https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-DomainType
@@ -35,6 +36,7 @@ export enum ResourceType {
     WebSocket = 'websocket',
     Other = 'other',
     // Temporary not using
+    // TODO: Add csp_report handler similar to AG-24613 but in declarative way.
     // CspReport = 'csp_report',
     // WebTransport = 'webtransport',
     // WebBundle = 'webbundle',
@@ -119,6 +121,10 @@ export enum RuleActionType {
     ALLOW = 'allow',
     UPGRADE_SCHEME = 'upgradeScheme',
     MODIFY_HEADERS = 'modifyHeaders',
+    /**
+     * For allowAllRequests rules {@link RuleCondition.resourceTypes} may only
+     * include the 'sub_frame' and 'main_frame' resource types.
+     */
     ALLOW_ALL_REQUESTS = 'allowAllRequests',
 }
 
@@ -151,6 +157,26 @@ export enum RequestMethod {
 }
 
 /**
+ * tsurlfilter {@link HTTPMethod} without {@link HTTPMethod.TRACE}
+ * because it is not supported by {@link RequestMethod}.
+ */
+export type SupportedHttpMethod = Exclude<HTTPMethod, HTTPMethod.TRACE>;
+
+/**
+ * Map {@link HTTPMethod} to declarative {@link RequestMethod}.
+ */
+export const DECLARATIVE_REQUEST_METHOD_MAP: Record<SupportedHttpMethod, RequestMethod> = {
+    [HTTPMethod.GET]: RequestMethod.Get,
+    [HTTPMethod.POST]: RequestMethod.Post,
+    [HTTPMethod.PUT]: RequestMethod.Put,
+    [HTTPMethod.DELETE]: RequestMethod.Delete,
+    [HTTPMethod.PATCH]: RequestMethod.Patch,
+    [HTTPMethod.HEAD]: RequestMethod.Head,
+    [HTTPMethod.OPTIONS]: RequestMethod.Options,
+    [HTTPMethod.CONNECT]: RequestMethod.Connect,
+};
+
+/**
  * https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-RuleCondition
  */
 
@@ -165,7 +191,7 @@ const RuleConditionValidator = zod.strictObject({
     isUrlFilterCaseSensitive: zod.boolean().optional(),
     regexFilter: zod.string().optional(),
     requestDomains: zod.string().array().optional(),
-    requestMethods: zod.string().array().optional(),
+    requestMethods: zod.nativeEnum(RequestMethod).array().optional(),
     /**
      * If none of the `excludedResourceTypes` and `resourceTypes` are specified,
      * all resource types except "main_frame" will be matched.

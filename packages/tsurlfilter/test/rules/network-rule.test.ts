@@ -117,6 +117,35 @@ describe('NetworkRule constructor', () => {
         }).toThrow(new SyntaxError('$app modifier cannot be empty'));
     });
 
+    it('throws error if $header modifier value is invalid', () => {
+        expect(() => {
+            new NetworkRule('||baddomain.com^$header', 0);
+        }).toThrow(new SyntaxError('$header modifier value cannot be empty'));
+
+        expect(() => {
+            new NetworkRule('||baddomain.com^$header=name:', 0);
+        }).toThrow(new SyntaxError('Invalid $header modifier value: "name:"'));
+    });
+
+    it('validates $header rules modifier compatibility', () => {
+        // Check compatibility with other modifiers
+        expect(() => {
+            new NetworkRule(String.raw`||baddomain.com^$header=h1,csp=frame-src 'none'`, 0);
+        }).not.toThrow();
+
+        expect(() => {
+            new NetworkRule('||baddomain.com^$header=h1,removeheader=param', 0);
+        }).not.toThrow();
+
+        expect(() => {
+            new NetworkRule('||baddomain.com^$header=h1,removeheader=request:param', 0);
+        }).toThrow(new SyntaxError('Request headers removal of $removeheaders is not compatible with $header rules.'));
+
+        expect(() => {
+            new NetworkRule('||baddomain.com^$header=h1,hls=urlpattern', 0);
+        }).toThrow('$header rules are not compatible with some other modifiers');
+    });
+
     it('throws error if $method modifier value is invalid', () => {
         expect(() => {
             new NetworkRule('||baddomain.com^$method=get', 0);
@@ -138,6 +167,10 @@ describe('NetworkRule constructor', () => {
     it('throws error if $to modifier value is invalid', () => {
         expect(() => {
             new NetworkRule('/ads$to=example.org|~example.com', 0);
+        }).not.toThrow();
+
+        expect(() => {
+            new NetworkRule('||*/ads^$to=evil.com', 0);
         }).not.toThrow();
 
         expect(() => {
@@ -176,7 +209,7 @@ describe('NetworkRule constructor', () => {
         }).not.toThrow();
     });
 
-    it('thorws error if $to modfiier value is invalid', () => {
+    it('thorws error if $to modifier value is invalid', () => {
         expect(() => {
             new NetworkRule('||*/ads^$to=evil.com', 0);
         }).not.toThrow();
@@ -250,6 +283,10 @@ describe('NetworkRule constructor', () => {
         expect(() => {
             new NetworkRule('||example.org^$removeheader=header-name,domain=test.com,popup', 0);
         }).toThrow(new SyntaxError('$removeheader rules are not compatible with some other modifiers'));
+
+        expect(() => {
+            new NetworkRule('||baddomain.com^$header=h1,removeheader=request:param', 0);
+        }).toThrow(new SyntaxError('Request headers removal of $removeheaders is not compatible with $header rules.'));
     });
 
     it('checks jsonprune modifier compatibility', () => {
@@ -282,6 +319,18 @@ describe('NetworkRule constructor', () => {
 
         // TODO: add more specific jsonprune tests during the implementation
         // https://github.com/AdguardTeam/tsurlfilter/issues/72
+    });
+
+    it('checks to modifier compatibility', () => {
+        expect(() => {
+            new NetworkRule('/ads$to=good.org,denyallow=good.com', 0);
+        }).toThrow(new SyntaxError('modifier $to is not compatible with $denyallow modifier'));
+    });
+
+    it('checks denyallow modifier compatibility', () => {
+        expect(() => {
+            new NetworkRule('/ads$to=good.org,denyallow=good.com', 0);
+        }).toThrow(new SyntaxError('modifier $to is not compatible with $denyallow modifier'));
     });
 
     it('works when it handles wide rules with $domain properly', () => {
@@ -1129,8 +1178,8 @@ describe('NetworkRule.match', () => {
         let request: Request;
         rule = new NetworkRule('/ads$to=~evil.*|good.*,script', 0);
 
-        expect(rule.getRestrictedToValues()).toHaveLength(1);
-        expect(rule.getPermittedToValues()).toHaveLength(1);
+        expect(rule.getRestrictedToDomains()).toHaveLength(1);
+        expect(rule.getPermittedToDomains()).toHaveLength(1);
 
         // Correctly matches domain that is specified in permitted domains list
         rule = new NetworkRule('/ads^$to=evil.com', 0);
@@ -1169,7 +1218,12 @@ describe('NetworkRule.isHigherPriority', () => {
         expect(l.isHigherPriority(r)).toBe(expected);
     }
 
-    const priorityCases = [
+    type PriorityTestCase = {
+        key: string,
+        cases: [string, string, boolean][],
+    };
+
+    const priorityCases: PriorityTestCase[] = [
         {
             key: 'basicModifiers',
             cases: [
@@ -1285,19 +1339,22 @@ describe('NetworkRule.isHigherPriority', () => {
                 .map(({ cases }) => cases)
                 .flat(1);
 
-            const cases: (string | boolean)[][] = [];
+            const cases: PriorityTestCase['cases'] = [];
             casesGroup.cases.forEach((item) => {
                 // Check case itself
                 cases.push(item);
-                // Add a comparison with all past and lower priority groups
+                // Add a comparison with all past cases from lower priority groups
                 lowerPriorityCases.forEach((lowerPriorityCase) => {
                     cases.push([item[0], lowerPriorityCase[1], true]);
                 });
             });
 
-            test.each(cases)('%s is a higher priority than %s, expected: %s', (left: string, right: string, expectedResult: boolean) => {
-                compareRulesPriority(left, right, expectedResult);
-            });
+            test.each(cases)(
+                '%s is a higher priority than %s, expected: %s',
+                (left: string, right: string, expectedResult: boolean) => {
+                    compareRulesPriority(left, right, expectedResult);
+                },
+            );
         });
     });
 });

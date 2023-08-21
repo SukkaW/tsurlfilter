@@ -4,7 +4,6 @@ import globals from 'rollup-plugin-node-globals';
 import camelCase from 'lodash/camelCase';
 import typescript from '@rollup/plugin-typescript';
 import json from '@rollup/plugin-json';
-import nodePolyfills from 'rollup-plugin-polyfill-node';
 import cleanup from 'rollup-plugin-cleanup';
 import { terser } from 'rollup-plugin-terser';
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs';
@@ -32,7 +31,6 @@ const commonConfig = {
             sourceMap: false,
         }),
         globals(),
-        nodePolyfills(),
 
         // Allow node_modules resolution, so you can use 'external' to control
         // which external modules to include in the bundle
@@ -53,8 +51,7 @@ const commonExternal = [
     'punycode/',
     'tldts',
     'is-cidr',
-    'netmask',
-    'ip6addr',
+    'cidr-tools',
     'zod',
     'commander',
 ];
@@ -133,7 +130,7 @@ const cliConfig = {
     external: [
         'fs',
         'path',
-        ...commonExternal,
+        'commander',
     ],
     plugins: [
         // Allow json resolution
@@ -141,6 +138,16 @@ const cliConfig = {
 
         // Compile TypeScript files
         typescript(),
+
+        // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
+        commonjs({
+            sourceMap: false,
+        }),
+
+        // Allow node_modules resolution, so you can use 'external' to control
+        // which external modules to include in the bundle
+        // https://github.com/rollup/rollup-plugin-node-resolve#usage
+        resolve({ preferBuiltins: false }),
 
         cleanup({
             comments: ['srcmaps'],

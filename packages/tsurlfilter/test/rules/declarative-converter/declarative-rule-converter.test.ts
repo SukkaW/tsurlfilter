@@ -1,4 +1,5 @@
 import { CSP_HEADER_NAME } from '../../../src/modifiers/csp-modifier';
+import { PERMISSIONS_POLICY_HEADER_NAME } from '../../../src/modifiers/permissions-modifier';
 import { ResourceType } from '../../../src/rules/declarative-converter/declarative-rule';
 import {
     TooComplexRegexpError,
@@ -858,7 +859,7 @@ describe('DeclarativeRuleConverter', () => {
         expect(declarativeRules).toHaveLength(2);
         expect(declarativeRules[0]).toStrictEqual({
             id: 1,
-            priority: 56,
+            priority: 55,
             action: {
                 type: 'block',
             },
@@ -1227,7 +1228,7 @@ describe('DeclarativeRuleConverter', () => {
             } = DeclarativeRulesConverter.convert(
                 [[filterId, rules]],
             );
-            expect(declarativeRules.length).toBe(1);
+            expect(declarativeRules).toHaveLength(1);
             expect(declarativeRules[0]).toEqual({
                 id: 1,
                 priority: 1,
@@ -1262,7 +1263,7 @@ describe('DeclarativeRuleConverter', () => {
             const { declarativeRules } = DeclarativeRulesConverter.convert(
                 [[filterId, rules]],
             );
-            expect(declarativeRules.length).toBe(3);
+            expect(declarativeRules).toHaveLength(3);
             expect(declarativeRules[0]).toStrictEqual({
                 id: 1,
                 priority: 1,
@@ -1422,6 +1423,306 @@ describe('DeclarativeRuleConverter', () => {
             expect(errors[0]).toStrictEqual(expectedErrors[0]);
             expect(errors[1]).toStrictEqual(expectedErrors[1]);
             expect(errors[2]).toStrictEqual(expectedErrors[2]);
+        });
+    });
+
+    describe('check $to', () => {
+        it('converts $to rule with two domains', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['/ads$to=evil.com|evil.org'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 2,
+                action: {
+                    type: 'block',
+                },
+                condition: {
+                    isUrlFilterCaseSensitive: false,
+                    requestDomains: [
+                        'evil.com',
+                        'evil.org',
+                    ],
+                    urlFilter: '/ads',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('converts $to rule with one included and one excluded domain', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['/ads$to=~not.evil.com|evil.com'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 2,
+                action: {
+                    type: 'block',
+                },
+                condition: {
+                    isUrlFilterCaseSensitive: false,
+                    requestDomains: ['evil.com'],
+                    excludedRequestDomains: ['not.evil.com'],
+                    urlFilter: '/ads',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('converts $to rule with two excluded domains', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['/ads$to=~good.com|~good.org'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 2,
+                action: {
+                    type: 'block',
+                },
+                condition: {
+                    isUrlFilterCaseSensitive: false,
+                    excludedRequestDomains: [
+                        'good.com',
+                        'good.org',
+                    ],
+                    urlFilter: '/ads',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+    });
+
+    describe('check $method', () => {
+        it('converts rule with two permitted methods', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['||evil.com$method=get|head'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 76,
+                action: {
+                    type: 'block',
+                },
+                condition: {
+                    requestMethods: ['get', 'head'],
+                    isUrlFilterCaseSensitive: false,
+                    urlFilter: '||evil.com',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('converts rule with two restricted methods', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['||evil.com$method=~post|~put'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 2,
+                action: {
+                    type: 'block',
+                },
+                condition: {
+                    excludedRequestMethods: ['post', 'put'],
+                    isUrlFilterCaseSensitive: false,
+                    urlFilter: '||evil.com',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('allowlist rule with one permitted method', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['@@||evil.com$method=get'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 100101,
+                action: {
+                    type: 'allow',
+                },
+                condition: {
+                    requestMethods: ['get'],
+                    isUrlFilterCaseSensitive: false,
+                    urlFilter: '||evil.com',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('allowlist rule with two restricted methods', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['@@||evil.com$method=~post'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 100002,
+                action: {
+                    type: 'allow',
+                },
+                condition: {
+                    excludedRequestMethods: ['post'],
+                    isUrlFilterCaseSensitive: false,
+                    urlFilter: '||evil.com',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('returns UnsupportedModifierError for `trace` method', () => {
+            const filterId = 0;
+            const ruleText = '||evil.com$method=trace';
+            const rules = createRulesFromText(filterId, [ruleText]);
+
+            const {
+                declarativeRules,
+                errors,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(0);
+            expect(errors).toHaveLength(1);
+
+            const networkRule = new NetworkRule(ruleText, filterId);
+
+            const err = new UnsupportedModifierError(
+                // eslint-disable-next-line max-len
+                `Network rule with $method modifier containing 'trace' method is not supported: "${networkRule.getText()}"`,
+                networkRule,
+            );
+            expect(errors[0]).toStrictEqual(err);
+        });
+    });
+
+    describe('check $permissions', () => {
+        it('converts $permissions rule', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['||example.org^$permissions=autoplay=()'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 1,
+                action: {
+                    type: 'modifyHeaders',
+                    responseHeaders: [{
+                        header: PERMISSIONS_POLICY_HEADER_NAME,
+                        operation: 'append',
+                        value: 'autoplay=()',
+                    }],
+                },
+                condition: {
+                    isUrlFilterCaseSensitive: false,
+                    urlFilter: '||example.org^',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('converts several $permissions directives', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                [
+                    '$domain=example.org|example.com,permissions=storage-access=()\\, сamera=()',
+                ],
+            );
+
+            const { declarativeRules } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toStrictEqual({
+                id: 1,
+                priority: 151,
+                action: {
+                    type: 'modifyHeaders',
+                    responseHeaders: [{
+                        header: PERMISSIONS_POLICY_HEADER_NAME,
+                        operation: 'append',
+                        value: 'storage-access=(), сamera=()',
+                    }],
+                },
+                condition: {
+                    initiatorDomains: [
+                        'example.org',
+                        'example.com',
+                    ],
+                    resourceTypes: allResourcesTypes,
+                    isUrlFilterCaseSensitive: false,
+                },
+            });
         });
     });
 });

@@ -1,4 +1,4 @@
-import { Modifier } from '../../src/parser/common';
+import { type Modifier } from '../../src/parser/common';
 import { ModifierParser } from '../../src/parser/misc/modifier';
 import { modifierValidator } from '../../src/validator';
 import { StringUtils } from '../../src/utils/string';
@@ -68,8 +68,10 @@ describe('ModifierValidator', () => {
                 'popup',
                 'redirect-rule',
                 'redirect',
+                'rewrite',
                 'removeheader',
                 'removeparam',
+                'replace',
                 'script',
                 'specifichide',
                 'stealth',
@@ -173,6 +175,8 @@ describe('ModifierValidator', () => {
                 'app=com.test.app',
                 '~third-party',
                 'badfilter',
+                // valid noop modifiers may be used like this:
+                '____',
             ];
             test.each(supportedModifiers)('%s', (rawModifier) => {
                 const modifier = getModifier(rawModifier);
@@ -195,7 +199,7 @@ describe('ModifierValidator', () => {
             });
         });
 
-        describe('unsupported', () => {
+        describe('invalid', () => {
             const unsupportedModifiersCases = [
                 {
                     actual: 'not-existent',
@@ -244,6 +248,10 @@ describe('ModifierValidator', () => {
                 {
                     actual: 'third-party=true',
                     expected: INVALID_ERROR_PREFIX.VALUE_FORBIDDEN,
+                },
+                {
+                    actual: '__noop__',
+                    expected: INVALID_ERROR_PREFIX.INVALID_NOOP,
                 },
             ];
             test.each(unsupportedModifiersCases)('$actual', ({ actual, expected }) => {
@@ -318,15 +326,44 @@ describe('ModifierValidator', () => {
                 expect(validationResult.ok).toBeTruthy();
             });
         });
+
+        describe('value validation', () => {
+            describe('optional value', () => {
+                const validModifiers = [
+                    'cookie=ABC',
+                    'cookie=/zmFQeXtI|JPIqApiY/',
+                    "csp=worker-src 'none'",
+                    'redirect=noopjs',
+                    'redirect-rule=noopjs',
+                    'removeheader=link',
+                    'removeheader=request:user-agent',
+                    'removeparam=cb',
+                    'removeparam=~red',
+                    // some assignable modifiers may not have a value
+                    'cookie',
+                    'csp',
+                    'redirect',
+                    'redirect-rule',
+                    'removeheader',
+                    'removeparam',
+                ];
+                test.each(validModifiers)('%s', (rawModifier) => {
+                    const modifier = getModifier(rawModifier);
+                    const validationResult = modifierValidator.validate(AdblockSyntax.Adg, modifier);
+                    expect(validationResult.ok).toBeTruthy();
+                });
+            });
+        });
     });
 
     describe('validate for UblockOrigin', () => {
-        describe('supported', () => {
+        describe('valid', () => {
             const supportedModifiers = [
                 'all',
                 '~third-party',
                 'badfilter',
                 'popunder',
+                '____',
             ];
             test.each(supportedModifiers)('%s', (rawModifier) => {
                 const modifier = getModifier(rawModifier);
@@ -335,7 +372,7 @@ describe('ModifierValidator', () => {
             });
         });
 
-        describe('unsupported', () => {
+        describe('invalid', () => {
             const unsupportedModifiersCases = [
                 {
                     actual: 'not-existent',
@@ -384,6 +421,10 @@ describe('ModifierValidator', () => {
                 {
                     actual: 'third-party=true',
                     expected: INVALID_ERROR_PREFIX.VALUE_FORBIDDEN,
+                },
+                {
+                    actual: '__-__',
+                    expected: INVALID_ERROR_PREFIX.INVALID_NOOP,
                 },
             ];
             test.each(unsupportedModifiersCases)('$actual', ({ actual, expected }) => {
@@ -450,12 +491,13 @@ describe('ModifierValidator', () => {
     });
 
     describe('validate for AdblockPlus', () => {
-        describe('supported', () => {
+        describe('valid', () => {
             const supportedModifiers = [
                 'domain=example.com',
                 'third-party',
                 // 'webrtc' is fully supported by ABP, not deprecated
                 'webrtc',
+                'rewrite=abp-resource:blank-js',
             ];
             test.each(supportedModifiers)('%s', (rawModifier) => {
                 const modifier = getModifier(rawModifier);
@@ -464,7 +506,7 @@ describe('ModifierValidator', () => {
             });
         });
 
-        describe('unsupported', () => {
+        describe('invalid', () => {
             const unsupportedModifiersCases = [
                 {
                     actual: 'not-existent',
@@ -506,6 +548,23 @@ describe('ModifierValidator', () => {
                     actual: 'third-party=true',
                     expected: INVALID_ERROR_PREFIX.VALUE_FORBIDDEN,
                 },
+                {
+                    actual: '___',
+                    expected: INVALID_ERROR_PREFIX.NOT_SUPPORTED,
+                },
+                {
+                    actual: 'rewrite',
+                    expected: INVALID_ERROR_PREFIX.VALUE_REQUIRED,
+                },
+                {
+                    actual: '~rewrite=abp-resource:blank-js',
+                    expected: INVALID_ERROR_PREFIX.NOT_NEGATABLE,
+                },
+                // TODO: Validate value format
+                // {
+                //     actual: 'rewrite=abp-resource:protobuf',
+                //     expected: INVALID_ERROR_PREFIX.VALUE_FORBIDDEN,
+                // },
             ];
             test.each(unsupportedModifiersCases)('$actual', ({ actual, expected }) => {
                 const modifier = getModifier(actual);

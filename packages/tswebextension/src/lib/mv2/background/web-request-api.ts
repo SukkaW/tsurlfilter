@@ -177,11 +177,11 @@ import {
     type ApplyJsRulesParams,
     type ApplyCssRulesParams,
 } from './cosmetic-api';
-import { headersService } from './services/headers-service';
+import { removeHeadersService } from './services/remove-headers-service';
 import { paramsService } from './services/params-service';
 import { cookieFiltering } from './services/cookie-filtering/cookie-filtering';
 import { ContentFiltering } from './services/content-filtering/content-filtering';
-import { CspService } from './services/csp-service';
+import { cspService } from './services/csp-service';
 import { permissionsPolicyService } from './services/permissions-policy-service';
 import {
     hideRequestInitiatorElement,
@@ -213,6 +213,7 @@ export class WebRequestApi {
      */
     public static start(): void {
         // browser.webRequest Events
+        RequestEvents.onBeforeRequest.addListener(WebRequestApi.onBeforeCspReport);
         RequestEvents.onBeforeRequest.addListener(WebRequestApi.onBeforeRequest);
         RequestEvents.onBeforeSendHeaders.addListener(WebRequestApi.onBeforeSendHeaders);
         RequestEvents.onHeadersReceived.addListener(WebRequestApi.onHeadersReceived);
@@ -229,6 +230,7 @@ export class WebRequestApi {
      * Removes web request event handlers.
      */
     public static stop(): void {
+        RequestEvents.onBeforeRequest.removeListener(WebRequestApi.onBeforeCspReport);
         RequestEvents.onBeforeRequest.removeListener(WebRequestApi.onBeforeRequest);
         RequestEvents.onBeforeSendHeaders.removeListener(WebRequestApi.onBeforeSendHeaders);
         RequestEvents.onHeadersReceived.removeListener(WebRequestApi.onHeadersReceived);
@@ -416,7 +418,7 @@ export class WebRequestApi {
                 requestHeadersModified = true;
             }
 
-            if (headersService.onBeforeSendHeaders(context)) {
+            if (removeHeadersService.onBeforeSendHeaders(context)) {
                 requestHeadersModified = true;
             }
         }
@@ -460,9 +462,40 @@ export class WebRequestApi {
         const {
             requestId,
             requestUrl,
+            referrerUrl,
             requestType,
             responseHeaders,
+            matchingResult,
+            requestFrameId,
+            thirdParty,
+            tabId,
         } = context;
+
+        const headerResult = matchingResult.getResponseHeadersResult(responseHeaders);
+
+        const response = RequestBlockingApi.getResponseOnHeadersReceived(
+            headerResult,
+            responseHeaders,
+            requestId,
+            tabId,
+        );
+
+        if (response?.cancel) {
+            tabsApi.incrementTabBlockedRequestCount(tabId);
+
+            const mainFrameUrl = tabsApi.getTabMainFrame(tabId)?.url;
+
+            hideRequestInitiatorElement(
+                tabId,
+                requestFrameId,
+                requestUrl,
+                mainFrameUrl || referrerUrl,
+                requestType,
+                thirdParty,
+            );
+
+            return response;
+        }
 
         const contentTypeHeader = findHeaderByName(responseHeaders!, 'content-type')?.value;
 
@@ -473,7 +506,7 @@ export class WebRequestApi {
         let responseHeadersModified = false;
 
         if (requestUrl && (requestType === RequestType.Document || requestType === RequestType.SubDocument)) {
-            if (CspService.onHeadersReceived(context)) {
+            if (cspService.onHeadersReceived(context)) {
                 responseHeadersModified = true;
             }
             if (permissionsPolicyService.onHeadersReceived(context)) {
@@ -485,7 +518,7 @@ export class WebRequestApi {
             responseHeadersModified = true;
         }
 
-        if (headersService.onHeadersReceived(context)) {
+        if (removeHeadersService.onHeadersReceived(context)) {
             responseHeadersModified = true;
         }
 
@@ -760,5 +793,82 @@ export class WebRequestApi {
                 cosmeticResult,
             })
             .catch(logger.debug);
+    }
+
+    /**
+     * Intercepts csp_report requests.
+     * Check the URL of the report.
+     * For chromium and firefox:
+     * If it's sent to a third party, block it right away.
+     * For firefox only:
+     * If it contains moz://extension with our extension ID, block it as well.
+     * @see https://github.com/AdguardTeam/AdguardBrowserExtension/issues/1792.
+     *
+     * @param details Request details.
+     * @param details.context Request context.
+     *
+     * @returns Web request response or void if there is nothing to do.
+     */
+    private static onBeforeCspReport(
+        { context }: RequestData<WebRequest.OnBeforeRequestDetailsType>,
+    ): WebRequestEventResponse {
+        // If filtering is disabled - skip process request.
+        if (!engineApi.isFilteringEnabled) {
+            return undefined;
+        }
+
+        if (!context) {
+            return undefined;
+        }
+
+        const {
+            requestUrl,
+            requestType,
+            matchingResult,
+            tabId,
+            eventId,
+            timestamp,
+            thirdParty,
+            contentType,
+            method,
+        } = context;
+
+        /**
+         * Checks request type here instead of creating two event listener with
+         * different filter types via {@link RequestEvent.init} to simplify
+         * event handlers flow and create only one {@link RequestEvents.onBeforeRequest}
+         * listener and two WebRequest listeners: {@link WebRequestApi.onBeforeCspReport}
+         * and {@link WebRequestApi.onBeforeRequest}.
+         */
+        if (requestType !== RequestType.CspReport) {
+            return undefined;
+        }
+
+        // If filtering disabled for this request.
+        if (matchingResult?.getBasicResult()?.isFilteringDisabled()) {
+            return undefined;
+        }
+
+        if (thirdParty) {
+            defaultFilteringLog.publishEvent({
+                type: FilteringEventType.CspReportBlocked,
+                data: {
+                    tabId,
+                    eventId,
+                    cspReportBlocked: true,
+                    requestUrl,
+                    requestType: contentType,
+                    timestamp,
+                    requestThirdParty: thirdParty,
+                    method,
+                },
+            });
+
+            return { cancel: true };
+        }
+
+        // Don't check for moz://extension because it was fixed in
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1588957#c10.
+        return undefined;
     }
 }
