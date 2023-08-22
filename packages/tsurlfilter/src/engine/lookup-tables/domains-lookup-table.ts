@@ -33,7 +33,6 @@ export class DomainsLookupTable implements ILookupTable {
         this.ruleStorage = storage;
     }
 
-    // FIXME add tests for lookup-tables
     /**
      * addRule implements the ILookupTable interface for DomainsLookupTable.
      * @param rule

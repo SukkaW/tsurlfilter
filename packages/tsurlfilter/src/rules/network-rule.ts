@@ -657,22 +657,6 @@ export class NetworkRule implements rule.IRule {
         return false;
     }
 
-    public matchesPermittedWildcardDomains(hostname: string): boolean {
-        if (this.hasPermittedWildcardDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedWildcardDomains!)) {
-            return true;
-        }
-        return false;
-    }
-
-    public matchesPermittedRegexDomains(hostname: string): boolean {
-        if (this.hasPermittedRegexDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedRegexDomains!)) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Checks if this filtering rule matches the specified request.
      * @param request - request to check.
@@ -1319,7 +1303,6 @@ export class NetworkRule implements rule.IRule {
             return false;
         }
 
-        // FIXME refactor this abomination
         // Regexp values have to be converted back to strings to be compared
         const restrictedRegexDomainsAreEqual = stringArraysEquals(
             this.restrictedRegexDomains?.map((reg) => reg.source) || null,
@@ -1445,19 +1428,13 @@ export class NetworkRule implements rule.IRule {
             );
         }
 
-        const denyAllowDomains = [
-            ...(permittedWildcardDomains || []), // FIXME return this back
-            ...(permittedDomains || []),
-        ];
-
-        if (denyAllowDomains
-            && denyAllowDomains.some((x) => x.includes(SimpleRegex.MASK_ANY_CHARACTER))) {
+        if (permittedWildcardDomains && permittedWildcardDomains.length > 0) {
             throw new SyntaxError(
                 'Invalid modifier: $denyallow domains wildcards are not supported',
             );
         }
 
-        this.denyAllowDomains = denyAllowDomains;
+        this.denyAllowDomains = permittedDomains;
     }
 
     /**

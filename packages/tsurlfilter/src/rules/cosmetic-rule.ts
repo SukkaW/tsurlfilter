@@ -719,20 +719,9 @@ export class CosmeticRule implements rule.IRule {
             && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.restrictedDomains!);
     }
 
-    // FIXME check usage
-    public matchesPermittedWildcardDomains(hostname: string): boolean {
-        return this.hasPermittedWildcardDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedWildcardDomains!);
-    }
-
     public matchesRestrictedWildcardDomains(hostname: string): boolean {
         return this.hasRestrictedWildcardDomains()
             && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.restrictedWildcardDomains!);
-    }
-
-    public matchesPermittedRegexDomains(hostname: string): boolean {
-        return this.hasPermittedRegexDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedRegexDomains!);
     }
 
     public matchesRestrictedRegexDomains(hostname: string): boolean {

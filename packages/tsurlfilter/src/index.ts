@@ -31,4 +31,3 @@ export { CosmeticRuleParser } from './rules/cosmetic-rule-parser';
 export { RuleSyntaxUtils } from './utils/rule-syntax-utils';
 export { HTTPMethod } from './modifiers/method-modifier';
 export { NETWORK_RULE_OPTIONS, OPTIONS_DELIMITER } from './rules/network-rule-options';
-export { DomainModifier } from './modifiers/domain-modifier'; // FIXME

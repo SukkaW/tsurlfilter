@@ -79,7 +79,6 @@ export class CosmeticLookupTable {
             return;
         }
 
-        // FIXME check that the rules with both wildcard and regexp working correctly
         if (rule.hasPermittedWildcardDomains()) {
             this.wildcardRules.push(rule);
             return;

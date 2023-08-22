@@ -541,7 +541,6 @@ export abstract class DeclarativeRuleConverter {
             condition.domainType = DomainType.FirstParty;
         }
 
-        // FIXME should this be changed?
         // set initiatorDomains
         const permittedDomains = rule.getPermittedDomains();
         if (permittedDomains && permittedDomains.length > 0) {
