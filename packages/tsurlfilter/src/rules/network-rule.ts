@@ -977,10 +977,21 @@ export class NetworkRule implements rule.IRule {
      * It parses this rule and extracts the rule pattern (see {@link SimpleRegex}),
      * and rule modifiers.
      *
-     * @param inputRule - String or AST of the rule.
+     * Currently, the constructor can accept two types of input:
+     * - Raw rule text (string)
+     * - AGTree AST node of the rule
+     *
+     * If you pass a string, the constructor will parse it with AGTree first.
+     *
+     * In the long term, we plan to remove the ability to pass a string to the constructor
+     * and change the type of the first argument to AST node only.
+     *
+     * @param inputRule - Raw rule text or AST node of the rule.
      * @param filterListId - ID of the filter list this rule belongs to.
      *
      * @throws error if it fails to parse the rule.
+     *
+     * @todo Remove type union and only accept AST node
      */
     // FIXME: add some default dummy filter list ID?
     constructor(inputRule: string | NetworkRuleNode, filterListId: number) {
