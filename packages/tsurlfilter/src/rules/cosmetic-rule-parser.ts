@@ -180,12 +180,12 @@ export class CosmeticRuleParser {
     static parseRulePattern(rulePattern: string): {
         url?: string;
         path?: string;
-        permittedDomains: StringDomainsList;
-        restrictedDomains: StringDomainsList;
-        permittedWildcardDomains: StringDomainsList;
-        restrictedWildcardDomains: StringDomainsList;
-        permittedRegexDomains: RegexDomainsList;
-        restrictedRegexDomains: RegexDomainsList;
+        permittedDomains?: StringDomainsList;
+        restrictedDomains?: StringDomainsList;
+        permittedWildcardDomains?: StringDomainsList;
+        restrictedWildcardDomains?: StringDomainsList;
+        permittedRegexDomains?: RegexDomainsList;
+        restrictedRegexDomains?: RegexDomainsList;
     } {
         const {
             domainsText,

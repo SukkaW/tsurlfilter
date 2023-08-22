@@ -769,10 +769,9 @@ export class NetworkRule implements rule.IRule {
             }
         }
 
-        let ruleWithExplicitDomains = false;
-
+        let hasExplicitPermittedDomains = false;
         if (this.hasPermittedDomains()) {
-            ruleWithExplicitDomains = true;
+            hasExplicitPermittedDomains = true;
             if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedDomains!)) {
                 // Domain is not among permitted
                 // i.e. $domain=example.org and we're checking example.com
@@ -781,7 +780,7 @@ export class NetworkRule implements rule.IRule {
         }
 
         if (this.hasPermittedWildcardDomains()) {
-            ruleWithExplicitDomains = true;
+            hasExplicitPermittedDomains = true;
             if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedWildcardDomains!)) {
                 // Domain is not among permitted
                 // i.e. $domain=example.org and we're checking example.com
@@ -790,7 +789,7 @@ export class NetworkRule implements rule.IRule {
         }
 
         if (this.hasPermittedRegexDomains()) {
-            ruleWithExplicitDomains = true;
+            hasExplicitPermittedDomains = true;
             if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedRegexDomains!)) {
                 // Domain is not among permitted
                 // i.e. $domain=example.org and we're checking example.com
@@ -798,7 +797,7 @@ export class NetworkRule implements rule.IRule {
             }
         }
 
-        return !ruleWithExplicitDomains;
+        return !hasExplicitPermittedDomains;
     }
 
     /**

@@ -445,12 +445,24 @@ export class CosmeticRule implements rule.IRule {
                 if (path || path === '') {
                     this.pathModifier = new Pattern(path);
                 }
-                this.permittedDomains = permittedDomains;
-                this.restrictedDomains = restrictedDomains;
-                this.permittedWildcardDomains = permittedWildcardDomains;
-                this.restrictedWildcardDomains = restrictedWildcardDomains;
-                this.permittedRegexDomains = permittedRegexDomains;
-                this.restrictedRegexDomains = restrictedRegexDomains;
+                if (permittedDomains) {
+                    this.permittedDomains = permittedDomains;
+                }
+                if (restrictedDomains) {
+                    this.restrictedDomains = restrictedDomains;
+                }
+                if (permittedWildcardDomains) {
+                    this.permittedWildcardDomains = permittedWildcardDomains;
+                }
+                if (restrictedWildcardDomains) {
+                    this.restrictedWildcardDomains = restrictedWildcardDomains;
+                }
+                if (permittedRegexDomains) {
+                    this.permittedRegexDomains = permittedRegexDomains;
+                }
+                if (restrictedRegexDomains) {
+                    this.restrictedRegexDomains = restrictedRegexDomains;
+                }
             }
         }
 
@@ -505,9 +517,37 @@ export class CosmeticRule implements rule.IRule {
             return false;
         }
 
-        return this.matchesPermittedDomains(hostname)
-            || this.matchesPermittedWildcardDomains(hostname)
-            || this.matchesPermittedRegexDomains(hostname);
+        let hasExplicitPermittedDomains = false;
+        if (this.hasPermittedDomains()) {
+            hasExplicitPermittedDomains = true;
+            if (DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedDomains!)) {
+                // Domain is not among permitted
+                // i.e. $domain=example.org and we're checking example.com
+                return true;
+            }
+        }
+
+        if (this.hasPermittedWildcardDomains()) {
+            hasExplicitPermittedDomains = true;
+            if (DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedWildcardDomains!)) {
+                // Domain is not among permitted
+                // i.e. $domain=example.org and we're checking example.com
+                return true;
+            }
+        }
+
+        if (this.hasPermittedRegexDomains()) {
+            hasExplicitPermittedDomains = true;
+            if (DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedRegexDomains!)) {
+                // Domain is not among permitted
+                // i.e. $domain=example.org and we're checking example.com
+                return true;
+            }
+        }
+
+        return !hasExplicitPermittedDomains;
+
+        return true;
     }
 
     static parseType(marker: string): CosmeticRuleType {

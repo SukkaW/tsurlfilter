@@ -90,40 +90,43 @@ describe('CosmeticRuleParser', () => {
     });
 
     it('parse and extracts the permitted/restricted domains and the unescaped path modifier value', () => {
-        expect(CosmeticRuleParser.parseRulePattern('example.org')).toEqual({
-            permittedDomains: ['example.org'],
+        let modifiersValues = CosmeticRuleParser.parseRulePattern('example.org');
+        expect(modifiersValues.permittedDomains).toEqual(['example.org']);
+
+        modifiersValues = CosmeticRuleParser.parseRulePattern('example.org,another.com');
+        expect(modifiersValues.permittedDomains).toEqual(['example.org', 'another.com']);
+
+        modifiersValues = CosmeticRuleParser.parseRulePattern('*');
+        expect(modifiersValues).toEqual({
+            url: undefined,
+            path: undefined,
+            permittedDomains: null,
+            restrictedDomains: null,
+            permittedWildcardDomains: null,
+            restrictedWildcardDomains: null,
+            permittedRegexDomains: null,
+            restrictedRegexDomains: null,
         });
 
-        expect(CosmeticRuleParser.parseRulePattern('example.org,another.com')).toEqual({
-            permittedDomains: ['example.org', 'another.com'],
-        });
+        modifiersValues = CosmeticRuleParser.parseRulePattern('example.org,~another.com');
+        expect(modifiersValues.permittedDomains).toEqual(['example.org']);
+        expect(modifiersValues.restrictedDomains).toEqual(['another.com']);
 
-        expect(CosmeticRuleParser.parseRulePattern('*')).toEqual({});
+        modifiersValues = CosmeticRuleParser.parseRulePattern('[$url=example.com/category/5]');
+        expect(modifiersValues.url).toEqual('example.com/category/5');
 
-        expect(CosmeticRuleParser.parseRulePattern('example.org,~another.com')).toEqual({
-            permittedDomains: ['example.org'],
-            restrictedDomains: ['another.com'],
-        });
+        modifiersValues = CosmeticRuleParser.parseRulePattern('[$path=/page]example.org,~another.com');
+        expect(modifiersValues.permittedDomains).toEqual(['example.org']);
+        expect(modifiersValues.restrictedDomains).toEqual(['another.com']);
+        expect(modifiersValues.path).toEqual('/page');
 
-        expect(CosmeticRuleParser.parseRulePattern('[$url=example.com/category/5]')).toEqual({
-            url: 'example.com/category/5',
-        });
+        modifiersValues = CosmeticRuleParser.parseRulePattern('[$path=/page,domain=example.org|~another.com]');
+        expect(modifiersValues.permittedDomains).toEqual(['example.org']);
+        expect(modifiersValues.restrictedDomains).toEqual(['another.com']);
+        expect(modifiersValues.path).toEqual('/page');
 
-        expect(CosmeticRuleParser.parseRulePattern('[$path=/page]example.org,~another.com')).toEqual({
-            permittedDomains: ['example.org'],
-            restrictedDomains: ['another.com'],
-            path: '/page',
-        });
-
-        expect(CosmeticRuleParser.parseRulePattern('[$path=/page,domain=example.org|~another.com]')).toEqual({
-            permittedDomains: ['example.org'],
-            restrictedDomains: ['another.com'],
-            path: '/page',
-        });
-
-        expect(CosmeticRuleParser.parseRulePattern(String.raw`[$path=/\[^a|b|c|\,|d|\\]\]werty\\?=qwe/]`)).toEqual({
-            path: String.raw`/[^a|b|c|,|d|\]]werty\?=qwe/`,
-        });
+        modifiersValues = CosmeticRuleParser.parseRulePattern(String.raw`[$path=/\[^a|b|c|\,|d|\\]\]werty\\?=qwe/]`);
+        expect(modifiersValues.path).toEqual(String.raw`/[^a|b|c|,|d|\]]werty\?=qwe/`);
 
         expect(() => {
             CosmeticRuleParser.parseRulePattern('[$path=/page,domain=example.org]~another.com');

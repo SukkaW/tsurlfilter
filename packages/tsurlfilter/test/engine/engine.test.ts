@@ -754,12 +754,14 @@ describe('$specifichide modifier', () => {
         const engine = new Engine(new RuleStorage([list]));
         const request = new Request('http://example.org', '', RequestType.Document);
         const result = engine.matchRequest(request);
+        console.log(result.getCosmeticOption());
         const cosmeticResult = engine.getCosmeticResult(createRequest('example.org'), result.getCosmeticOption());
         expect(cosmeticResult).toBeTruthy();
         expect(cosmeticResult.elementHiding.specific).toHaveLength(0);
         expect(cosmeticResult.elementHiding.generic).toHaveLength(1);
         expect(cosmeticResult.elementHiding.generic[0].getText()).toBe(genericElemhideRule);
         expect(cosmeticResult.CSS.specific).toHaveLength(0);
+        console.log(cosmeticResult);
         expect(cosmeticResult.CSS.generic).toHaveLength(2);
 
         const cssGenericRules = cosmeticResult.CSS.generic;
