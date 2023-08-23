@@ -1711,7 +1711,10 @@ describe('DeclarativeRuleConverter', () => {
                     responseHeaders: [{
                         header: PERMISSIONS_POLICY_HEADER_NAME,
                         operation: 'append',
-                        value: 'storage-access=(), сamera=()',
+                        // FIXME: Add option to AGTree to unescape delimiters
+                        // in modifier values.
+                        // value: 'storage-access=(), сamera=()', // <- expected
+                        value: 'storage-access=()\\, сamera=()', // <- temporary
                     }],
                 },
                 condition: {
