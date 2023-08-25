@@ -1,8 +1,13 @@
-import { buildExtendedCssScriptText, buildScriptText } from '@lib/mv2/background/injection-helper';
-
 const timestamp = Date.now();
 
+// Mock first call of Date.now() to return the same timestamp to avoid failing tests
+// on different timestamps
 jest.spyOn(Date, 'now').mockReturnValueOnce(timestamp);
+
+// We should import this module after mocking Date.now() because it calls Date.now()
+// in the module body
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { buildExtendedCssScriptText, buildScriptText } = require('@lib/mv2/background/injection-helper');
 
 const trim = (str: string): string => str.replace(/\s+/g, '');
 

@@ -96,7 +96,7 @@ describe('RuleValidator', () => {
     });
 
     it('correctly validates html rules', () => {
-        const ruleText = 'animalog.biz$$script[tag-content="window["open"]("about:blank")"][max-length="4200"]';
+        const ruleText = 'animalog.biz$$script[tag-content="window[""open""](""about:blank"")"][max-length="4200"]';
         expect(RuleValidator.validate(ruleText).valid).toBeTruthy();
     });
 

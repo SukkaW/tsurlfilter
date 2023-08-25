@@ -28,7 +28,7 @@ describe('Html rule attributes parser', () => {
         expect(parsed.tagName).toBe('div');
         expect(parsed.selector).toBe('div');
 
-        ruleText = 'example.org$$div[id=""';
+        ruleText = 'example.org$$div[id=""]';
         rule = new CosmeticRule(ruleText, 0);
 
         parsed = HtmlRuleParser.parse(rule);

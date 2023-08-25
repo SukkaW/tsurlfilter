@@ -1,7 +1,8 @@
+import { CosmeticRuleType } from '@adguard/agtree';
 import { IndexedRule, IRule } from '../../rules/rule';
 import { RuleFactory } from '../../rules/rule-factory';
 import { ILineReader } from '../reader/line-reader';
-import { CosmeticRule, CosmeticRuleType } from '../../rules/cosmetic-rule';
+import { CosmeticRule } from '../../rules/cosmetic-rule';
 import { ScannerType } from './scanner-type';
 import { NetworkRule } from '../../rules/network-rule';
 import { RemoveHeaderModifier } from '../../modifiers/remove-header-modifier';
@@ -188,7 +189,7 @@ export class RuleScanner {
             }
             // Ignore JS type rules
             // TODO: in the future we may allow CSS rules and Scriptlets (except for "trusted" scriptlets)
-            return (this.ignoreJS && rule.getType() === CosmeticRuleType.Js);
+            return (this.ignoreJS && rule.getType() === CosmeticRuleType.JsInjectionRule);
         }
 
         if (this.ignoreUnsafe) {
