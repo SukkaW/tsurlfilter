@@ -1268,11 +1268,15 @@ export class NetworkRule implements rule.IRule {
             );
         }
 
-        if (domainModifier.permittedDomains
-            && domainModifier.permittedDomains.some((x) => x.includes(SimpleRegex.MASK_ANY_CHARACTER))) {
-            throw new SyntaxError(
-                'Invalid modifier: $denyallow domains wildcards are not supported',
-            );
+        if (domainModifier.permittedDomains) {
+            const hasNonPlainDomain = domainModifier.permittedDomains.some((d) => {
+                return d.includes(SimpleRegex.MASK_ANY_CHARACTER) || SimpleRegex.isRegexPattern(d);
+            });
+            if (hasNonPlainDomain) {
+                throw new SyntaxError(
+                    'Invalid modifier: $denyallow does not support wildcards and regex domains',
+                );
+            }
         }
 
         this.denyAllowDomains = domainModifier.permittedDomains;

@@ -624,7 +624,9 @@ describe('NetworkRule constructor', () => {
     });
 
     it('works if denyallow modifier works properly', () => {
-        const rule = new NetworkRule('/some.png$denyallow=example.ru|example.uk', -1);
+        let rule: NetworkRule;
+        
+        rule = new NetworkRule('/some.png$denyallow=example.ru|example.uk', -1);
         expect(rule).toBeTruthy();
 
         // Domains in the modifier's parameter cannot be negated ($denyallow=~x.com)
@@ -635,7 +637,12 @@ describe('NetworkRule constructor', () => {
         // or have a wildcard TLD ($denyallow=x.*)
         expect(() => {
             new NetworkRule('/some$denyallow=example.*,domain=example.com', -1);
-        }).toThrow('Invalid modifier: $denyallow domains wildcards are not supported');
+        }).toThrow('Invalid modifier: $denyallow does not support wildcards and regex domains');
+
+        // or have a regex value ($denyallow=/(x\|y)/)
+        expect(() => {
+            new NetworkRule('/some$denyallow=/domainname/,domain=example.com', -1);
+        }).toThrow('Invalid modifier: $denyallow does not support wildcards and regex domains');
     });
 
     it('works if document modifier works properly', () => {
