@@ -1,4 +1,6 @@
 import { getPublicSuffix } from 'tldts';
+import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
+import { SimpleRegex } from '../rules/simple-regex';
 
 /**
  * This is a helper class that is used specifically to work
@@ -42,7 +44,7 @@ export class DomainModifier {
         const permittedDomains: string[] = [];
         const restrictedDomains: string[] = [];
 
-        const parts = domainsStr.toLowerCase().split(separator);
+        const parts = splitByDelimiterWithEscapeCharacter(domainsStr.toLowerCase(), separator, '\\', true);
         for (let i = 0; i < parts.length; i += 1) {
             let domain = parts[i].trim();
             let restricted = false;
@@ -84,6 +86,15 @@ export class DomainModifier {
 
             if (domain === d || (domain.endsWith(d) && domain.endsWith(`.${d}`))) {
                 return true;
+            }
+
+            if (SimpleRegex.isRegexPattern(d)) {
+                // FIXME SimpleRegex.patternFromString(d); use this after it is refactored to not add 'g' flag
+                const domainPattern = new RegExp(d.slice(1, -1));
+                if (domainPattern.test(domain)) {
+                    return true;
+                }
+                continue;
             }
         }
 

@@ -4,6 +4,7 @@ import { Request } from '../../request';
 import { DomainModifier } from '../../modifiers/domain-modifier';
 import { fastHash } from '../../utils/string-utils';
 import { NetworkRule } from '../../rules/network-rule';
+import { SimpleRegex } from '../../rules/simple-regex';
 
 /**
  * Domain lookup table. Key is the domain name hash.
@@ -45,8 +46,10 @@ export class DomainsLookupTable implements ILookupTable {
             return false;
         }
 
-        const hasWildcardDomain = permittedDomains.some((d) => DomainModifier.isWildcardDomain(d));
-        if (hasWildcardDomain) {
+        const hasWildcardOrRegexpDomain = permittedDomains.some((d) => {
+            return DomainModifier.isWildcardDomain(d) || SimpleRegex.isRegexPattern(d);
+        });
+        if (hasWildcardOrRegexpDomain) {
             return false;
         }
 
