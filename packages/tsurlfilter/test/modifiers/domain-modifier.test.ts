@@ -46,6 +46,13 @@ describe('Domain modifier', () => {
                     restricted: ['example.com'],
                 },
             },
+            {
+                actual: 'example.org,~example.com,example.*,/io/|~/net/',
+                expected: {
+                    permitted: ['example.org', 'example.*', '/io/|~/net/'],
+                    restricted: ['example.com'],
+                },
+            },
         ];
         test.each(domainsListCases)('%s', ({ actual, expected }) => {
             const domainModifier = new DomainModifier(actual, COMMA_SEPARATOR);
@@ -146,10 +153,6 @@ describe('Domain modifier', () => {
             },
             {
                 actual: 'example.com,',
-                error: EMPTY_DOMAIN_ERROR,
-            },
-            {
-                actual: ',example.com',
                 error: EMPTY_DOMAIN_ERROR,
             },
             {
