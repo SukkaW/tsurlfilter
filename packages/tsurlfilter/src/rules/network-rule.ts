@@ -711,7 +711,7 @@ export class NetworkRule implements rule.IRule {
         const isDocumentType = request.requestType === RequestType.Document
             || request.requestType === RequestType.SubDocument;
 
-        const hasOnlyExcludedDomains = (!domainModifier.hasPermittedDomains())
+        const hasOnlyExcludedDomains = !domainModifier.hasPermittedDomains()
             && domainModifier.hasRestrictedDomains();
 
         const patternIsRegex = this.isRegexRule();
@@ -1137,11 +1137,11 @@ export class NetworkRule implements rule.IRule {
             return false;
         }
 
-        if (!stringArraysEquals(this.restrictedDomains, specifiedRule.restrictedDomains)) {
+        if (!stringArraysEquals(this.getRestrictedDomains(), specifiedRule.getRestrictedDomains())) {
             return false;
         }
 
-        if (!stringArraysHaveIntersection(this.permittedDomains, specifiedRule.permittedDomains)) {
+        if (!stringArraysHaveIntersection(this.getPermittedDomains(), specifiedRule.getPermittedDomains())) {
             return false;
         }
 
@@ -1675,7 +1675,8 @@ export class NetworkRule implements rule.IRule {
             this.priorityWeight += 1;
         }
 
-        if (this.restrictedDomains && this.restrictedDomains.length > 0) {
+        const { domainModifier } = this;
+        if (domainModifier?.hasRestrictedDomains()) {
             this.priorityWeight += 1;
         }
 
@@ -1733,9 +1734,9 @@ export class NetworkRule implements rule.IRule {
          * `||example.com^$app=org.example.app1|org.example.app2`
          * will add `100 + 100 / 2 = 151`.
          */
-        if (this.permittedDomains && this.permittedDomains.length > 0) {
+        if (domainModifier?.hasPermittedDomains()) {
             // More permitted domains mean less priority weight.
-            const relativeWeight = NetworkRule.CategoryThreeWeight / this.permittedDomains.length;
+            const relativeWeight = NetworkRule.CategoryThreeWeight / domainModifier.getPermittedDomains()!.length;
             this.priorityWeight += NetworkRule.CategoryThreeWeight + relativeWeight;
         }
 

@@ -151,7 +151,7 @@ export class CosmeticRule implements rule.IRule {
     /** FIXME should this be private?
      * $domain modifier pattern. It is only set if $domain modifier is specified for this rule.
      */
-    public domainModifier: DomainModifier | undefined;
+    public domainModifier: DomainModifier | null = null;
 
     /**
      * $path modifier pattern. It is only set if $path modifier is specified for this rule.
