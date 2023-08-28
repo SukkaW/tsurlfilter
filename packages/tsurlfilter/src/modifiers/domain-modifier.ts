@@ -64,8 +64,61 @@ export class DomainModifier {
             }
         }
 
+        // FIXME improve typings to state that domains list cannot be empty
         this.restrictedDomains = restrictedDomains.length > 0 ? restrictedDomains : null;
         this.permittedDomains = permittedDomains.length > 0 ? permittedDomains : null;
+    }
+
+    /**
+     * matchDomain checks if the filtering rule is allowed on this domain.
+     * @param domain - domain to check.
+     */
+    public matchDomain(domain: string): boolean {
+        if (this.hasRestrictedDomains()) {
+            if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.restrictedDomains!)) {
+                // Domain or host is restricted
+                // i.e. $domain=~example.org
+                return false;
+            }
+        }
+
+        if (this.hasPermittedDomains()) {
+            if (!DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedDomains!)) {
+                // Domain is not among permitted
+                // i.e. $domain=example.org and we're checking example.com
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if rule has permitted domains
+     */
+    public hasPermittedDomains(): boolean {
+        return !!this.permittedDomains && this.permittedDomains.length > 0;
+    }
+
+    /**
+     * Checks if rule has restricted domains
+     */
+    public hasRestrictedDomains(): boolean {
+        return !!this.restrictedDomains && this.restrictedDomains.length > 0;
+    }
+
+    /**
+     * Gets list of permitted domains.
+     */
+    public getPermittedDomains(): string[] | null {
+        return this.permittedDomains;
+    }
+
+    /**
+     * Gets list of restricted domains.
+     */
+    public getRestrictedDomains(): string[] | null {
+        return this.restrictedDomains;
     }
 
     /**

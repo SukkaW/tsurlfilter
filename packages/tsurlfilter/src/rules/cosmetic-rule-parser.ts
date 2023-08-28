@@ -176,11 +176,12 @@ export class CosmeticRuleParser {
      * @returns Object with permitted/restricted domains list and/or the path modifier string value,
      * or url modifier string value
      */
+    // FIXME improve typings to explicitly state that its either { url: string }
+    // or { path: string, domainModifier: DomainModifier } wil lbe returned
     static parseRulePattern(rulePattern: string): {
+        domainModifier?: DomainModifier,
         url?: string,
         path?: string,
-        permittedDomains?: string[];
-        restrictedDomains?: string[];
     } {
         const {
             domainsText,
@@ -222,27 +223,17 @@ export class CosmeticRuleParser {
             }
         }
 
-        let permittedDomains;
-        let restrictedDomains;
+        let domainModifier;
 
         // Skip wildcard domain
         if (domains && domains !== SimpleRegex.MASK_ANY_CHARACTER) {
             const separator = modifiers?.domain ? PIPE_SEPARATOR : COMMA_SEPARATOR;
-            const domainModifier = new DomainModifier(domains, separator);
-
-            if (domainModifier.permittedDomains) {
-                permittedDomains = domainModifier.permittedDomains;
-            }
-
-            if (domainModifier.restrictedDomains) {
-                restrictedDomains = domainModifier.restrictedDomains;
-            }
+            domainModifier = new DomainModifier(domains, separator);
         }
 
         return {
             path,
-            permittedDomains,
-            restrictedDomains,
+            domainModifier,
         };
     }
 }

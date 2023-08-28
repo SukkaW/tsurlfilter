@@ -148,9 +148,10 @@ export class CosmeticRule implements rule.IRule {
 
     private extendedCss = false;
 
-    private readonly permittedDomains: string[] | undefined = undefined;
-
-    private readonly restrictedDomains: string[] | undefined = undefined;
+    /** FIXME should this be private?
+     * $domain modifier pattern. It is only set if $domain modifier is specified for this rule.
+     */
+    public domainModifier: DomainModifier | undefined;
 
     /**
      * $path modifier pattern. It is only set if $path modifier is specified for this rule.
@@ -331,8 +332,21 @@ export class CosmeticRule implements rule.IRule {
     /**
      * Gets list of permitted domains.
      */
-    getPermittedDomains(): string[] | undefined {
-        return this.permittedDomains;
+    getPermittedDomains(): string[] | null {
+        if (this.domainModifier) {
+            return this.domainModifier.getPermittedDomains();
+        }
+        return null;
+    }
+
+    /**
+     * Gets list of restricted domains.
+     */
+    getRestrictedDomains(): string[] | null {
+        if (this.domainModifier) {
+            return this.domainModifier.getRestrictedDomains();
+        }
+        return null;
     }
 
     /**
@@ -343,14 +357,7 @@ export class CosmeticRule implements rule.IRule {
      * @return {boolean}
      */
     isGeneric(): boolean {
-        return !this.permittedDomains || this.permittedDomains.length === 0;
-    }
-
-    /**
-     * Gets list of restricted domains.
-     */
-    getRestrictedDomains(): string[] | undefined {
-        return this.restrictedDomains;
+        return !this.domainModifier?.hasPermittedDomains();
     }
 
     isExtendedCss(): boolean {
@@ -404,8 +411,7 @@ export class CosmeticRule implements rule.IRule {
             const {
                 url,
                 path,
-                permittedDomains,
-                restrictedDomains,
+                domainModifier,
             } = CosmeticRuleParser.parseRulePattern(pattern);
 
             if (url) {
@@ -415,12 +421,8 @@ export class CosmeticRule implements rule.IRule {
                     this.pathModifier = new Pattern(path);
                 }
 
-                if (permittedDomains) {
-                    this.permittedDomains = permittedDomains;
-                }
-
-                if (restrictedDomains) {
-                    this.restrictedDomains = restrictedDomains;
+                if (domainModifier) {
+                    this.domainModifier = domainModifier;
                 }
             }
         }
@@ -435,7 +437,10 @@ export class CosmeticRule implements rule.IRule {
      * @param request - request to check
      */
     match(request: Request): boolean {
-        if (!this.permittedDomains && !this.restrictedDomains && !this.pathModifier && !this.urlModifier) {
+        if (!this.domainModifier
+            && !this.pathModifier
+            && !this.urlModifier
+        ) {
             return true;
         }
 
@@ -443,20 +448,8 @@ export class CosmeticRule implements rule.IRule {
             return this.urlModifier.matchPattern(request, false);
         }
 
-        if (this.matchesRestrictedDomains(request.hostname)) {
-            /**
-             * Domain or host is restricted
-             * i.e. ~example.org##rule
-             */
-            return false;
-        }
-
-        if (this.hasPermittedDomains()) {
-            if (!DomainModifier.isDomainOrSubdomainOfAny(request.hostname, this.permittedDomains!)) {
-                /**
-                 * Domain is not among permitted
-                 * i.e. example.org##rule and we're checking example.org
-                 */
+        if (this.domainModifier) {
+            if (!this.domainModifier.matchDomain(request.hostname)) {
                 return false;
             }
         }
@@ -592,37 +585,6 @@ export class CosmeticRule implements rule.IRule {
         if (ruleContent.indexOf('\\', ruleContent.lastIndexOf('{')) > -1) {
             throw new SyntaxError('CSS injection rule with \'\\\' was omitted');
         }
-    }
-
-    /**
-     * Checks if the rule has permitted domains
-     */
-    private hasPermittedDomains(): boolean {
-        return this.permittedDomains != null && this.permittedDomains.length > 0;
-    }
-
-    /**
-     * Checks if the rule has restricted domains
-     */
-    private hasRestrictedDomains(): boolean {
-        return this.restrictedDomains != null && this.restrictedDomains.length > 0;
-    }
-
-    /**
-     * Checks if the hostname matches permitted domains
-     * @param hostname
-     */
-    public matchesPermittedDomains(hostname: string): boolean {
-        return this.hasPermittedDomains() && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedDomains!);
-    }
-
-    /**
-     * Checks if the hostname matches the restricted domains.
-     * @param hostname
-     */
-    public matchesRestrictedDomains(hostname: string): boolean {
-        return this.hasRestrictedDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.restrictedDomains!);
     }
 
     /**
