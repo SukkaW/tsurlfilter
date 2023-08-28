@@ -112,16 +112,16 @@ export class CosmeticLookupTable {
                 rulesIndexes = rulesIndexes.filter((v, index) => rulesIndexes!.indexOf(v) === index);
                 for (let j = 0; j < rulesIndexes.length; j += 1) {
                     const rule = this.ruleStorage.retrieveRule(rulesIndexes[j]) as CosmeticRule;
-                    if (rule && rule.match(request)) {
+                    if (rule && !rule.isAllowlist() && rule.match(request)) {
                         result.push(rule);
                     }
                 }
             }
         }
 
-        result.push(...this.domainMatchRules.filter((r) => r.match(request)));
+        result.push(...this.domainMatchRules.filter((r) => !r.isAllowlist() && r.match(request)));
 
-        return result.filter((rule) => !rule.isAllowlist());
+        return result;
     }
 
     /**

@@ -158,7 +158,7 @@ describe('Element hiding rules constructor', () => {
 
         const permittedDomains = rule.getPermittedDomains()!;
         const restrictedDomains = rule.getRestrictedDomains()!;
-        expect(permittedDomains).toEqual(['example.org', String.raw`/evil\.(org|com)/`])
+        expect(permittedDomains).toEqual(['example.org', String.raw`/evil\.(org|com)/`]);
         expect(restrictedDomains).toEqual([String.raw`/good/`]);
     });
 
@@ -230,7 +230,6 @@ describe('CosmeticRule match', () => {
         const rule = new CosmeticRule('##banner', 0);
         expect(rule.match(createRequest('example.org'))).toEqual(true);
     });
-
 
     it('matches requests by regexp pattern of domain', () => {
         let rule: CosmeticRule;

@@ -624,9 +624,7 @@ describe('NetworkRule constructor', () => {
     });
 
     it('works if denyallow modifier works properly', () => {
-        let rule: NetworkRule;
-        
-        rule = new NetworkRule('/some.png$denyallow=example.ru|example.uk', -1);
+        const rule = new NetworkRule('/some.png$denyallow=example.ru|example.uk', -1);
         expect(rule).toBeTruthy();
 
         // Domains in the modifier's parameter cannot be negated ($denyallow=~x.com)
