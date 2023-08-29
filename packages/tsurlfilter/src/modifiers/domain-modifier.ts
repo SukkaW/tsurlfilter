@@ -3,6 +3,13 @@ import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
 import { SimpleRegex } from '../rules/simple-regex';
 
 /**
+ * Domain modifier list of domains, which cannot be empty
+ */
+type DomainModifierList = [string, ...string[]];
+
+const isDomainModifierList = (list: string[]): list is DomainModifierList => list.length > 0;
+
+/**
  * This is a helper class that is used specifically to work
  * with domains restrictions.
  *
@@ -21,12 +28,12 @@ export class DomainModifier {
     /**
      * List of permitted domains or null.
      */
-    public readonly permittedDomains: string[] | null;
+    private readonly permittedDomains: DomainModifierList | null;
 
     /**
      * List of restricted domains or null.
      */
-    public readonly restrictedDomains: string[] | null;
+    private readonly restrictedDomains: DomainModifierList | null;
 
     /**
      * Parses the `domains` string and initializes the object.
@@ -64,9 +71,8 @@ export class DomainModifier {
             }
         }
 
-        // FIXME improve typings to state that domains list cannot be empty
-        this.restrictedDomains = restrictedDomains.length > 0 ? restrictedDomains : null;
-        this.permittedDomains = permittedDomains.length > 0 ? permittedDomains : null;
+        this.restrictedDomains = isDomainModifierList(restrictedDomains) ? restrictedDomains : null;
+        this.permittedDomains = isDomainModifierList(permittedDomains) ? permittedDomains : null;
     }
 
     /**
@@ -97,14 +103,14 @@ export class DomainModifier {
      * Checks if rule has permitted domains
      */
     public hasPermittedDomains(): boolean {
-        return !!this.permittedDomains && this.permittedDomains.length > 0;
+        return !!this.permittedDomains;
     }
 
     /**
      * Checks if rule has restricted domains
      */
     public hasRestrictedDomains(): boolean {
-        return !!this.restrictedDomains && this.restrictedDomains.length > 0;
+        return !!this.restrictedDomains;
     }
 
     /**
@@ -142,7 +148,7 @@ export class DomainModifier {
             }
 
             if (SimpleRegex.isRegexPattern(d)) {
-                // FIXME SimpleRegex.patternFromString(d); use this after it is refactored to not add 'g' flag
+                // TODO use SimpleRegex.patternFromString(d) after it is refactored to not add 'g' flag
                 const domainPattern = new RegExp(d.slice(1, -1));
                 if (domainPattern.test(domain)) {
                     return true;
