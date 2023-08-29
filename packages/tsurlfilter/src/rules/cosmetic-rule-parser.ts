@@ -10,6 +10,13 @@ export type CosmeticRuleModifiersCollection = {
     [P in CosmeticRuleModifiers]?: string;
 };
 
+type UrlPatternResult = { url: string };
+type PathDomainPatternResult = { path?: string, domainModifier?: DomainModifier };
+
+export const isUrlPatternResult = (
+    result: UrlPatternResult | PathDomainPatternResult,
+): result is UrlPatternResult => 'url' in result;
+
 /**
  * Helper class for parsing text of cosmetic rules
  * used by CosmeticRule and [Filter compiler](https://github.com/AdguardTeam/FiltersCompiler)
@@ -176,13 +183,7 @@ export class CosmeticRuleParser {
      * @returns Object with permitted/restricted domains list and/or the path modifier string value,
      * or url modifier string value
      */
-    // FIXME improve typings to explicitly state that its either { url: string }
-    // or { path: string, domainModifier: DomainModifier } wil lbe returned
-    static parseRulePattern(rulePattern: string): {
-        domainModifier?: DomainModifier,
-        url?: string,
-        path?: string,
-    } {
+    static parseRulePattern(rulePattern: string): UrlPatternResult | PathDomainPatternResult {
         const {
             domainsText,
             modifiersText,

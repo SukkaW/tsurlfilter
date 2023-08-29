@@ -5,7 +5,7 @@ import { DomainModifier } from '../modifiers/domain-modifier';
 import { hasUnquotedSubstring, indexOfAny } from '../utils/string-utils';
 import { getRelativeUrl } from '../utils/url';
 import { SimpleRegex } from './simple-regex';
-import { CosmeticRuleParser } from './cosmetic-rule-parser';
+import { CosmeticRuleParser, isUrlPatternResult } from './cosmetic-rule-parser';
 import { Request } from '../request';
 import { Pattern } from './pattern';
 import { ScriptletParser } from '../engine/cosmetic-engine/scriptlet-parser';
@@ -148,10 +148,10 @@ export class CosmeticRule implements rule.IRule {
 
     private extendedCss = false;
 
-    /** FIXME should this be private?
+    /**
      * $domain modifier pattern. It is only set if $domain modifier is specified for this rule.
      */
-    public domainModifier: DomainModifier | null = null;
+    private domainModifier: DomainModifier | null = null;
 
     /**
      * $path modifier pattern. It is only set if $path modifier is specified for this rule.
@@ -408,15 +408,12 @@ export class CosmeticRule implements rule.IRule {
         if (pattern) {
             // This means that the marker is preceded by the list of domains and modifiers
             // Now it's a good time to parse them.
-            const {
-                url,
-                path,
-                domainModifier,
-            } = CosmeticRuleParser.parseRulePattern(pattern);
+            const parsedPattern = CosmeticRuleParser.parseRulePattern(pattern);
 
-            if (url) {
-                this.urlModifier = new Pattern(url);
+            if (isUrlPatternResult(parsedPattern)) {
+                this.urlModifier = new Pattern(parsedPattern.url);
             } else {
+                const { path, domainModifier } = parsedPattern;
                 if (path || path === '') {
                     this.pathModifier = new Pattern(path);
                 }
