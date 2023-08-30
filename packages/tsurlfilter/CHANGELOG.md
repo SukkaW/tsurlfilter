@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+- Support for regexp values in $domain modifier of network and cosmetic rules.
 - New `$permissions` modifier to set Permissions-Policy response header.
 - New `$header` modifier to match requests by response headers.
 - Support conversion to DNR for `$permissions` modifier.
