@@ -7,6 +7,7 @@
 
 import { NetworkRule } from '../network-rule';
 import { IndexedRule } from '../rule';
+import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
 
 import { DeclarativeRule } from './declarative-rule';
 import { ConvertedRules } from './converted-result';
@@ -21,17 +22,18 @@ import { DeclarativeRulesGrouper, GroupedRules, RulesGroup } from './rules-group
 import { DeclarativeConverterOptions } from './declarative-converter-options';
 import { ConversionError, InvalidDeclarativeRuleError } from './errors/conversion-errors';
 
-export type FilterIdsWithRules = [number, IndexedRule[]];
-export type FiltersIdsWithRules = FilterIdsWithRules[];
-export type ScannedFilters = {
-    errors: Error[],
-    filters: FiltersIdsWithRules,
+export type ScannedFilter = {
+    id: number,
+    rules: IndexedRuleWithHash[],
+    badFilterRules: IndexedRuleWithHash[],
 };
 
-type FiltersIdsWithRulesGroups = [number, GroupedRules][];
+export type ScannedFilters = ScannedFilter[];
+
+type FiltersIdsWithGroupedRules = [number, GroupedRules][];
 
 /**
- * Describes how to convert {@link IndexedRule|indexed rules} into list of
+ * Describes how to convert {@link IndexedRuleWithHash|indexed rules} into list of
  * {@link DeclarativeRule|declarative rules}.
  */
 export class DeclarativeRulesConverter {
@@ -69,7 +71,7 @@ export class DeclarativeRulesConverter {
      * transformed declarative rule and the source rule.
      */
     public static convert(
-        filtersWithRules: FiltersIdsWithRules,
+        filtersWithRules: ScannedFilters,
         options?: DeclarativeConverterOptions,
     ): ConvertedRules {
         const filters = this.applyBadFilter(filtersWithRules);
@@ -332,15 +334,15 @@ export class DeclarativeRulesConverter {
      *
      * @returns List with filters ids and grouped indexed rules.
      */
-    private static applyBadFilter(filtersWithRules: FiltersIdsWithRules): FiltersIdsWithRulesGroups {
+    private static applyBadFilter(filtersWithRules: ScannedFilters): FiltersIdsWithGroupedRules {
         let allBadFilterRules: IndexedRule[] = [];
 
         // Group rules
         const filterIdsWithGroupedRules = filtersWithRules
-            .map(([filterId, indexedRules]) => {
-                const rulesToProcess = DeclarativeRulesGrouper.splitRulesByGroups(indexedRules);
+            .map(({ id, rules }) => {
+                const rulesToProcess = DeclarativeRulesGrouper.splitRulesByGroups(rules);
                 allBadFilterRules = allBadFilterRules.concat(rulesToProcess[RulesGroup.BadFilter]);
-                const tuple: [number, GroupedRules] = [filterId, rulesToProcess];
+                const tuple: [number, GroupedRules] = [id, rulesToProcess];
 
                 return tuple;
             });

@@ -3,7 +3,10 @@
  * to rule sets {@link IRuleSet} with declarative rules {@link DeclarativeRule}.
  */
 
-import { IRuleSetContentProvider, RuleSet } from './rule-set';
+import { NetworkRule } from '../network-rule';
+import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
+
+import { IRuleSet, IRuleSetContentProvider, RuleSet } from './rule-set';
 import { FilterScanner } from './filter-scanner';
 import { SourceMap } from './source-map';
 import type { IFilter } from './filter';
@@ -15,18 +18,25 @@ import {
 } from './errors/converter-options-errors';
 import type { ConversionResult } from './conversion-result';
 import type { DeclarativeConverterOptions } from './declarative-converter-options';
-import type { ScannedFilters, FilterIdsWithRules } from './rules-converter';
+import type { ScannedFilter, ScannedFilters } from './rules-converter';
+import { RulesHashMap } from './rule-hash-map';
+
+type ScannedFiltersWithErrors = {
+    errors: Error[],
+    filters: ScannedFilters,
+};
 
 /**
  * The interface for the declarative filter converter describes what the filter
  * converter expects on the input and what should be returned on the output.
+ *
+ * TODO: Description for method's parameters.
  */
 interface IFilterConverter {
     /**
-     * Extracts content from the provided list of filters and converts each of
-     * them to a set of declarative rules with error-catching non-convertible
-     * rules and checks that each of the converted rule sets matches
-     * the constraints (reduce if not).
+     * Extracts content from the provided static filter and converts to a set
+     * of declarative rules with error-catching non-convertible rules and
+     * checks that converted ruleset matches the constraints (reduce if not).
      *
      * @throws Error {@link UnavailableFilterSourceError} if filter content
      * is not available OR some of {@link ResourcesPathError},
@@ -34,17 +44,21 @@ interface IFilterConverter {
      * {@link NegativeNumberOfRegexpRulesError}.
      * @see {@link DeclarativeFilterConverter#checkConverterOptions}
      * for details.
+     *
+     * @returns Item of {@link ConversionResult}.
      */
-    convert(
-        filterList: IFilter[],
+    convertStaticRuleset(
+        filterList: IFilter,
         options?: DeclarativeConverterOptions,
     ): Promise<ConversionResult>;
 
     /**
-     * Extracts content from the provided list of filters and converts all
-     * together into one set of rules with declarative rules.
-     * During the conversion, it catches unconvertible rules and checks if each
-     * of the converted rule sets matches the constraints (reduce if not).
+     * Extracts content from the provided list of dynamic filters and converts
+     * all together into one set of rules with declarative rules.
+     * During the conversion, it catches unconvertible rules and checks if
+     * the converted ruleset matches the constraints (reduce if not).
+     *
+     * TODO: This method should be changed: it should return list of badfilter rules.
      *
      * @throws Error {@link UnavailableFilterSourceError} if filter content
      * is not available OR some of {@link ResourcesPathError},
@@ -52,9 +66,12 @@ interface IFilterConverter {
      * {@link NegativeNumberOfRegexpRulesError}.
      * @see {@link DeclarativeFilterConverter#checkConverterOptions}
      * for details.
+     *
+     * @returns Item of {@link ConversionResult}.
      */
-    convertToSingle(
+    convertDynamicRulesets(
         filterList: IFilter[],
+        staticRuleSets: IRuleSet[],
         options?: DeclarativeConverterOptions,
     ): Promise<ConversionResult>;
 }
@@ -72,27 +89,39 @@ export class DeclarativeFilterConverter implements IFilterConverter {
      * Asynchronous scans the list of filters for rules.
      *
      * @param filterList List of {@link IFilter}.
+     * @param filterFn
      *
      * @returns Map, where the key is the filter identifier and the value is the
      * indexed filter rules {@link IndexedRule}.
      */
     // eslint-disable-next-line class-methods-use-this
-    private async scanRules(filterList: IFilter[]): Promise<ScannedFilters> {
-        const res: ScannedFilters = {
+    private async scanRules(
+        filterList: IFilter[],
+        filterFn?: (r: IndexedRuleWithHash) => boolean,
+    ): Promise<ScannedFiltersWithErrors> {
+        const res: ScannedFiltersWithErrors = {
             errors: [],
             filters: [],
         };
 
-        const promises = filterList.map(async (filter) => {
+        const promises = filterList.map(async (filter): Promise<ScannedFilter> => {
             const scanner = await FilterScanner.createNew(filter);
-            const { errors, rules } = scanner.getIndexedRules();
-            const tuple: FilterIdsWithRules = [filter.getId(), rules];
+            const {
+                errors,
+                rules,
+                badFilterRules,
+            } = scanner.getIndexedRules(filterFn);
 
-            res.errors.push(...errors);
+            res.errors = res.errors.concat(errors);
 
-            return tuple;
+            return {
+                id: filter.getId(),
+                rules,
+                badFilterRules,
+            };
         });
 
+        // FIXME: Add error catching
         res.filters = await Promise.all(promises);
 
         return res;
@@ -151,10 +180,10 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description
     /**
-     * @see {@link IFilterConverter#convert}
+     * @see {@link IFilterConverter#convertStaticRuleset}
      */
-    public async convert(
-        filterList: IFilter[],
+    public async convertStaticRuleset(
+        filter: IFilter,
         options?: DeclarativeConverterOptions,
     ): Promise<ConversionResult> {
         if (options) {
@@ -167,12 +196,16 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             limitations: [],
         };
 
-        const scanned = await this.scanRules(filterList);
+        const scanned = await this.scanRules([filter]);
 
-        converted.errors.push(...scanned.errors);
+        converted.errors = converted.errors.concat(scanned.errors);
 
-        scanned.filters.forEach((filterIdWithRules: FilterIdsWithRules) => {
-            const [filterId] = filterIdWithRules;
+        scanned.filters.forEach((filterIdWithRules: ScannedFilter) => {
+            const {
+                id: filterId,
+                rules,
+                badFilterRules,
+            } = filterIdWithRules;
             const {
                 sourceMapValues,
                 declarativeRules,
@@ -188,11 +221,23 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                     return Promise.resolve(new SourceMap(sourceMapValues));
                 },
                 getFilterList: () => {
-                    const filter = filterList.find((f) => f.getId() === filterId);
-                    return Promise.resolve(filter ? [filter] : []);
+                    return Promise.resolve([filter]);
                 },
                 getDeclarativeRules: () => {
                     return Promise.resolve(declarativeRules);
+                },
+                getRulesHashMap: () => {
+                    const values = rules.map((r) => ({
+                        hash: r.hash,
+                        source: {
+                            sourceRuleIndex: r.index,
+                            filterId,
+                        },
+                    }));
+
+                    const rulesHashMap = new RulesHashMap(values);
+
+                    return Promise.resolve(rulesHashMap);
                 },
             };
 
@@ -201,6 +246,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                 declarativeRules.length,
                 declarativeRules.filter((d) => d.condition.regexFilter).length,
                 ruleSetContent,
+                badFilterRules,
             );
 
             converted.ruleSets.push(ruleSet);
@@ -215,17 +261,49 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description
     /**
-     * @see {@link IFilterConverter#convertToSingle}
+     * @see {@link IFilterConverter#convertDynamicRulesets}
      */
-    public async convertToSingle(
+    public async convertDynamicRulesets(
         filterList: IFilter[],
+        staticRuleSets: IRuleSet[],
         options?: DeclarativeConverterOptions,
     ): Promise<ConversionResult> {
         if (options) {
             DeclarativeFilterConverter.checkConverterOptions(options);
         }
 
-        const scanned = await this.scanRules(filterList);
+        let allStaticBadFilterRules: IndexedRuleWithHash[] = [];
+
+        // FIXME: Optimize this part, instead of storing all rules as array,
+        // check if there is a hash of rule in hashmap. If so - call ruleSet.getSourceRule(id)
+        // and then convert it to NetworkRule.
+        staticRuleSets.forEach((ruleSet) => {
+            allStaticBadFilterRules = allStaticBadFilterRules.concat(ruleSet.getBadFilterRules());
+        });
+
+        const checkRule = (r: IndexedRuleWithHash): boolean => {
+            for (let i = 0; i < allStaticBadFilterRules.length; i += 1) {
+                const rule = allStaticBadFilterRules[i];
+
+                if (r.hash === rule.hash
+                    && rule.rule instanceof NetworkRule
+                    && r.rule instanceof NetworkRule
+                ) {
+                    const badFilterRule = rule.rule;
+                    const ruleToCheck = r.rule;
+
+                    if (badFilterRule.negatesBadfilter(ruleToCheck)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        };
+
+        // Note: if we drop some rules because of applying $badfilter - we
+        // cannot show info about it to user.
+        const scanned = await this.scanRules(filterList, checkRule);
 
         const combinedConvertedRules = DeclarativeRulesConverter.convert(
             scanned.filters,
@@ -249,6 +327,23 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             getDeclarativeRules: () => {
                 return Promise.resolve(declarativeRules);
             },
+            getRulesHashMap: () => {
+                const values = scanned.filters
+                    .map(({ id, rules }) => {
+                        return rules.map((r) => ({
+                            hash: r.hash,
+                            source: {
+                                sourceRuleIndex: r.index,
+                                filterId: id,
+                            },
+                        }));
+                    })
+                    .flat();
+
+                const rulesHashMap = new RulesHashMap(values);
+
+                return Promise.resolve(rulesHashMap);
+            },
         };
 
         const ruleSet = new RuleSet(
@@ -256,6 +351,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             declarativeRules.length,
             declarativeRules.filter((d) => d.condition.regexFilter).length,
             ruleSetContent,
+            scanned.filters.map(({ badFilterRules }) => badFilterRules).flat(),
         );
 
         return {
