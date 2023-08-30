@@ -106,7 +106,7 @@ export const convertFilters = async (
                 declarativeRules,
                 regexpRulesCount,
                 rulesCount,
-                sourceMap,
+                sourceMapRaw,
                 filterListsIds,
             } = await ruleSet.serialize();
 
@@ -115,9 +115,11 @@ export const convertFilters = async (
 
             await Promise.all([
                 fs.promises.writeFile(`${ruleSetDir}/${id}.json`, JSON.stringify(declarativeRules, null, '\t')),
+                fs.promises.writeFile(`${ruleSetDir}/${SOURCE_MAP_FILENAME_JSON}`, sourceMapRaw),
+
+                // TODO: Combine all these files together
                 fs.promises.writeFile(`${ruleSetDir}/${REGEXP_RULES_COUNT_FILENAME}`, regexpRulesCount.toString()),
                 fs.promises.writeFile(`${ruleSetDir}/${RULES_COUNT_FILENAME}`, rulesCount.toString()),
-                fs.promises.writeFile(`${ruleSetDir}/${SOURCE_MAP_FILENAME_JSON}`, sourceMap),
                 fs.promises.writeFile(`${ruleSetDir}/${FILTER_LIST_IDS_FILENAME_JSON}`, JSON.stringify(filterListsIds)),
             ]);
 

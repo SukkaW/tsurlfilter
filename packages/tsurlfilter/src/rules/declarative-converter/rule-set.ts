@@ -1,7 +1,10 @@
+import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
+
 import { DeclarativeRule } from './declarative-rule';
 import { IFilter } from './filter';
 import { UnavailableRuleSetSourceError } from './errors/unavailable-sources-errors/unavailable-rule-set-source-error';
-import { ISourceMap } from './source-map';
+import { ISourceMap, SourceRuleIdxAndFilterId } from './source-map';
+import { IRulesHashMap } from './rule-hash-map';
 
 /**
  * The OriginalSource contains the text of the original rule and the filter
@@ -39,6 +42,14 @@ export interface IRuleSet {
      */
     getRulesById(declarativeRuleId: number): Promise<SourceRuleAndFilterId[]>;
 
+    getBadFilterRules(): IndexedRuleWithHash[];
+
+    getRulesHashMap(): Promise<IRulesHashMap>;
+
+    getDeclarativeRulesIdsBySourceRuleIndex(
+        source: SourceRuleIdxAndFilterId,
+    ): Promise<number[]>;
+
     /**
      * Serializes a rule set into primitive values.
      */
@@ -51,7 +62,8 @@ export interface IRuleSet {
 export type IRuleSetContentProvider = {
     getSourceMap: () => Promise<ISourceMap>,
     getFilterList: () => Promise<IFilter[]>,
-    getDeclarativeRules: () => Promise<DeclarativeRule[]>
+    getDeclarativeRules: () => Promise<DeclarativeRule[]>,
+    getRulesHashMap: () => Promise<IRulesHashMap>,
 };
 
 /**
@@ -62,8 +74,10 @@ export type SerializedRuleSet = {
     declarativeRules: DeclarativeRule[],
     regexpRulesCount: number,
     rulesCount: number,
-    sourceMap: string,
+    sourceMapRaw: string,
+    ruleSetHashMapRaw: string,
     filterListsIds: number[],
+    badFiltersRules: IndexedRuleWithHash[],
 };
 
 /**
@@ -98,6 +112,16 @@ export class RuleSet implements IRuleSet {
     private sourceMap: ISourceMap | undefined;
 
     /**
+     * TODO: Description.
+     */
+    private rulesHashMap: IRulesHashMap | undefined;
+
+    /**
+     * TODO: Description.
+     */
+    private badFilterRules: IndexedRuleWithHash[];
+
+    /**
      * Keeps array of source filter lists
      * TODO: ? May it leads to memory leaks,
      * because one FilterList with its content
@@ -124,17 +148,20 @@ export class RuleSet implements IRuleSet {
      * @param rulesCount Number of rules.
      * @param regexpRulesCount Number of regexp rules.
      * @param ruleSetContentProvider Rule set content provider.
+     * @param badFilterRules List of rules with $badfilter modifier.
      */
     constructor(
         id: string,
         rulesCount: number,
         regexpRulesCount: number,
         ruleSetContentProvider: IRuleSetContentProvider,
+        badFilterRules: IndexedRuleWithHash[],
     ) {
         this.id = id;
         this.rulesCount = rulesCount;
         this.regexpRulesCount = regexpRulesCount;
         this.ruleSetContentProvider = ruleSetContentProvider;
+        this.badFilterRules = badFilterRules;
     }
 
     /**
@@ -201,6 +228,9 @@ export class RuleSet implements IRuleSet {
     /**
      * Run inner deserialization from rule set content provider to load
      * the source map, filter list and declarative rules list.
+     *
+     * FIXME: Maybe we should load badFilterIds with hashes separately from other
+     * part for better perfomance?
      */
     private async loadContent(): Promise<void> {
         if (this.initialized) {
@@ -211,6 +241,7 @@ export class RuleSet implements IRuleSet {
             getSourceMap,
             getFilterList,
             getDeclarativeRules,
+            getRulesHashMap,
         } = this.ruleSetContentProvider;
 
         this.sourceMap = await getSourceMap();
@@ -219,6 +250,8 @@ export class RuleSet implements IRuleSet {
         filtersList.forEach((filter) => {
             this.filterList.set(filter.getId(), filter);
         });
+        this.rulesHashMap = await getRulesHashMap();
+
         this.initialized = true;
     }
 
@@ -250,6 +283,49 @@ export class RuleSet implements IRuleSet {
     }
 
     /**
+     * TODO: Description.
+     */
+    public getBadFilterRules(): IndexedRuleWithHash[] {
+        return this.badFilterRules;
+    }
+
+    /**
+     * TODO: Description.
+     * TODO: Error catch.
+     */
+    public async getRulesHashMap(): Promise<IRulesHashMap> {
+        if (!this.initialized) {
+            await this.loadContent();
+        }
+
+        if (!this.rulesHashMap) {
+            throw Error();
+        }
+
+        return this.rulesHashMap;
+    }
+
+    /**
+     * TODO: Description.
+     *
+     * @param sourceRuleIndex
+     * @param filterId
+     */
+    public async getDeclarativeRulesIdsBySourceRuleIndex(
+        source: SourceRuleIdxAndFilterId,
+    ): Promise<number[]> {
+        if (!this.initialized) {
+            await this.loadContent();
+        }
+
+        if (!this.sourceMap) {
+            throw Error();
+        }
+
+        return this.sourceMap.getBySourceRuleIndex(source) || [];
+    }
+
+    /**
      * Serializes rule set to primitives values with lazy load.
      *
      * @returns Serialized rule set.
@@ -272,8 +348,10 @@ export class RuleSet implements IRuleSet {
             declarativeRules: this.declarativeRules,
             regexpRulesCount: this.regexpRulesCount,
             rulesCount: this.rulesCount,
-            sourceMap: this.sourceMap?.serialize() || '',
+            sourceMapRaw: this.sourceMap?.serialize() || '',
             filterListsIds: Array.from(this.filterList.keys()),
+            ruleSetHashMapRaw: this.rulesHashMap?.serialize() || '',
+            badFiltersRules: this.badFilterRules || [],
         };
 
         return serialized;
