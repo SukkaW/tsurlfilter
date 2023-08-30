@@ -18,9 +18,9 @@ export class CosmeticLookupTable {
 
     /**
      * Collection of domain specific rules, those could not be grouped by domain name
-    * For instance, wildcard domain rules and regexp domain rules.
+     * For instance, wildcard domain rules and regexp domain rules.
      */
-    public domainMatchRules: CosmeticRule[];
+    public domainMatcherRules: CosmeticRule[];
 
     /**
      * Collection of generic rules.
@@ -48,7 +48,7 @@ export class CosmeticLookupTable {
      */
     constructor(storage: RuleStorage) {
         this.byHostname = new Map();
-        this.domainMatchRules = [] as CosmeticRule[];
+        this.domainMatcherRules = [] as CosmeticRule[];
         this.genericRules = [] as CosmeticRule[];
         this.allowlist = new Map();
         this.ruleStorage = storage;
@@ -79,7 +79,7 @@ export class CosmeticLookupTable {
                 return DomainModifier.isWildcardDomain(d) || SimpleRegex.isRegexPattern(d);
             });
             if (hasWildcardOrRegexpDomain) {
-                this.domainMatchRules.push(rule);
+                this.domainMatcherRules.push(rule);
                 return;
             }
             for (const domain of permittedDomains) {
@@ -119,7 +119,7 @@ export class CosmeticLookupTable {
             }
         }
 
-        result.push(...this.domainMatchRules.filter((r) => !r.isAllowlist() && r.match(request)));
+        result.push(...this.domainMatcherRules.filter((r) => !r.isAllowlist() && r.match(request)));
 
         return result;
     }

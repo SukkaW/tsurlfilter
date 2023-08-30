@@ -1,4 +1,5 @@
 import { getPublicSuffix } from 'tldts';
+
 import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
 import { SimpleRegex } from '../rules/simple-regex';
 
