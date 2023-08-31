@@ -149,19 +149,26 @@ describe('DeclarativeConverter', () => {
         });
 
         it('applies badfilter rules from user rules to static filter', async () => {
+            const ruleToCancel1 = '||example.com^';
+            const ruleToCancel2 = '||example.io^';
+
             const staticFilter = createFilter([
                 '||example.org^',
-                '||example.com^', // 1
+                ruleToCancel1,
                 '||example.net^',
-                '||example.io^', // 3
-            ]);
+                ruleToCancel2,
+            ], 1);
+
             const userRules = createFilter([
-                '||example.io^$badfilter',
+                `${ruleToCancel1}$badfilter`,
                 '||persistent.com^',
-                '||example.com^$badfilter',
-            ]);
+                `${ruleToCancel2}$badfilter`,
+            ], 2);
+
             const { ruleSets } = await converter.convertStaticRuleset(staticFilter);
-            const { declarativeRulesToCancel } = await converter.convertDynamicRulesets([userRules], ruleSets);
+            const {
+                declarativeRulesToCancel,
+            } = await converter.convertDynamicRulesets([userRules], ruleSets);
 
             expect(declarativeRulesToCancel).toBeDefined();
             if (declarativeRulesToCancel === undefined) {
@@ -172,8 +179,83 @@ describe('DeclarativeConverter', () => {
             const { rulesetId, disableRuleIds } = declarativeRulesToCancel[0];
 
             expect(rulesetId).toBe(ruleSets[0].getId());
-            expect(disableRuleIds[0]).toEqual(4);
-            expect(disableRuleIds[1]).toEqual(2);
+
+            expect(disableRuleIds[0]).toEqual(2);
+            let source = await ruleSets[0].getRulesById(2);
+            expect(source[0].sourceRule).toBe(ruleToCancel1);
+
+            expect(disableRuleIds[1]).toEqual(4);
+            source = await ruleSets[0].getRulesById(4);
+            expect(source[0].sourceRule).toBe(ruleToCancel2);
+        });
+
+        it('applies badfilter rules from custom filter and user rules to several static filters', async () => {
+            const ruleToCancel1 = '||example.com^';
+            const ruleToCancel2 = '||example.io^';
+            const ruleToCancel3 = '||evil.net^';
+
+            const staticFilter1 = createFilter([
+                '||example.org^',
+                ruleToCancel1,
+                '||example.net^',
+                ruleToCancel2,
+            ], 1);
+            const staticFilter2 = createFilter([
+                '||good.org^',
+                '||good.io^',
+                ruleToCancel3,
+            ], 2);
+            const converted = await Promise.all([
+                converter.convertStaticRuleset(staticFilter1),
+                converter.convertStaticRuleset(staticFilter2),
+            ]);
+            const staticRuleSets = converted
+                .map(({ ruleSets }) => ruleSets)
+                .flat();
+
+            const customFilter1 = createFilter([
+                '||good.org##h1',
+                `${ruleToCancel3}$badfilter`,
+            ], 3);
+            const userRules = createFilter([
+                `${ruleToCancel1}$badfilter`,
+                '||persistent.com^',
+                `${ruleToCancel2}$badfilter`,
+            ], 4);
+            const {
+                declarativeRulesToCancel,
+            } = await converter.convertDynamicRulesets([customFilter1, userRules], staticRuleSets);
+
+            expect(declarativeRulesToCancel).toBeDefined();
+            if (declarativeRulesToCancel === undefined) {
+                return;
+            }
+
+            expect(declarativeRulesToCancel).toHaveLength(2);
+
+            const [disableStatic1, disableStatic2] = declarativeRulesToCancel;
+
+            // Check first static filter.
+            expect(disableStatic1.rulesetId).toBe(staticRuleSets[0].getId());
+
+            expect(disableStatic1.disableRuleIds).toHaveLength(2);
+
+            expect(disableStatic1.disableRuleIds[0]).toEqual(2);
+            let source = await staticRuleSets[0].getRulesById(2);
+            expect(source[0].sourceRule).toBe(ruleToCancel1);
+
+            expect(disableStatic1.disableRuleIds[1]).toEqual(4);
+            source = await staticRuleSets[0].getRulesById(4);
+            expect(source[0].sourceRule).toBe(ruleToCancel2);
+
+            // Check second static filter.
+            expect(disableStatic2.rulesetId).toBe(staticRuleSets[1].getId());
+
+            expect(disableStatic2.disableRuleIds).toHaveLength(1);
+
+            expect(disableStatic2.disableRuleIds[0]).toEqual(3);
+            source = await staticRuleSets[1].getRulesById(3);
+            expect(source[0].sourceRule).toBe(ruleToCancel3);
         });
     });
 
@@ -232,24 +314,22 @@ describe('DeclarativeConverter', () => {
     });
 
     it('returns badfilter sources', async () => {
+        const rulesToCancel = [
+            '||example.net^$document,badfilter',
+            '||example.io^$badfilter',
+        ];
         const rules = [
             '||example.com^$document',
-            '||example.net^$document,badfilter',
+            `${rulesToCancel[0]}`,
             '||example.org^$document',
-            '||example.io^$document,badfilter',
+            `${rulesToCancel[1]}`,
         ];
         const filter = createFilter(rules);
         const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(filter);
 
         const badFilterRules = await ruleSet.getBadFilterRules();
-        expect(badFilterRules[0].index).toEqual({
-            sourceRuleIndex: 1,
-            filterId: 0,
-        });
-        expect(badFilterRules[1]).toStrictEqual({
-            sourceRuleIndex: 3,
-            filterId: 0,
-        });
+        expect(badFilterRules[0].rule.getText()).toEqual(rulesToCancel[0]);
+        expect(badFilterRules[1].rule.getText()).toEqual(rulesToCancel[1]);
     });
 
     describe('respects limitations', () => {
