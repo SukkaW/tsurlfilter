@@ -16,6 +16,16 @@ export type SourceRuleAndFilterId = {
 };
 
 /**
+ * Describes object of ruleset id with list of ids of declarative rules. Needs
+ * to disable declarative rules from static ruleset by applying $badfilter rules
+ * from dynamic rulesets.
+ */
+export type UpdateStaticRulesOptions = {
+    rulesetId: string,
+    disableRuleIds: number[],
+};
+
+/**
  * Keeps converted declarative rules and source map for it.
  */
 export interface IRuleSet {
@@ -310,6 +320,7 @@ export class RuleSet implements IRuleSet {
      *
      * @param sourceRuleIndex
      * @param filterId
+     * @param source
      */
     public async getDeclarativeRulesIdsBySourceRuleIndex(
         source: SourceRuleIdxAndFilterId,

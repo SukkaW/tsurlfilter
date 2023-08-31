@@ -161,80 +161,19 @@ describe('DeclarativeConverter', () => {
                 '||example.com^$badfilter',
             ]);
             const { ruleSets } = await converter.convertStaticRuleset(staticFilter);
-            const { ruleSets: [ruleSet] } = await converter.convertDynamicRulesets([userRules], ruleSets);
+            const { declarativeRulesToCancel } = await converter.convertDynamicRulesets([userRules], ruleSets);
 
-            const declarativeRulesIdsToCancel: number[] = [];
-
-            const badFilterRules = ruleSet.getBadFilterRules();
-
-            // FIXME: Move this part to tswebextension
-            for (let i = 0; i < badFilterRules.length; i += 1) {
-                const badFilterRule = badFilterRules[i];
-
-                for (let j = 0; j < ruleSets.length; j += 1) {
-                    const r = ruleSets[j];
-
-                    // eslint-disable-next-line no-await-in-loop
-                    const hashMap = await r.getRulesHashMap();
-                    const matchedRules = hashMap.findRules(badFilterRule.hash);
-
-                    if (matchedRules.length > 0) {
-                        console.log(`rule ${badFilterRule.rule.getText()} matched ${JSON.stringify(matchedRules[0])}`);
-
-                        // eslint-disable-next-line no-await-in-loop
-                        const promises = await Promise.all(matchedRules.map(async (source) => {
-                            return r.getDeclarativeRulesIdsBySourceRuleIndex(source);
-                        }));
-                        const fastMatchedDeclarativeRulesIds = promises.flat();
-
-                        // FIXME: Should fix this ugly way.
-                        // eslint-disable-next-line no-await-in-loop
-                        const matchedDeclarativeRulesIds = await Promise.all(
-                            fastMatchedDeclarativeRulesIds.filter(async (id) => {
-                                const declarativeRules = await r.getRulesById(id);
-                                const allRulesMatched = declarativeRules.every((rule) => {
-                                    const rawRule = rule.sourceRule;
-
-                                    try {
-                                        const rules = RuleConverter.convertRule(rawRule);
-
-                                        return rules.every((convertedRule) => {
-                                            // Create IndexedRule from AG rule
-                                            const iRule = RuleFactory.createRule(
-                                                convertedRule,
-                                                rule.filterId,
-                                                false,
-                                                true, // ignore cosmetic rules
-                                                true, // ignore host rules
-                                                false, // throw exception on creating rule error.
-                                            );
-
-                                            if (
-                                                iRule instanceof NetworkRule
-                                                && badFilterRule.rule instanceof NetworkRule
-                                            ) {
-                                                return badFilterRule.rule.negatesBadfilter(iRule);
-                                            }
-
-                                            return false;
-                                        });
-                                    } catch (e) {
-                                        return false;
-                                    }
-                                });
-
-                                return allRulesMatched;
-                            }),
-                        );
-
-                        declarativeRulesIdsToCancel.push(...matchedDeclarativeRulesIds);
-                    }
-                }
+            expect(declarativeRulesToCancel).toBeDefined();
+            if (declarativeRulesToCancel === undefined) {
+                return;
             }
 
-            expect(declarativeRulesIdsToCancel).toHaveLength(2);
-            expect(declarativeRulesIdsToCancel[0]).toEqual(4);
-            expect(declarativeRulesIdsToCancel[1]).toEqual(2);
+            expect(declarativeRulesToCancel).toHaveLength(1);
+            const { rulesetId, disableRuleIds } = declarativeRulesToCancel[0];
+
+            expect(rulesetId).toBe(ruleSets[0].getId());
+            expect(disableRuleIds[0]).toEqual(4);
+            expect(disableRuleIds[1]).toEqual(2);
         });
     });
 

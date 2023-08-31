@@ -53,14 +53,17 @@ export class FilterScanner implements IFilterScanner {
     }
 
     /**
-     * TODO: Description.
+     * Converts a raw string rule to AG syntax (apply aliases, etc.). If an error
+     * was detected during the conversion - return it.
      *
-     * @param sourceRule
+     * @param rawStringRule Raw string rule.
+     *
+     * @returns Rule converted to AG syntax or Error.
      */
-    private static convertRuleToAGSyntax(sourceRule: string): string[] | Error {
+    private static convertRuleToAGSyntax(rawStringRule: string): string[] | Error {
         // Try to convert to AG syntax.
         try {
-            return RuleConverter.convertRule(sourceRule);
+            return RuleConverter.convertRule(rawStringRule);
         } catch (e: unknown) {
             if (e instanceof Error) {
                 return e;
@@ -70,11 +73,14 @@ export class FilterScanner implements IFilterScanner {
     }
 
     /**
-     * TODO: Description.
+     * Create {@link IndexedRuleWithHash} from rule. If an error
+     * was detected during the conversion - return it.
      *
-     * @param filterId
-     * @param lineIndex
-     * @param ruleConvertedToAGSyntax
+     * @param filterId Filter id.
+     * @param lineIndex Rule's line index in that filter.
+     * @param ruleConvertedToAGSyntax Rule which was converted to AG syntax.
+     *
+     * @returns Item of {@link IndexedRuleWithHash} or Error.
      */
     private static createIndexedRuleWithHash(
         filterId: number,
@@ -122,9 +128,13 @@ export class FilterScanner implements IFilterScanner {
      * extracts only the network rules (ignore cosmetic and host rules)
      * and tries to convert each line into an indexed rule.
      *
-     * @param filterFn
+     * @param filterFn If this function is specified, it will be applied to each
+     * rule after it has been parsed and transformed. This function is needed
+     * for example to apply $badfilter: to exclude negated rules from the array
+     * of rules that will be returned.
      *
-     * @returns List of indexed rules.
+     * @returns List of indexed rules with filtered values,
+     * if filterFn was specified.
      */
     public getIndexedRules(
         filterFn?: (r: IndexedRuleWithHash) => boolean,
@@ -165,17 +175,18 @@ export class FilterScanner implements IFilterScanner {
 
                 if (indexedRuleWithHashOrError instanceof Error) {
                     result.errors.push(indexedRuleWithHashOrError);
-                } else {
-                    if (filterFn && filterFn(indexedRuleWithHashOrError)) {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    result.rules.push(indexedRuleWithHashOrError);
+                if (filterFn && filterFn(indexedRuleWithHashOrError)) {
+                    continue;
+                }
 
-                    const { rule } = indexedRuleWithHashOrError;
-                    if (rule instanceof NetworkRule && rule.isOptionEnabled(NetworkRuleOption.Badfilter)) {
-                        result.badFilterRules.push(indexedRuleWithHashOrError);
-                    }
+                result.rules.push(indexedRuleWithHashOrError);
+
+                const { rule } = indexedRuleWithHashOrError;
+                if (rule instanceof NetworkRule && rule.isOptionEnabled(NetworkRuleOption.Badfilter)) {
+                    result.badFilterRules.push(indexedRuleWithHashOrError);
                 }
             }
         }
