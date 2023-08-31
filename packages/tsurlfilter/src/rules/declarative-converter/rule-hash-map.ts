@@ -1,7 +1,6 @@
 import { SourceRuleIdxAndFilterId } from './source-map';
 
 // This type is using only to better description of code.
-// FIXME: Check that hash always will be unique.
 type RuleHash = number;
 
 /**
@@ -30,22 +29,23 @@ export interface IRulesHashMap {
 }
 
 /**
- * TODO: Description.
- * TODO: Maybe just extend Map?
+ * Contains a dictionary where the key is the hash of the rule and the value is
+ * a list of sources for the rule. Storing this dictionary is necessary for fast
+ * rule matching, which can be negated by $badfilter.
+ *
  * FIXME: Create serializable class to remove keys and reduce usage of disk space.
  */
 export class RulesHashMap implements IRulesHashMap {
     private map: RuleHashToRuleIdx = new Map();
 
     /**
-     * TODO: Description.
+     * Creates new {@link RulesHashMap}.
      *
-     * @param sources List of sources.
-     * @param map
-     * @param listOfValues
+     * @param listOfRulesWithHash List of rules hashes and rules sources:
+     * filter id with rule index.
      */
-    constructor(listOfValues: RuleWithHash[]) {
-        listOfValues.forEach(({ hash, source }) => {
+    constructor(listOfRulesWithHash: RuleWithHash[]) {
+        listOfRulesWithHash.forEach(({ hash, source }) => {
             const existingValue = this.map.get(hash);
             if (existingValue) {
                 this.map.set(hash, existingValue.concat(source));
@@ -56,26 +56,28 @@ export class RulesHashMap implements IRulesHashMap {
     }
 
     /**
-     * TODO: Description.
+     * Tries to find rules with same hash and if found - returns theirs sources:
+     * filter id and rule id.
      *
-     * @param badFilterRule
-     * @param filterId
-     * @param badFilterRuleHash
+     * @param badFilterRuleHash Number hash of $badfilter rule to search rules
+     * with same hash.
+     *
+     * @returns List of sources (filter id and rule id) of rules with same hash as
+     * provided in parameter or empty array.
      */
     findRules(badFilterRuleHash: number): SourceRuleIdxAndFilterId[] {
         return this.map.get(badFilterRuleHash) || [];
     }
 
     /**
-     * Deserializes array of sources from string.
+     * Deserializes dictionary from raw string.
      *
-     * @param sourceString The original map that was serialized into a string.
+     * @param rawString The original dictionary that was serialized into a string.
      *
-     * @param mapString
-     * @returns List of sources.
+     * @returns Deserialized dictionary.
      */
-    static deserializeSources(mapString: string): RuleHashToRuleIdx {
-        return JSON.parse(mapString) as RuleHashToRuleIdx;
+    static deserializeSources(rawString: string): RuleHashToRuleIdx {
+        return JSON.parse(rawString) as RuleHashToRuleIdx;
     }
 
     /**

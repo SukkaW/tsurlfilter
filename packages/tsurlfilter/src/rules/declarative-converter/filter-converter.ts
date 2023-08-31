@@ -5,8 +5,15 @@
 
 import { NetworkRule } from '../network-rule';
 import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
+import { RuleConverter } from '../rule-converter';
+import { RuleFactory } from '../rule-factory';
 
-import { IRuleSet, IRuleSetContentProvider, RuleSet } from './rule-set';
+import {
+    IRuleSet,
+    IRuleSetContentProvider,
+    RuleSet,
+    UpdateStaticRulesOptions,
+} from './rule-set';
 import { FilterScanner } from './filter-scanner';
 import { SourceMap } from './source-map';
 import type { IFilter } from './filter';
@@ -29,14 +36,15 @@ type ScannedFiltersWithErrors = {
 /**
  * The interface for the declarative filter converter describes what the filter
  * converter expects on the input and what should be returned on the output.
- *
- * TODO: Description for method's parameters.
  */
 interface IFilterConverter {
     /**
      * Extracts content from the provided static filter and converts to a set
      * of declarative rules with error-catching non-convertible rules and
      * checks that converted ruleset matches the constraints (reduce if not).
+     *
+     * @param filterList List of {@link IFilter} to convert.
+     * @param options Options from {@link DeclarativeConverterOptions}.
      *
      * @throws Error {@link UnavailableFilterSourceError} if filter content
      * is not available OR some of {@link ResourcesPathError},
@@ -58,7 +66,11 @@ interface IFilterConverter {
      * During the conversion, it catches unconvertible rules and checks if
      * the converted ruleset matches the constraints (reduce if not).
      *
-     * TODO: This method should be changed: it should return list of badfilter rules.
+     * @param filterList List of {@link IFilter} to convert.
+     * @param staticRuleSets List of already converted static rulesets. It is
+     * needed to apply $badfilter rules from dynamic rules to these rules from
+     * converted filters.
+     * @param options Options from {@link DeclarativeConverterOptions}.
      *
      * @throws Error {@link UnavailableFilterSourceError} if filter content
      * is not available OR some of {@link ResourcesPathError},
@@ -89,7 +101,10 @@ export class DeclarativeFilterConverter implements IFilterConverter {
      * Asynchronous scans the list of filters for rules.
      *
      * @param filterList List of {@link IFilter}.
-     * @param filterFn
+     * @param filterFn If this function is specified, it will be applied to each
+     * rule after it has been parsed and transformed. This function is needed
+     * for example to apply $badfilter: to exclude negated rules from the array
+     * of rules that will be returned.
      *
      * @returns Map, where the key is the filter identifier and the value is the
      * indexed filter rules {@link IndexedRule}.
@@ -346,18 +361,109 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             },
         };
 
+        const dynamicBadFilterRules = scanned.filters
+            .map(({ badFilterRules }) => badFilterRules)
+            .flat();
+
         const ruleSet = new RuleSet(
             DeclarativeFilterConverter.COMBINED_RULESET_ID,
             declarativeRules.length,
             declarativeRules.filter((d) => d.condition.regexFilter).length,
             ruleSetContent,
-            scanned.filters.map(({ badFilterRules }) => badFilterRules).flat(),
+            dynamicBadFilterRules,
         );
+
+        const declarativeRulesToCancel: UpdateStaticRulesOptions[] = [];
+
+        // Check every static ruleset.
+        for (let i = 0; i < staticRuleSets.length; i += 1) {
+            const staticRuleSet = staticRuleSets[i];
+
+            const disableRuleIds: number[] = [];
+
+            // Check every rule with $badfilter from dynamic filters
+            // (custom filter and user rules).
+            for (let j = 0; j < dynamicBadFilterRules.length; j += 1) {
+                const badFilterRule = dynamicBadFilterRules[j];
+                // eslint-disable-next-line no-await-in-loop
+                const hashMap = await staticRuleSet.getRulesHashMap();
+                const fastMatchedRulesByHash = hashMap.findRules(badFilterRule.hash);
+
+                if (fastMatchedRulesByHash.length === 0) {
+                    continue;
+                }
+
+                // FIXME: Remove
+                // eslint-disable-next-line max-len
+                console.log(`rule ${badFilterRule.rule.getText()} matched ${JSON.stringify(fastMatchedRulesByHash[0])}`);
+
+                // eslint-disable-next-line no-await-in-loop
+                const ids = await Promise.all(
+                    fastMatchedRulesByHash.map(async (source) => {
+                        return staticRuleSet.getDeclarativeRulesIdsBySourceRuleIndex(source);
+                    }),
+                );
+                const fastMatchedDeclarativeRulesIds = ids.flat();
+
+                // FIXME: Should fix this ugly way.
+                for (let k = 0; k < fastMatchedDeclarativeRulesIds.length; k += 1) {
+                    const id = fastMatchedDeclarativeRulesIds[k];
+
+                    // eslint-disable-next-line no-await-in-loop
+                    const matchedDeclarativeRules = await staticRuleSet.getRulesById(id);
+                    // NOTE: Here we use .some but not .every to simplify first version
+                    // of applying $badfilter rules.
+                    const someRulesMatched = matchedDeclarativeRules.some((rule) => {
+                        const rawRule = rule.sourceRule;
+
+                        // FIXME: Better to move this logic to ruleset - ruleset should return network rule or null.
+                        try {
+                            const rules = RuleConverter.convertRule(rawRule);
+
+                            return rules.every((convertedRule) => {
+                                // Create IndexedRule from AG rule
+                                const iRule = RuleFactory.createRule(
+                                    convertedRule,
+                                    rule.filterId,
+                                    false,
+                                    true, // ignore cosmetic rules
+                                    true, // ignore host rules
+                                    false, // throw exception on creating rule error.
+                                );
+
+                                if (
+                                    iRule instanceof NetworkRule
+                                    && badFilterRule.rule instanceof NetworkRule
+                                ) {
+                                    return badFilterRule.rule.negatesBadfilter(iRule);
+                                }
+
+                                return false;
+                            });
+                        } catch (e) {
+                            return false;
+                        }
+                    });
+
+                    if (someRulesMatched) {
+                        disableRuleIds.push(id);
+                    }
+                }
+            }
+
+            if (disableRuleIds.length > 0) {
+                declarativeRulesToCancel.push({
+                    rulesetId: staticRuleSet.getId(),
+                    disableRuleIds,
+                });
+            }
+        }
 
         return {
             ruleSets: [ruleSet],
             errors: errors.concat(scanned.errors),
             limitations,
+            declarativeRulesToCancel,
         };
     }
 }
