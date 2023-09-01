@@ -410,40 +410,28 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                     const id = fastMatchedDeclarativeRulesIds[k];
 
                     // eslint-disable-next-line no-await-in-loop
-                    const matchedDeclarativeRules = await staticRuleSet.getRulesById(id);
+                    const matchedSourceRules = await staticRuleSet.getRulesById(id);
+
+                    // eslint-disable-next-line no-await-in-loop
+                    const indexedRulesWithHash = await Promise.all(
+                        matchedSourceRules.map((source) => {
+                            return RuleSet.getNetworkRuleBySourceRule(source);
+                        }),
+                    );
+
                     // NOTE: Here we use .some but not .every to simplify first version
                     // of applying $badfilter rules.
-                    const someRulesMatched = matchedDeclarativeRules.some((rule) => {
-                        const rawRule = rule.sourceRule;
+                    const someRulesMatched = indexedRulesWithHash
+                        .flat()
+                        .some((r) => {
+                            const { rule } = r;
 
-                        // FIXME: Better to move this logic to ruleset - ruleset should return network rule or null.
-                        try {
-                            const rules = RuleConverter.convertRule(rawRule);
+                            if (rule instanceof NetworkRule && badFilterRule.rule instanceof NetworkRule) {
+                                return badFilterRule.rule.negatesBadfilter(rule);
+                            }
 
-                            return rules.every((convertedRule) => {
-                                // Create IndexedRule from AG rule
-                                const iRule = RuleFactory.createRule(
-                                    convertedRule,
-                                    rule.filterId,
-                                    false,
-                                    true, // ignore cosmetic rules
-                                    true, // ignore host rules
-                                    false, // throw exception on creating rule error.
-                                );
-
-                                if (
-                                    iRule instanceof NetworkRule
-                                    && badFilterRule.rule instanceof NetworkRule
-                                ) {
-                                    return badFilterRule.rule.negatesBadfilter(iRule);
-                                }
-
-                                return false;
-                            });
-                        } catch (e) {
                             return false;
-                        }
-                    });
+                        });
 
                     if (someRulesMatched) {
                         disableRuleIds.push(id);

@@ -5,6 +5,7 @@ import { IFilter } from './filter';
 import { UnavailableRuleSetSourceError } from './errors/unavailable-sources-errors/unavailable-rule-set-source-error';
 import { ISourceMap, SourceRuleIdxAndFilterId } from './source-map';
 import { IRulesHashMap } from './rule-hash-map';
+import { FilterScanner } from './filter-scanner';
 
 /**
  * The OriginalSource contains the text of the original rule and the filter
@@ -49,19 +50,40 @@ export interface IRuleSet {
      * for a given declarative rule identifier.
      *
      * @param declarativeRuleId {@link DeclarativeRule|declarative rule} Id.
+     *
+     * @returns Promise with list of source rules.
+     *
+     * @throws Error {@link UnavailableRuleSetSourceError} if rule set source
+     * is not available.
      */
     getRulesById(declarativeRuleId: number): Promise<SourceRuleAndFilterId[]>;
 
+    /**
+     * Returns list of network rules with $badfilter option.
+     */
     getBadFilterRules(): IndexedRuleWithHash[];
 
+    /**
+     * Returns dictionary with hashes of all ruleset's source rules.
+     */
     getRulesHashMap(): Promise<IRulesHashMap>;
 
+    /**
+     * For provided source return list of ids of converted declarative rule.
+     *
+     * @param source Source rule index and filter id.
+     */
     getDeclarativeRulesIdsBySourceRuleIndex(
         source: SourceRuleIdxAndFilterId,
     ): Promise<number[]>;
 
     /**
-     * Serializes a rule set into primitive values.
+     * Serializes rule set to primitives values with lazy load.
+     *
+     * @returns Serialized rule set.
+     *
+     * @throws Error {@link UnavailableRuleSetSourceError} if rule set source
+     * is not available.
      */
     serialize(): Promise<SerializedRuleSet>;
 }
@@ -122,12 +144,12 @@ export class RuleSet implements IRuleSet {
     private sourceMap: ISourceMap | undefined;
 
     /**
-     * TODO: Description.
+     * Dictionary which helps to fast find rule by it's hash.
      */
     private rulesHashMap: IRulesHashMap | undefined;
 
     /**
-     * TODO: Description.
+     * List of network rules with $badfilter option.
      */
     private badFilterRules: IndexedRuleWithHash[];
 
@@ -265,17 +287,7 @@ export class RuleSet implements IRuleSet {
         this.initialized = true;
     }
 
-    /**
-     * Returns a list of pairs of source text rules and their filter identifiers
-     * for a given declarative rule identifier.
-     *
-     * @param declarativeRuleId {@link DeclarativeRule|declarative rule} Id.
-     *
-     * @returns Promise with list of source rules.
-     *
-     * @throws Error {@link UnavailableRuleSetSourceError} if rule set source
-     * is not available.
-     */
+    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
     public async getRulesById(declarativeRuleId: number): Promise<SourceRuleAndFilterId[]> {
         try {
             if (!this.initialized) {
@@ -292,17 +304,13 @@ export class RuleSet implements IRuleSet {
         }
     }
 
-    /**
-     * TODO: Description.
-     */
+    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
     public getBadFilterRules(): IndexedRuleWithHash[] {
         return this.badFilterRules;
     }
 
-    /**
-     * TODO: Description.
-     * TODO: Error catch.
-     */
+    // TODO: Error catch.
+    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
     public async getRulesHashMap(): Promise<IRulesHashMap> {
         if (!this.initialized) {
             await this.loadContent();
@@ -315,13 +323,7 @@ export class RuleSet implements IRuleSet {
         return this.rulesHashMap;
     }
 
-    /**
-     * TODO: Description.
-     *
-     * @param sourceRuleIndex
-     * @param filterId
-     * @param source
-     */
+    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
     public async getDeclarativeRulesIdsBySourceRuleIndex(
         source: SourceRuleIdxAndFilterId,
     ): Promise<number[]> {
@@ -337,13 +339,48 @@ export class RuleSet implements IRuleSet {
     }
 
     /**
-     * Serializes rule set to primitives values with lazy load.
+     * For provided source rule and filter id return network rule.
      *
-     * @returns Serialized rule set.
+     * @param source Source rule and filter id.
      *
-     * @throws Error {@link UnavailableRuleSetSourceError} if rule set source
-     * is not available.
+     * @returns List of {@link IndexedRuleWithHash} which should contain
+     * {@link NetworkRule}.
      */
+    public static getNetworkRuleBySourceRule(
+        source: SourceRuleAndFilterId,
+    ): IndexedRuleWithHash[] {
+        const { sourceRule, filterId } = source;
+
+        try {
+            const rules = FilterScanner.convertRuleToAGSyntax(sourceRule);
+
+            if (rules instanceof Error) {
+                return [];
+            }
+
+            const indexedRulesWithHash = rules
+                .map((convertedRule) => {
+                    const rule = FilterScanner.createIndexedRuleWithHash(
+                        filterId,
+                        0,
+                        convertedRule,
+                    );
+
+                    if (rule instanceof Error) {
+                        return null;
+                    }
+
+                    return rule;
+                })
+                .filter((r): r is IndexedRuleWithHash => r !== null);
+
+            return indexedRulesWithHash;
+        } catch (e) {
+            return [];
+        }
+    }
+
+    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
     public async serialize(): Promise<SerializedRuleSet> {
         try {
             await this.loadContent();
