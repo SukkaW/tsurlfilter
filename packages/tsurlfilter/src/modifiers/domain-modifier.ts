@@ -49,6 +49,10 @@ export class DomainModifier {
             throw new SyntaxError('Modifier $domain cannot be empty');
         }
 
+        if (domainsStr.startsWith(separator)) {
+            throw new SyntaxError(`Modifier $domain cannot start with "${separator}"`);
+        }
+
         const permittedDomains: string[] = [];
         const restrictedDomains: string[] = [];
 

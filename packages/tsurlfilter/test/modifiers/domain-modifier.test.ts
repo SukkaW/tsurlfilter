@@ -130,6 +130,7 @@ describe('Domain modifier', () => {
     describe('constructor and invalid domains', () => {
         const COMMA_SEPARATOR = ',';
         const EMPTY_DOMAIN_ERROR = 'Empty domain specified in';
+        const STARTS_WITH_SEPARATOR_ERROR = `Modifier $domain cannot start with "${COMMA_SEPARATOR}"`;
         const invalidCases = [
             {
                 actual: '',
@@ -148,10 +149,6 @@ describe('Domain modifier', () => {
                 error: EMPTY_DOMAIN_ERROR,
             },
             {
-                actual: ',',
-                error: EMPTY_DOMAIN_ERROR,
-            },
-            {
                 actual: 'example.com,',
                 error: EMPTY_DOMAIN_ERROR,
             },
@@ -166,6 +163,14 @@ describe('Domain modifier', () => {
             {
                 actual: 'example.com,  ,example.org',
                 error: EMPTY_DOMAIN_ERROR,
+            },
+            {
+                actual: ',example.com',
+                error: STARTS_WITH_SEPARATOR_ERROR,
+            },
+            {
+                actual: ',',
+                error: STARTS_WITH_SEPARATOR_ERROR,
             },
         ];
         test.each(invalidCases)('%s', ({ actual, error }) => {
