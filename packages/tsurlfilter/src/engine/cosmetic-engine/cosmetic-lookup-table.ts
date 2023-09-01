@@ -20,7 +20,7 @@ export class CosmeticLookupTable {
      * Collection of domain specific rules, those could not be grouped by domain name
      * For instance, wildcard domain rules and regexp domain rules.
      */
-    public domainMatcherRules: CosmeticRule[];
+    public specialRules: CosmeticRule[];
 
     /**
      * Collection of generic rules.
@@ -48,7 +48,7 @@ export class CosmeticLookupTable {
      */
     constructor(storage: RuleStorage) {
         this.byHostname = new Map();
-        this.domainMatcherRules = [] as CosmeticRule[];
+        this.specialRules = [] as CosmeticRule[];
         this.genericRules = [] as CosmeticRule[];
         this.allowlist = new Map();
         this.ruleStorage = storage;
@@ -79,7 +79,7 @@ export class CosmeticLookupTable {
                 return DomainModifier.isWildcardDomain(d) || SimpleRegex.isRegexPattern(d);
             });
             if (hasWildcardOrRegexpDomain) {
-                this.domainMatcherRules.push(rule);
+                this.specialRules.push(rule);
                 return;
             }
             for (const domain of permittedDomains) {
@@ -119,7 +119,7 @@ export class CosmeticLookupTable {
             }
         }
 
-        result.push(...this.domainMatcherRules.filter((r) => !r.isAllowlist() && r.match(request)));
+        result.push(...this.specialRules.filter((r) => !r.isAllowlist() && r.match(request)));
 
         return result;
     }
