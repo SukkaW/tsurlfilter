@@ -60,7 +60,7 @@ export class FilterScanner implements IFilterScanner {
      *
      * @returns Rule converted to AG syntax or Error.
      */
-    private static convertRuleToAGSyntax(rawStringRule: string): string[] | Error {
+    public static convertRuleToAGSyntax(rawStringRule: string): string[] | Error {
         // Try to convert to AG syntax.
         try {
             return RuleConverter.convertRule(rawStringRule);
@@ -82,7 +82,7 @@ export class FilterScanner implements IFilterScanner {
      *
      * @returns Item of {@link IndexedRuleWithHash} or Error.
      */
-    private static createIndexedRuleWithHash(
+    public static createIndexedRuleWithHash(
         filterId: number,
         lineIndex: number,
         ruleConvertedToAGSyntax: string,
@@ -124,9 +124,9 @@ export class FilterScanner implements IFilterScanner {
     }
 
     /**
-     * Gets the entire contents of the filter,
-     * extracts only the network rules (ignore cosmetic and host rules)
-     * and tries to convert each line into an indexed rule.
+     * Gets the entire contents of the filter, extracts only the network rules
+     * (ignore cosmetic and host rules) and tries to convert each line into an
+     * indexed rule.
      *
      * @param filterFn If this function is specified, it will be applied to each
      * rule after it has been parsed and transformed. This function is needed

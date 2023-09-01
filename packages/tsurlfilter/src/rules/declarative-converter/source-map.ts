@@ -74,7 +74,11 @@ export class SourceMap implements ISourceMap {
     }
 
     /**
-     * TODO: Description.
+     * Creates unique key for provided pair of source rule and filter id.
+     *
+     * @param source Pair of source rule and filter id.
+     *
+     * @returns Unique key for dictionary.
      */
     static getKeyFromSource(source: SourceRuleIdxAndFilterId): string {
         return `${source.filterId}_${source.sourceRuleIndex}`;
@@ -93,7 +97,12 @@ export class SourceMap implements ISourceMap {
     }
 
     /**
-     * TODO: Description.
+     * Returns ids of converted declarative rules for provided pairs of source
+     * filter id and source text rule.
+     *
+     * @param source Pair of source rule and filter id.
+     *
+     * @returns List of ids of converted declarative rules.
      */
     getBySourceRuleIndex(source: SourceRuleIdxAndFilterId): number[] {
         const key = SourceMap.getKeyFromSource(source);

@@ -3,7 +3,7 @@ import { NetworkRule } from './network-rule';
 import { IndexedRule, type IRule } from './rule';
 
 /**
- * Rule with index and hash
+ * Rule with index and hash.
  */
 export class IndexedRuleWithHash extends IndexedRule {
     /**
@@ -24,20 +24,25 @@ export class IndexedRuleWithHash extends IndexedRule {
         this.hash = hash;
     }
 
-    /** TODO: Description. */
+    /**
+     * Creates hash for pattern part of the network rule and return it.
+     *
+     * @param indexedRule Item of {@link IRule}.
+     *
+     * @returns Hash for patter prt of the network rule.
+     */
     public static createRuleHash(indexedRule: IRule): number {
-        if (indexedRule instanceof NetworkRule) {
-            const networkRule = indexedRule;
-
-            // FIXME: Improve this part (maybe use trie-lookup-table and .getShortcut()?)
-            const significantPart = networkRule.getPattern();
-
-            const hash = fastHash(significantPart);
-
-            return hash;
+        if (!(indexedRule instanceof NetworkRule)) {
+            // We don't need hash value for not network rule
+            return 0;
         }
 
-        // FIXME: Maybe return source text of rule?
-        return fastHash(indexedRule.getText());
+        const networkRule = indexedRule;
+        // TODO: Improve this part: maybe use trie-lookup-table and .getShortcut()?
+        // or use agtree to collect pattern + all enabled network options without values
+        const significantPart = networkRule.getPattern();
+        const hash = fastHash(significantPart);
+
+        return hash;
     }
 }
