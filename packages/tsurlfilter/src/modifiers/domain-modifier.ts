@@ -81,9 +81,13 @@ export class DomainModifier {
     }
 
     /**
-     * matchDomain checks if the filtering rule is allowed on this domain.
-     * @param domain - domain to check.
+     * Checks if the filtering rule is allowed on this domain.
+     *
+     * @param domain Domain to check.
+     *
+     * @returns True if the filtering rule is allowed on this domain.
      */
+
     public matchDomain(domain: string): boolean {
         if (this.hasRestrictedDomains()) {
             if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.restrictedDomains!)) {
@@ -138,6 +142,8 @@ export class DomainModifier {
      *
      * @param domain - domain to check
      * @param domains - domains list to check against
+     *
+     * @returns true if `domain` is the same or a subdomain of any of `domains`
      */
     public static isDomainOrSubdomainOfAny(domain: string, domains: string[]): boolean {
         for (let i = 0; i < domains.length; i += 1) {
@@ -179,6 +185,8 @@ export class DomainModifier {
      *
      * @param wildcard
      * @param domainNameToCheck
+     *
+     * @returns true if wildcard matches domain
      */
     private static matchAsWildcard(wildcard: string, domainNameToCheck: string): boolean {
         const wildcardedDomainToCheck = DomainModifier.genTldWildcard(domainNameToCheck);
@@ -193,8 +201,9 @@ export class DomainModifier {
     /**
      * Generates from domain tld wildcard e.g. google.com -> google.* ; youtube.co.uk -> youtube.*
      *
-     * @param {string} domainName
-     * @returns {string} string is empty if tld for provided domain name doesn't exists
+     * @param domainName
+     *
+     * @returns string is empty if tld for provided domain name doesn't exists
      */
     private static genTldWildcard(domainName: string): string {
         const tld = getPublicSuffix(domainName);
