@@ -1152,11 +1152,8 @@ export class NetworkRule implements rule.IRule {
      * Checks if this rule can be used for hosts-level blocking
      */
     isHostLevelNetworkRule(): boolean {
-        const { domainModifier } = this;
-        if (domainModifier) {
-            if (domainModifier.hasPermittedDomains() || domainModifier.hasRestrictedDomains()) {
-                return false;
-            }
+        if (this.domainModifier?.hasPermittedDomains() || this.domainModifier?.hasRestrictedDomains()) {
+            return false;
         }
 
         if (this.permittedRequestTypes !== 0 && this.restrictedRequestTypes !== 0) {
