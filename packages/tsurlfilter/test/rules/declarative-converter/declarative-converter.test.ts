@@ -8,8 +8,6 @@ import {
 import { UnsupportedModifierError } from '../../../src/rules/declarative-converter/errors/conversion-errors';
 import { NetworkRule } from '../../../src/rules/network-rule';
 import { RuleActionType } from '../../../src/rules/declarative-converter/declarative-rule';
-import { RuleConverter } from '../../../src/rules/rule-converter';
-import { RuleFactory } from '../../../src/rules/rule-factory';
 
 const createFilter = (
     rules: string[],

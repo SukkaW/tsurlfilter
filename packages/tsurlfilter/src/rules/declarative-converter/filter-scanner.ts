@@ -1,5 +1,4 @@
 import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
-import { NetworkRule, NetworkRuleOption } from '../network-rule';
 import { RuleConverter } from '../rule-converter';
 import { RuleFactory } from '../rule-factory';
 
@@ -15,7 +14,6 @@ interface IFilterScanner {
 export type ScannedRulesWithErrors = {
     errors: Error[],
     rules: IndexedRuleWithHash[],
-    badFilterRules: IndexedRuleWithHash[],
 };
 
 /**
@@ -68,7 +66,7 @@ export class FilterScanner implements IFilterScanner {
             if (e instanceof Error) {
                 return e;
             }
-            return new Error('Unknown error during conversion rule to AG syntax', { cause: e });
+            return new Error(`Unknown error during conversion rule to AG syntax: ${e}`);
         }
     }
 
@@ -119,7 +117,7 @@ export class FilterScanner implements IFilterScanner {
                 return e;
             }
             // eslint-disable-next-line max-len
-            return new Error(`Unknown error during creating indexed with hash from filter "${filterId}" and line "${lineIndex}"`, { cause: e });
+            return new Error(`Unknown error during creating indexed with hash from filter "${filterId}" and line "${lineIndex}". ${e}`);
         }
     }
 
@@ -144,7 +142,6 @@ export class FilterScanner implements IFilterScanner {
         const result: ScannedRulesWithErrors = {
             errors: [],
             rules: [],
-            badFilterRules: [],
         };
 
         for (let lineIndex = 0; lineIndex < filterContent.length; lineIndex += 1) {
@@ -183,11 +180,6 @@ export class FilterScanner implements IFilterScanner {
                 }
 
                 result.rules.push(indexedRuleWithHashOrError);
-
-                const { rule } = indexedRuleWithHashOrError;
-                if (rule instanceof NetworkRule && rule.isOptionEnabled(NetworkRuleOption.Badfilter)) {
-                    result.badFilterRules.push(indexedRuleWithHashOrError);
-                }
             }
         }
 

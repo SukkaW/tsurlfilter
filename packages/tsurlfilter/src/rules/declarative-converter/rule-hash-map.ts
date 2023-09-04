@@ -17,13 +17,15 @@ type RuleWithHash = {
 
 export interface IRulesHashMap {
     /**
-     * Checks if provided $badfilter rule can match some rule.
+     * Tries to find rules with same hash and if found - returns theirs sources:
+     * filter id and rule id.
      *
-     * @param badFilterRule Rule with $badfilter.
+     * @param hash Number hash to search rules with same hash.
      *
-     * @returns List of matched rules line id's.
+     * @returns List of sources (filter id and rule id) of rules with same hash as
+     * provided in parameter or empty array.
      */
-    findRules(badFilterRuleHash: number): SourceRuleIdxAndFilterId[];
+    findRules(hash: number): SourceRuleIdxAndFilterId[];
 
     serialize(): string;
 }
@@ -48,25 +50,16 @@ export class RulesHashMap implements IRulesHashMap {
         listOfRulesWithHash.forEach(({ hash, source }) => {
             const existingValue = this.map.get(hash);
             if (existingValue) {
-                this.map.set(hash, existingValue.concat(source));
+                existingValue.push(source);
             } else {
                 this.map.set(hash, [source]);
             }
         });
     }
 
-    /**
-     * Tries to find rules with same hash and if found - returns theirs sources:
-     * filter id and rule id.
-     *
-     * @param badFilterRuleHash Number hash of $badfilter rule to search rules
-     * with same hash.
-     *
-     * @returns List of sources (filter id and rule id) of rules with same hash as
-     * provided in parameter or empty array.
-     */
-    findRules(badFilterRuleHash: number): SourceRuleIdxAndFilterId[] {
-        return this.map.get(badFilterRuleHash) || [];
+    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    findRules(hash: number): SourceRuleIdxAndFilterId[] {
+        return this.map.get(hash) || [];
     }
 
     /**

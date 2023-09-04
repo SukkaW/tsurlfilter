@@ -98,7 +98,9 @@ describe('Creating request', () => {
             new Request(undefined, 'example.com', RequestType.Other);
         } catch (e) {
             expect(e).toBeInstanceOf(TypeError);
-            expect(e.message).toMatch(/Invalid request url:/);
+            if (e instanceof Error) {
+                expect(e.message).toMatch(/Invalid request url:/);
+            }
         }
     });
 });
