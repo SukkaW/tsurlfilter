@@ -109,7 +109,7 @@ export type SerializedRuleSet = {
     sourceMapRaw: string,
     ruleSetHashMapRaw: string,
     filterListsIds: number[],
-    badFiltersRules: IndexedRuleWithHash[],
+    badFilterRules: string[],
 };
 
 /**
@@ -399,7 +399,7 @@ export class RuleSet implements IRuleSet {
             sourceMapRaw: this.sourceMap?.serialize() || '',
             filterListsIds: Array.from(this.filterList.keys()),
             ruleSetHashMapRaw: this.rulesHashMap?.serialize() || '',
-            badFiltersRules: this.badFilterRules || [],
+            badFilterRules: this.badFilterRules.map((r) => r.rule.getText()) || [],
         };
 
         return serialized;

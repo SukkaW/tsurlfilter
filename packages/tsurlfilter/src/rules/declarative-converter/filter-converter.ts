@@ -3,10 +3,8 @@
  * to rule sets {@link IRuleSet} with declarative rules {@link DeclarativeRule}.
  */
 
-import { NetworkRule } from '../network-rule';
+import { NetworkRule, NetworkRuleOption } from '../network-rule';
 import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
-import { RuleConverter } from '../rule-converter';
-import { RuleFactory } from '../rule-factory';
 
 import {
     IRuleSet,
@@ -121,13 +119,13 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
         const promises = filterList.map(async (filter): Promise<ScannedFilter> => {
             const scanner = await FilterScanner.createNew(filter);
-            const {
-                errors,
-                rules,
-                badFilterRules,
-            } = scanner.getIndexedRules(filterFn);
+            const { errors, rules } = scanner.getIndexedRules(filterFn);
 
             res.errors = res.errors.concat(errors);
+
+            const badFilterRules = rules.filter(({ rule }) => {
+                return rule instanceof NetworkRule && rule.isOptionEnabled(NetworkRuleOption.Badfilter);
+            });
 
             return {
                 id: filter.getId(),
@@ -213,7 +211,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
         const scanned = await this.scanRules([filter]);
 
-        converted.errors = converted.errors.concat(scanned.errors);
+        converted.errors = scanned.errors;
 
         scanned.filters.forEach((filterIdWithRules: ScannedFilter) => {
             const {
@@ -232,16 +230,16 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             );
 
             const ruleSetContent: IRuleSetContentProvider = {
-                getSourceMap: () => {
-                    return Promise.resolve(new SourceMap(sourceMapValues));
+                getSourceMap: async () => {
+                    return new SourceMap(sourceMapValues);
                 },
-                getFilterList: () => {
-                    return Promise.resolve([filter]);
+                getFilterList: async () => {
+                    return [filter];
                 },
-                getDeclarativeRules: () => {
-                    return Promise.resolve(declarativeRules);
+                getDeclarativeRules: async () => {
+                    return declarativeRules;
                 },
-                getRulesHashMap: () => {
+                getRulesHashMap: async () => {
                     const values = rules.map((r) => ({
                         hash: r.hash,
                         source: {
@@ -252,7 +250,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
                     const rulesHashMap = new RulesHashMap(values);
 
-                    return Promise.resolve(rulesHashMap);
+                    return rulesHashMap;
                 },
             };
 
@@ -287,29 +285,27 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             DeclarativeFilterConverter.checkConverterOptions(options);
         }
 
-        let allStaticBadFilterRules: IndexedRuleWithHash[] = [];
-
-        // FIXME: Optimize this part, instead of storing all rules as array,
-        // check if there is a hash of rule in hashmap. If so - call ruleSet.getSourceRule(id)
-        // and then convert it to NetworkRule.
-        staticRuleSets.forEach((ruleSet) => {
-            allStaticBadFilterRules = allStaticBadFilterRules.concat(ruleSet.getBadFilterRules());
-        });
+        const allStaticBadFilterRules = DeclarativeFilterConverter.createBadFilterRulesHashMap(staticRuleSets);
 
         const checkRule = (r: IndexedRuleWithHash): boolean => {
-            for (let i = 0; i < allStaticBadFilterRules.length; i += 1) {
-                const rule = allStaticBadFilterRules[i];
+            const fastMatchedBadFilterRules = allStaticBadFilterRules.get(r.hash);
 
-                if (r.hash === rule.hash
-                    && rule.rule instanceof NetworkRule
-                    && r.rule instanceof NetworkRule
-                ) {
-                    const badFilterRule = rule.rule;
-                    const ruleToCheck = r.rule;
+            if (!fastMatchedBadFilterRules) {
+                return false;
+            }
 
-                    if (badFilterRule.negatesBadfilter(ruleToCheck)) {
-                        return true;
-                    }
+            for (let i = 0; i < fastMatchedBadFilterRules.length; i += 1) {
+                const rule = fastMatchedBadFilterRules[i];
+
+                if (!(rule.rule instanceof NetworkRule) || !(r.rule instanceof NetworkRule)) {
+                    return false;
+                }
+
+                const badFilterRule = rule.rule;
+                const ruleToCheck = r.rule;
+
+                if (badFilterRule.negatesBadfilter(ruleToCheck)) {
+                    return true;
                 }
             }
 
@@ -333,16 +329,16 @@ export class DeclarativeFilterConverter implements IFilterConverter {
         } = combinedConvertedRules;
 
         const ruleSetContent: IRuleSetContentProvider = {
-            getSourceMap: () => {
-                return Promise.resolve(new SourceMap(sourceMapValues));
+            getSourceMap: async () => {
+                return new SourceMap(sourceMapValues);
             },
-            getFilterList: () => {
-                return Promise.resolve(filterList);
+            getFilterList: async () => {
+                return filterList;
             },
-            getDeclarativeRules: () => {
-                return Promise.resolve(declarativeRules);
+            getDeclarativeRules: async () => {
+                return declarativeRules;
             },
-            getRulesHashMap: () => {
+            getRulesHashMap: async () => {
                 const values = scanned.filters
                     .map(({ id, rules }) => {
                         return rules.map((r) => ({
@@ -357,7 +353,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
                 const rulesHashMap = new RulesHashMap(values);
 
-                return Promise.resolve(rulesHashMap);
+                return rulesHashMap;
             },
         };
 
@@ -373,6 +369,62 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             dynamicBadFilterRules,
         );
 
+        const declarativeRulesToCancel = await DeclarativeFilterConverter.collectDeclarativeRulesToCancel(
+            staticRuleSets,
+            dynamicBadFilterRules,
+        );
+
+        return {
+            ruleSets: [ruleSet],
+            errors: errors.concat(scanned.errors),
+            limitations,
+            declarativeRulesToCancel,
+        };
+    }
+
+    /**
+     * Creates dictionary where key is hash of indexed rule and value is array
+     * of rules with this hash.
+     *
+     * @param rulesets A list of IRuleSets for each of which a list of
+     * $badfilter rules.
+     *
+     * @returns Dictionary with all $badfilter rules which are extracted from
+     * rulesets.
+     */
+    private static createBadFilterRulesHashMap(
+        rulesets: IRuleSet[],
+    ): Map<number, IndexedRuleWithHash[]> {
+        const allStaticBadFilterRules: Map<number, IndexedRuleWithHash[]> = new Map();
+
+        rulesets.forEach((ruleSet) => {
+            ruleSet.getBadFilterRules().forEach((r) => {
+                const existingValue = allStaticBadFilterRules.get(r.hash);
+                if (existingValue) {
+                    existingValue.push(r);
+                } else {
+                    allStaticBadFilterRules.set(r.hash, [r]);
+                }
+            });
+        });
+
+        return allStaticBadFilterRules;
+    }
+
+    /**
+     * Applies rules with $badfilter modifier from dynamic rulesets to all rules
+     * from static rulesets and returns list of ids of declarative rules to
+     * disable them.
+     *
+     * @param staticRuleSets List of converted static rulesets.
+     * @param dynamicBadFilterRules List of rules with $badfilter.
+     *
+     * @returns List of ids of declarative rules to disable them.
+     */
+    private static async collectDeclarativeRulesToCancel(
+        staticRuleSets: IRuleSet[],
+        dynamicBadFilterRules: IndexedRuleWithHash[],
+    ): Promise<UpdateStaticRulesOptions[]> {
         const declarativeRulesToCancel: UpdateStaticRulesOptions[] = [];
 
         // Check every static ruleset.
@@ -447,11 +499,6 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             }
         }
 
-        return {
-            ruleSets: [ruleSet],
-            errors: errors.concat(scanned.errors),
-            limitations,
-            declarativeRulesToCancel,
-        };
+        return declarativeRulesToCancel;
     }
 }
