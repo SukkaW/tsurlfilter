@@ -1,4 +1,4 @@
-import { IRuleSet } from '@adguard/tsurlfilter/es/declarative-converter';
+import { IFilter, IRuleSet } from '@adguard/tsurlfilter/es/declarative-converter';
 
 import { AppInterface, defaultFilteringLog } from '../../common';
 import { logger } from '../utils/logger';
@@ -23,6 +23,13 @@ type ConfigurationResult = {
     staticFiltersStatus: UpdateStaticFiltersResult,
     staticFilters: IRuleSet[],
     dynamicRules: ConversionResult
+};
+
+type FiltersUpdateInfo = {
+    staticFilters: IFilter[],
+    customFilters: IFilter[],
+    filtersIdsToEnable: number[]
+    filtersIdsToDisable: number[],
 };
 
 // Reexport types
@@ -100,6 +107,8 @@ MessagesHandlerMV3
      *
      * @param config {@link Configuration} Configuration file which contains all
      * needed information to start.
+     *
+     * @returns Result of configuration {@link ConfigurationResult}.
      */
     private async innerStart(config: ConfigurationMV3): Promise<ConfigurationResult> {
         logger.debug('[START]: start');
@@ -124,7 +133,7 @@ MessagesHandlerMV3
     /**
      * Fires on WebNavigation.onCommitted event.
      *
-     * @param item {@link chrome.webNavigation.WebNavigationTransitionCallbackDetails}.
+     * @param item Item of {@link chrome.webNavigation.WebNavigationTransitionCallbackDetails}.
      * @param item.tabId The ID of the tab in which the navigation occurred.
      * @param item.url The url of the tab in which the navigation occurred.
      */
@@ -147,7 +156,9 @@ MessagesHandlerMV3
      * tab urls to work correctly with domain blocking/allowing rules, for
      * example: cosmetic rules in iframes.
      *
-     * @param config {@link Configuration}.
+     * @param config Config with type {@link Configuration}.
+     *
+     * @returns Result of configuration {@link ConfigurationResult}.
      */
     public async start(config: ConfigurationMV3): Promise<ConfigurationResult> {
         logger.debug('[START]: is started ', this.isStarted);
@@ -197,7 +208,7 @@ MessagesHandlerMV3
      * declarative filtering log and restarts the engine to reload cosmetic
      * rules.
      *
-     * @param config {@link Configuration}.
+     * @param config Config with type {@link Configuration}.
      *
      * @returns ConfigurationResult {@link ConfigurationResult} which contains:
      * - list of errors for static filters, if any of them has been thrown
@@ -209,17 +220,13 @@ MessagesHandlerMV3
 
         const configuration = configurationMV3Validator.parse(config);
 
-        // Wrap filters to tsurlfilter.IFilter
-        const staticFilters = FiltersApi.createStaticFilters(
-            configuration.staticFiltersIds,
-            configuration.filtersPath,
-        );
-        const customFilters = FiltersApi.createCustomFilters(configuration.customFilters);
-        const filtersIdsToEnable = staticFilters
-            .map((filter) => filter.getId());
-        const currentFiltersIds = await FiltersApi.getEnabledRuleSets();
-        const filtersIdsToDisable = currentFiltersIds
-            .filter((f) => !filtersIdsToEnable.includes(f)) || [];
+        // Extract filter into from configuration.
+        const {
+            staticFilters,
+            customFilters,
+            filtersIdsToEnable,
+            filtersIdsToDisable,
+        } = await TsWebExtension.getFiltersUpdateInfo(configuration);
 
         // Update list of enabled static filters
         const staticFiltersStatus = await FiltersApi.updateFiltering(
@@ -227,10 +234,17 @@ MessagesHandlerMV3
             filtersIdsToEnable,
         );
 
+        // Create static rulesets.
+        const staticRuleSets = await TsWebExtension.loadStaticRuleSets(
+            configuration.ruleSetsPath,
+            staticFilters,
+        );
+
         // Convert custom filters and user rules into one rule set and apply it
         const dynamicRules = await UserRulesApi.updateDynamicFiltering(
             configuration.userrules,
             customFilters,
+            staticRuleSets,
             this.webAccessibleResourcesPath,
         );
 
@@ -245,30 +259,19 @@ MessagesHandlerMV3
         });
         await engineApi.waitingForEngine;
 
-        // Wrap filters into rule sets
-        const ruleSetsLoaderApi = new RuleSetsLoaderApi(config.ruleSetsPath);
-        const manifest = chrome.runtime.getManifest();
-        // eslint-disable-next-line max-len
-        const manifestRuleSets = manifest.declarative_net_request.rule_resources as chrome.declarativeNetRequest.Ruleset[];
-        const staticRuleSetsTasks = manifestRuleSets.map(({ id }) => {
-            return ruleSetsLoaderApi.createRuleSet(id, staticFilters);
-        });
-        const staticRuleSets = await Promise.all(staticRuleSetsTasks);
-
         // TODO: Recreate only dynamic rule set, because static cannot be changed
         const ruleSets = [
             ...staticRuleSets,
             ...dynamicRules.ruleSets,
         ];
-        declarativeFilteringLog.ruleSets = ruleSets;
 
-        // Starts declarative filtering log
-        if (config.filteringLogEnabled) {
-            await declarativeFilteringLog.start();
-        } else {
-            await declarativeFilteringLog.stop();
-        }
+        // Update rulesets in declarative filtering log.
+        await TsWebExtension.updateRuleSetsForFilteringLog(
+            ruleSets,
+            configuration.filteringLogEnabled,
+        );
 
+        // Save only lightweight copy of configuration to decrease memory usage.
         this.configuration = TsWebExtension.createConfigurationContext(configuration);
 
         logger.debug('[CONFIGURE]: end');
@@ -375,5 +378,85 @@ MessagesHandlerMV3
             verbose,
             settings,
         };
+    }
+
+    /**
+     * Extract configuration update info from already parsed configuration.
+     *
+     * @param parsedConfiguration Already parsed {@link ConfigurationMV3}.
+     *
+     * @returns Item of {@link FiltersUpdateInfo}.
+     */
+    private static async getFiltersUpdateInfo(
+        parsedConfiguration: ConfigurationMV3,
+    ): Promise<FiltersUpdateInfo> {
+        // Wrap filters to tsurlfilter.IFilter
+        const staticFilters = FiltersApi.createStaticFilters(
+            parsedConfiguration.staticFiltersIds,
+            parsedConfiguration.filtersPath,
+        );
+        const customFilters = FiltersApi.createCustomFilters(
+            parsedConfiguration.customFilters,
+        );
+        const filtersIdsToEnable = staticFilters
+            .map((filter) => filter.getId());
+        const currentFiltersIds = await FiltersApi.getEnabledRuleSets();
+        const filtersIdsToDisable = currentFiltersIds
+            .filter((f) => !filtersIdsToEnable.includes(f)) || [];
+
+        return {
+            staticFilters,
+            customFilters,
+            filtersIdsToEnable,
+            filtersIdsToDisable,
+        };
+    }
+
+    /**
+     * Wraps static filters into rule sets.
+     *
+     * @param ruleSetsPath Path to the rule set metadata.
+     * @param staticFilters List of static {@link IFilter}.
+     *
+     * @returns List of static {@link IRuleSet}.
+     */
+    private static async loadStaticRuleSets(
+        ruleSetsPath: ConfigurationMV3['ruleSetsPath'],
+        staticFilters: IFilter[],
+    ): Promise<IRuleSet[]> {
+        // Wrap filters into rule sets
+        const ruleSetsLoaderApi = new RuleSetsLoaderApi(ruleSetsPath);
+        const manifest = chrome.runtime.getManifest();
+        // eslint-disable-next-line max-len
+        const manifestRuleSets = manifest.declarative_net_request.rule_resources as chrome.declarativeNetRequest.Ruleset[];
+        const staticRuleSetsTasks = manifestRuleSets.map(({ id }) => {
+            return ruleSetsLoaderApi.createRuleSet(id, staticFilters);
+        });
+
+        // TODO: Error catching
+        const staticRuleSets = await Promise.all(staticRuleSetsTasks);
+
+        return staticRuleSets;
+    }
+
+    /**
+     * Set provided list of rule sets to a filtering log and toggle it's status
+     * with the passed value.
+     *
+     * @param allRuleSets List of {@link IRuleSet}.
+     * @param filteringLogEnabled Preferred status for filtering log.
+     */
+    private static async updateRuleSetsForFilteringLog(
+        allRuleSets: IRuleSet[],
+        filteringLogEnabled: boolean,
+    ): Promise<void> {
+        declarativeFilteringLog.ruleSets = allRuleSets;
+
+        // Starts or stop declarative filtering log.
+        if (filteringLogEnabled) {
+            await declarativeFilteringLog.start();
+        } else {
+            await declarativeFilteringLog.stop();
+        }
     }
 }
