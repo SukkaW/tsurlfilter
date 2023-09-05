@@ -24,7 +24,7 @@ describe('DeclarativeConverter', () => {
 
     it('converts simple blocking rule', async () => {
         const filter = createFilter(['||example.org^']);
-        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(filter);
+        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(filter);
         const { declarativeRules } = await ruleSet.serialize();
 
         const ruleId = 1;
@@ -43,7 +43,7 @@ describe('DeclarativeConverter', () => {
 
     it('converts simple blocking regexp rule', async () => {
         const filter = createFilter(['/banner\\d+/$third-party']);
-        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(filter);
+        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(filter);
         const { declarativeRules } = await ruleSet.serialize();
 
         const ruleId = 1;
@@ -89,7 +89,7 @@ describe('DeclarativeConverter', () => {
                 '||example.org^$badfilter',
                 '||persistent.com^',
             ]);
-            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(filter);
+            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(filter);
             const { declarativeRules } = await ruleSet.serialize();
 
             const ruleId = 3;
@@ -121,7 +121,7 @@ describe('DeclarativeConverter', () => {
             ], 2);
             const {
                 ruleSets: [ruleSet],
-            } = await converter.convertDynamicRulesets([
+            } = await converter.convertDynamicRuleSets([
                 filter, filter2, filter3,
             ], []);
             const { declarativeRules } = await ruleSet.serialize();
@@ -149,8 +149,8 @@ describe('DeclarativeConverter', () => {
                 '||example.org^',
                 '||persistent.com^',
             ]);
-            const { ruleSets } = await converter.convertStaticRuleset(staticFilter);
-            const { ruleSets: [ruleSet] } = await converter.convertDynamicRulesets([userRules], ruleSets);
+            const { ruleSets } = await converter.convertStaticRuleSet(staticFilter);
+            const { ruleSets: [ruleSet] } = await converter.convertDynamicRuleSets([userRules], ruleSets);
             const { declarativeRules } = await ruleSet.serialize();
 
             const ruleId = 2;
@@ -184,10 +184,10 @@ describe('DeclarativeConverter', () => {
                 `${ruleToCancel2}$badfilter`,
             ], 2);
 
-            const { ruleSets } = await converter.convertStaticRuleset(staticFilter);
+            const { ruleSets } = await converter.convertStaticRuleSet(staticFilter);
             const {
                 declarativeRulesToCancel,
-            } = await converter.convertDynamicRulesets([userRules], ruleSets);
+            } = await converter.convertDynamicRuleSets([userRules], ruleSets);
 
             expect(declarativeRulesToCancel).toBeDefined();
             if (declarativeRulesToCancel === undefined) {
@@ -225,8 +225,8 @@ describe('DeclarativeConverter', () => {
                 ruleToCancel3,
             ], 2);
             const converted = await Promise.all([
-                converter.convertStaticRuleset(staticFilter1),
-                converter.convertStaticRuleset(staticFilter2),
+                converter.convertStaticRuleSet(staticFilter1),
+                converter.convertStaticRuleSet(staticFilter2),
             ]);
             const staticRuleSets = converted
                 .map(({ ruleSets }) => ruleSets)
@@ -243,7 +243,7 @@ describe('DeclarativeConverter', () => {
             ], 4);
             const {
                 declarativeRulesToCancel,
-            } = await converter.convertDynamicRulesets([customFilter1, userRules], staticRuleSets);
+            } = await converter.convertDynamicRuleSets([customFilter1, userRules], staticRuleSets);
 
             expect(declarativeRulesToCancel).toBeDefined();
             if (declarativeRulesToCancel === undefined) {
@@ -283,7 +283,7 @@ describe('DeclarativeConverter', () => {
             '||example.org^$badfilter',
             '@@||example.org^$elemhide',
         ]);
-        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(filter);
+        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(filter);
         const { declarativeRules } = await ruleSet.serialize();
 
         expect(declarativeRules).toHaveLength(0);
@@ -294,7 +294,7 @@ describe('DeclarativeConverter', () => {
             '@@||example.org^$document',
             '@@||example.com^$urlblock',
         ]);
-        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(filter);
+        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(filter);
         const { declarativeRules } = await ruleSet.serialize();
 
         expect(declarativeRules).toHaveLength(1);
@@ -321,7 +321,7 @@ describe('DeclarativeConverter', () => {
             ...rules,
             additionalRule,
         ]);
-        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(filter);
+        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(filter);
 
         let sources = await ruleSet.getRulesById(1);
         let originalRules = sources.map(({ sourceRule }) => sourceRule);
@@ -344,7 +344,7 @@ describe('DeclarativeConverter', () => {
             `${rulesToCancel[1]}`,
         ];
         const filter = createFilter(rules);
-        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(filter);
+        const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(filter);
 
         const badFilterRules = await ruleSet.getBadFilterRules();
         expect(badFilterRules[0].rule.getText()).toEqual(rulesToCancel[0]);
@@ -359,7 +359,7 @@ describe('DeclarativeConverter', () => {
                 '||example.net^',
             ]);
 
-            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(
+            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(
                 filter,
                 { maxNumberOfRules: 2 },
             );
@@ -397,7 +397,7 @@ describe('DeclarativeConverter', () => {
                 '||example.io^',
             ], 1);
 
-            const { ruleSets: [ruleSet] } = await converter.convertDynamicRulesets(
+            const { ruleSets: [ruleSet] } = await converter.convertDynamicRuleSets(
                 [filter1, filter2],
                 [],
                 { maxNumberOfRules: 4 },
@@ -450,7 +450,7 @@ describe('DeclarativeConverter', () => {
                 '/wind10.ru/w*.js/$domain=wind10.ru,',
             ]);
 
-            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(
+            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(
                 filter,
                 { maxNumberOfRules: 2 },
             );
@@ -492,7 +492,7 @@ describe('DeclarativeConverter', () => {
             const {
                 ruleSets: [ruleSet],
                 limitations,
-            } = await converter.convertStaticRuleset(
+            } = await converter.convertStaticRuleSet(
                 filter,
                 { maxNumberOfRules },
             );
@@ -532,7 +532,7 @@ describe('DeclarativeConverter', () => {
             const filter = createFilter(['||example.org^']);
             const resourcesPath = '';
             const convert = async () => {
-                await converter.convertStaticRuleset(filter, { resourcesPath });
+                await converter.convertStaticRuleSet(filter, { resourcesPath });
             };
 
             const msg = 'Path to web accessible resources should '
@@ -544,7 +544,7 @@ describe('DeclarativeConverter', () => {
             const filter = createFilter(['||example.org^']);
             const resourcesPath = 'path';
             const convert = async () => {
-                await converter.convertStaticRuleset(filter, { resourcesPath });
+                await converter.convertStaticRuleSet(filter, { resourcesPath });
             };
 
             const msg = 'Path to web accessible resources should '
@@ -556,7 +556,7 @@ describe('DeclarativeConverter', () => {
             const filter = createFilter(['||example.org^']);
             const resourcesPath = '/path/';
             const convert = async () => {
-                await converter.convertStaticRuleset(filter, { resourcesPath });
+                await converter.convertStaticRuleSet(filter, { resourcesPath });
             };
 
             const msg = 'Path to web accessible resources should '
@@ -568,7 +568,7 @@ describe('DeclarativeConverter', () => {
             const filter = createFilter(['||example.org^']);
             const maxNumberOfRules = 0;
             const convert = async () => {
-                await converter.convertStaticRuleset(filter, { maxNumberOfRules });
+                await converter.convertStaticRuleSet(filter, { maxNumberOfRules });
             };
 
             const msg = 'Maximum number of rules cannot be equal or less than 0';
@@ -579,7 +579,7 @@ describe('DeclarativeConverter', () => {
             const filter = createFilter(['||example.org^']);
             const maxNumberOfRegexpRules = -1;
             const convert = async () => {
-                await converter.convertStaticRuleset(filter, { maxNumberOfRegexpRules });
+                await converter.convertStaticRuleSet(filter, { maxNumberOfRegexpRules });
             };
 
             const msg = 'Maximum number of regexp rules cannot be less than 0';
@@ -590,7 +590,7 @@ describe('DeclarativeConverter', () => {
     describe('uses RuleConverter to convert rules to AG syntax', () => {
         it('converts deprecated modifier mp4 to redirect rule', async () => {
             const filter = createFilter(['||example.org^$mp4']);
-            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(
+            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(
                 filter,
                 { resourcesPath: '/path/to/resources' },
             );
@@ -617,7 +617,7 @@ describe('DeclarativeConverter', () => {
 
         it('converts deprecated modifier $empty to redirect rule', async () => {
             const filter = createFilter(['||example.org^$empty']);
-            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleset(
+            const { ruleSets: [ruleSet] } = await converter.convertStaticRuleSet(
                 filter,
                 { resourcesPath: '/path/to/resources' },
             );
@@ -648,7 +648,7 @@ describe('DeclarativeConverter', () => {
             const {
                 ruleSets: [ruleSet],
                 errors,
-            } = await converter.convertStaticRuleset(filter);
+            } = await converter.convertStaticRuleSet(filter);
 
             const { declarativeRules } = await ruleSet.serialize();
 
@@ -666,7 +666,7 @@ describe('DeclarativeConverter', () => {
             const {
                 ruleSets: [ruleSet],
                 errors,
-            } = await converter.convertStaticRuleset(filter);
+            } = await converter.convertStaticRuleSet(filter);
 
             const { declarativeRules } = await ruleSet.serialize();
 
@@ -687,7 +687,7 @@ describe('DeclarativeConverter', () => {
             const {
                 ruleSets: [ruleSet],
                 errors,
-            } = await converter.convertStaticRuleset(filter);
+            } = await converter.convertStaticRuleSet(filter);
 
             const { declarativeRules } = await ruleSet.serialize();
 
@@ -707,7 +707,7 @@ describe('DeclarativeConverter', () => {
             const filter = createFilter([rule]);
             const {
                 ruleSets: [ruleSet],
-            } = await converter.convertStaticRuleset(filter);
+            } = await converter.convertStaticRuleSet(filter);
 
             const { declarativeRules } = await ruleSet.serialize();
 
@@ -722,7 +722,7 @@ describe('DeclarativeConverter', () => {
             const {
                 ruleSets: [ruleSet],
                 errors,
-            } = await converter.convertStaticRuleset(filter);
+            } = await converter.convertStaticRuleSet(filter);
             const { declarativeRules } = await ruleSet.serialize();
 
             expect(errors).toHaveLength(1);
