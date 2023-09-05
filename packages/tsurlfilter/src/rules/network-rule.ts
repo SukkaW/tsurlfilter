@@ -1223,15 +1223,14 @@ export class NetworkRule implements rule.IRule {
      */
     private setDenyAllowDomains(optionValue: string): void {
         const domainModifier = new DomainModifier(optionValue, PIPE_SEPARATOR);
-        if (domainModifier.hasRestrictedDomains()) {
+        if (domainModifier.restrictedDomains && domainModifier.restrictedDomains.length > 0) {
             throw new SyntaxError(
                 'Invalid modifier: $denyallow domains cannot be negated',
             );
         }
 
-        const permittedDomains = domainModifier.getPermittedDomains();
-        if (permittedDomains) {
-            const hasNonPlainDomain = permittedDomains.some((d) => {
+        if (domainModifier.permittedDomains) {
+            const hasNonPlainDomain = domainModifier.permittedDomains.some((d) => {
                 return d.includes(SimpleRegex.MASK_ANY_CHARACTER) || SimpleRegex.isRegexPattern(d);
             });
             if (hasNonPlainDomain) {
@@ -1241,7 +1240,7 @@ export class NetworkRule implements rule.IRule {
             }
         }
 
-        this.denyAllowDomains = permittedDomains;
+        this.denyAllowDomains = domainModifier.permittedDomains;
     }
 
     /**
@@ -1673,7 +1672,8 @@ export class NetworkRule implements rule.IRule {
             this.priorityWeight += 1;
         }
 
-        if (this.domainModifier?.hasRestrictedDomains()) {
+        const { domainModifier } = this;
+        if (domainModifier?.hasRestrictedDomains()) {
             this.priorityWeight += 1;
         }
 
@@ -1731,10 +1731,9 @@ export class NetworkRule implements rule.IRule {
          * `||example.com^$app=org.example.app1|org.example.app2`
          * will add `100 + 100 / 2 = 151`.
          */
-        const permittedDomains = this.getPermittedDomains();
-        if (permittedDomains) {
+        if (domainModifier?.hasPermittedDomains()) {
             // More permitted domains mean less priority weight.
-            const relativeWeight = NetworkRule.CategoryThreeWeight / permittedDomains.length;
+            const relativeWeight = NetworkRule.CategoryThreeWeight / domainModifier.getPermittedDomains()!.length;
             this.priorityWeight += NetworkRule.CategoryThreeWeight + relativeWeight;
         }
 
