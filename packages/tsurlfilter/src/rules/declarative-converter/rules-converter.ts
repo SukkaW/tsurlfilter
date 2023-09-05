@@ -7,7 +7,6 @@
 
 import { NetworkRule } from '../network-rule';
 import { IndexedRule } from '../rule';
-import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
 
 import { DeclarativeRule } from './declarative-rule';
 import { ConvertedRules } from './converted-result';
@@ -16,6 +15,7 @@ import { RemoveParamRulesConverter } from './grouped-rules-converters/remove-par
 import { RemoveHeaderRulesConverter } from './grouped-rules-converters/remove-header-converter';
 import { CspRulesConverter } from './grouped-rules-converters/csp-converter';
 import { Source } from './source-map';
+import { IndexedRuleWithHash } from './indexed-rule-with-hash';
 import { LimitationError, TooManyRulesError, TooManyRegexpRulesError } from './errors/limitation-errors';
 import { BadFilterRulesConverter } from './grouped-rules-converters/bad-filter-converter';
 import { DeclarativeRulesGrouper, GroupedRules, RulesGroup } from './rules-grouper';
