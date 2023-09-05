@@ -262,9 +262,6 @@ export class RuleSet implements IRuleSet {
     /**
      * Run inner deserialization from rule set content provider to load
      * the source map, filter list and declarative rules list.
-     *
-     * FIXME: Maybe we should load badFilterIds with hashes separately from other
-     * part for better perfomance?
      */
     private async loadContent(): Promise<void> {
         if (this.initialized) {
