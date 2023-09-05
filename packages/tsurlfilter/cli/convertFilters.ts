@@ -3,9 +3,11 @@ import path from 'path';
 import fs from 'fs';
 
 import {
+    BAD_FILTER_RULES_FILENAME,
     DeclarativeFilterConverter,
     Filter,
     FILTER_LIST_IDS_FILENAME_JSON,
+    HASH_MAP_FILENAME_JSON,
     REGEXP_RULES_COUNT_FILENAME,
     RULES_COUNT_FILENAME,
     SOURCE_MAP_FILENAME_JSON,
@@ -47,7 +49,7 @@ export const convertFilters = async (
         const filtersPaths = new Map<number, string>();
 
         const files = fs.readdirSync(filtersPath);
-        const filterList = files
+        const filters = files
             .map((filePath: string) => {
                 console.info(`Parsing ${filePath}...`);
                 const index = filePath.match(/\d+/);
@@ -65,39 +67,49 @@ export const convertFilters = async (
                 console.info(`Preparing filter #${filterId} to convert`);
 
                 return new Filter(filterId, {
-                    getContent: () => Promise.resolve(data.split('\n')),
+                    getContent: async () => data.split('\n'),
                 });
             })
             .filter((filter): filter is Filter => filter !== null);
 
         const converter = new DeclarativeFilterConverter();
+
+        const convertingTasks = await Promise.all(
+            filters.map((filter) => converter.convertStaticRuleset(
+                filter,
+                { resourcesPath },
+            )),
+        );
+
+        // FIXME: This part looks very ugly.
         const {
             ruleSets,
             errors,
             limitations,
-        } = await converter.convert(
-            filterList,
-            { resourcesPath },
-        );
+        } = convertingTasks.reduce((prev, cur) => {
+            return {
+                ruleSets: prev.ruleSets.concat(cur.ruleSets),
+                errors: prev.errors.concat(cur.errors),
+                limitations: prev.limitations.concat(cur.limitations),
+            };
+        }, { ruleSets: [], errors: [], limitations: [] });
 
-        console.log(`Converted with ${errors.length} errors`);
-
-        if (limitations.length > 0) {
-            console.log(`Skipped ${limitations.length} converted rules`);
-
-            if (debug) {
-                console.log('======================================');
-                console.log('Converted with following limitations: ');
-                console.log('======================================');
-                limitations.forEach((e) => console.log(e.message));
-            }
-        }
+        console.log(`Converted with errors: ${errors.length}`);
 
         if (debug) {
             console.log('======================================');
             console.log('Converted with following errors: ');
             console.log('======================================');
             errors.forEach((e) => console.log(e.message));
+        }
+
+        console.log(`Skipped converting for rules: ${limitations.length}`);
+
+        if (debug) {
+            console.log('======================================');
+            console.log('Converted with following limitations: ');
+            console.log('======================================');
+            limitations.forEach((e) => console.log(e.message));
         }
 
         const promises = ruleSets.map(async (ruleSet) => {
@@ -108,6 +120,8 @@ export const convertFilters = async (
                 rulesCount,
                 sourceMapRaw,
                 filterListsIds,
+                ruleSetHashMapRaw,
+                badFilterRules,
             } = await ruleSet.serialize();
 
             const ruleSetDir = `${destRuleSetsPath}/${id}`;
@@ -115,9 +129,14 @@ export const convertFilters = async (
 
             await Promise.all([
                 fs.promises.writeFile(`${ruleSetDir}/${id}.json`, JSON.stringify(declarativeRules, null, '\t')),
+
+                // These two files need for every run of engine.configure to calculate $badfilter rules.
+                fs.promises.writeFile(`${ruleSetDir}/${HASH_MAP_FILENAME_JSON}`, ruleSetHashMapRaw),
+                fs.promises.writeFile(`${ruleSetDir}/${BAD_FILTER_RULES_FILENAME}`, badFilterRules),
+
                 fs.promises.writeFile(`${ruleSetDir}/${SOURCE_MAP_FILENAME_JSON}`, sourceMapRaw),
 
-                // TODO: Combine all these files together
+                // FIXME: Combine all these files together
                 fs.promises.writeFile(`${ruleSetDir}/${REGEXP_RULES_COUNT_FILENAME}`, regexpRulesCount.toString()),
                 fs.promises.writeFile(`${ruleSetDir}/${RULES_COUNT_FILENAME}`, rulesCount.toString()),
                 fs.promises.writeFile(`${ruleSetDir}/${FILTER_LIST_IDS_FILENAME_JSON}`, JSON.stringify(filterListsIds)),
