@@ -4,6 +4,7 @@ import {
     ConversionResult,
     IFilter,
     IRuleSet,
+    UpdateStaticRulesOptions,
 } from '@adguard/tsurlfilter/es/declarative-converter';
 
 export { ConversionResult };
@@ -60,7 +61,7 @@ export default class UserRulesApi {
                 maxNumberOfRegexpRules: MAX_NUMBER_OF_REGEX_RULES,
             },
         );
-        const { ruleSets: [ruleSet] } = conversionResult;
+        const { ruleSets: [ruleSet], declarativeRulesToCancel } = conversionResult;
 
         const { declarativeRules } = await ruleSet.serialize();
 
@@ -73,7 +74,71 @@ export default class UserRulesApi {
             addRules: declarativeRules as chrome.declarativeNetRequest.Rule[],
         });
 
+        if (declarativeRulesToCancel && declarativeRulesToCancel.length > 0) {
+            // Apply $badfilter rules from dynamic filters.
+            await this.applyBadFilterRules(declarativeRulesToCancel);
+        } else {
+            // Undoes all previously applied changes.
+            await this.cancelAllStaticRulesUpdates(staticRuleSets);
+        }
+
         return conversionResult;
+    }
+
+    /**
+     * Cancels any disabled rules ids for all static rulesets.
+     *
+     * @param staticRuleSets List of static {@link IRuleSet}.
+     */
+    private static async cancelAllStaticRulesUpdates(
+        staticRuleSets: IRuleSet[],
+    ): Promise<void> {
+        const tasks = staticRuleSets.map(async (r) => {
+            const rulesetId = r.getId();
+
+            // Get list of current disabled rules ids.
+            const enableRuleIds = await chrome.declarativeNetRequest.getDisabledRuleIds({ rulesetId });
+
+            // And enable all of them.
+            return chrome.declarativeNetRequest.updateStaticRules({
+                rulesetId,
+                enableRuleIds,
+            });
+        });
+
+        await Promise.all(tasks);
+    }
+
+    /**
+     * Applies rules with $badfilter modifier which can cancel other rules from
+     * static filters which already converted to declarative rules.
+     *
+     * @param declarativeRulesToCancel List of {@link UpdateStaticRulesOptions}.
+     */
+    private static async applyBadFilterRules(
+        declarativeRulesToCancel: UpdateStaticRulesOptions[],
+    ): Promise<void> {
+        const tasks = declarativeRulesToCancel.map(async ({
+            rulesetId,
+            disableRuleIds: ruleIdsToDisable,
+        }) => {
+            // Get list of current disabled rules ids.
+            const disabledRuleIds = await chrome.declarativeNetRequest.getDisabledRuleIds({ rulesetId });
+
+            // Collect rules which should be enabled.
+            const enableRuleIds = disabledRuleIds.filter((id) => !ruleIdsToDisable.includes(id));
+
+            // Filter only that rules which are not disabled already.
+            const disableRuleIds = ruleIdsToDisable.filter((id) => !disabledRuleIds.includes(id));
+
+            return chrome.declarativeNetRequest.updateStaticRules({
+                rulesetId,
+                enableRuleIds,
+                disableRuleIds,
+            });
+        });
+
+        await Promise.all(tasks);
     }
 
     /**

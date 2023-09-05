@@ -155,6 +155,10 @@ export default class RuleSetsLoaderApi {
         const file = await fetch(url);
         const fileText = await file.text();
 
+        if (!fileText) {
+            return [];
+        }
+
         const badFilterRules = fileText
             .split(/\r?\n/)
             // We don't need specify filterId and line because we only need NetworkRule with hash.
