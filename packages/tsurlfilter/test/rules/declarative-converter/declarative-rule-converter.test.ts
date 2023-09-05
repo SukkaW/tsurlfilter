@@ -14,8 +14,8 @@ const createFilter = async (
 ): Promise<ScannedFilter> => {
     const scanner = await FilterScanner.createNew({
         getId: () => filterId,
-        getContent: () => Promise.resolve(lines),
-        getRuleByIndex: (index) => Promise.resolve(lines[index]),
+        getContent: async () => lines,
+        getRuleByIndex: async (index) => lines[index],
     });
 
     const { rules } = scanner.getIndexedRules();
@@ -154,7 +154,7 @@ describe('DeclarativeRuleConverter', () => {
         });
     });
 
-    it('converts rules with $first-party modifiers', async () => {
+    it('converts rules with first-party modifiers', async () => {
         const filterId = 0;
         const ruleId = 1;
 
