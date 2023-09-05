@@ -4,7 +4,6 @@
  */
 
 import { NetworkRule, NetworkRuleOption } from '../network-rule';
-import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
 
 import {
     IRuleSet,
@@ -24,7 +23,8 @@ import {
 import type { ConversionResult } from './conversion-result';
 import type { DeclarativeConverterOptions } from './declarative-converter-options';
 import type { ScannedFilter, ScannedFilters } from './rules-converter';
-import { RulesHashMap } from './rule-hash-map';
+import { RulesHashMap } from './rules-hash-map';
+import { IndexedRuleWithHash } from './indexed-rule-with-hash';
 
 type ScannedFiltersWithErrors = {
     errors: Error[],
@@ -239,20 +239,17 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                 getDeclarativeRules: async () => {
                     return declarativeRules;
                 },
-                getRulesHashMap: async () => {
-                    const values = rules.map((r) => ({
-                        hash: r.hash,
-                        source: {
-                            sourceRuleIndex: r.index,
-                            filterId,
-                        },
-                    }));
-
-                    const rulesHashMap = new RulesHashMap(values);
-
-                    return rulesHashMap;
-                },
             };
+
+            const listOfRulesWithHash = rules.map((r) => ({
+                hash: r.hash,
+                source: {
+                    sourceRuleIndex: r.index,
+                    filterId,
+                },
+            }));
+
+            const rulesHashMap = new RulesHashMap(listOfRulesWithHash);
 
             const ruleSet = new RuleSet(
                 `ruleset_${filterId}`,
@@ -260,6 +257,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                 declarativeRules.filter((d) => d.condition.regexFilter).length,
                 ruleSetContent,
                 badFilterRules,
+                rulesHashMap,
             );
 
             converted.ruleSets.push(ruleSet);
@@ -287,34 +285,34 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
         const allStaticBadFilterRules = DeclarativeFilterConverter.createBadFilterRulesHashMap(staticRuleSets);
 
-        const checkRule = (r: IndexedRuleWithHash): boolean => {
+        const skipNegatedRulesFn = (r: IndexedRuleWithHash): boolean => {
             const fastMatchedBadFilterRules = allStaticBadFilterRules.get(r.hash);
 
             if (!fastMatchedBadFilterRules) {
-                return false;
+                return true;
             }
 
             for (let i = 0; i < fastMatchedBadFilterRules.length; i += 1) {
                 const rule = fastMatchedBadFilterRules[i];
 
                 if (!(rule.rule instanceof NetworkRule) || !(r.rule instanceof NetworkRule)) {
-                    return false;
+                    return true;
                 }
 
                 const badFilterRule = rule.rule;
                 const ruleToCheck = r.rule;
 
                 if (badFilterRule.negatesBadfilter(ruleToCheck)) {
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         };
 
         // Note: if we drop some rules because of applying $badfilter - we
         // cannot show info about it to user.
-        const scanned = await this.scanRules(filterList, checkRule);
+        const scanned = await this.scanRules(filterList, skipNegatedRulesFn);
 
         const combinedConvertedRules = DeclarativeRulesConverter.convert(
             scanned.filters,
@@ -338,24 +336,21 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             getDeclarativeRules: async () => {
                 return declarativeRules;
             },
-            getRulesHashMap: async () => {
-                const values = scanned.filters
-                    .map(({ id, rules }) => {
-                        return rules.map((r) => ({
-                            hash: r.hash,
-                            source: {
-                                sourceRuleIndex: r.index,
-                                filterId: id,
-                            },
-                        }));
-                    })
-                    .flat();
-
-                const rulesHashMap = new RulesHashMap(values);
-
-                return rulesHashMap;
-            },
         };
+
+        const listOfRulesWithHash = scanned.filters
+            .map(({ id, rules }) => {
+                return rules.map((r) => ({
+                    hash: r.hash,
+                    source: {
+                        sourceRuleIndex: r.index,
+                        filterId: id,
+                    },
+                }));
+            })
+            .flat();
+
+        const rulesHashMap = new RulesHashMap(listOfRulesWithHash);
 
         const dynamicBadFilterRules = scanned.filters
             .map(({ badFilterRules }) => badFilterRules)
@@ -367,6 +362,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             declarativeRules.filter((d) => d.condition.regexFilter).length,
             ruleSetContent,
             dynamicBadFilterRules,
+            rulesHashMap,
         );
 
         const declarativeRulesToCancel = await DeclarativeFilterConverter.collectDeclarativeRulesToCancel(
@@ -437,8 +433,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             // (custom filter and user rules).
             for (let j = 0; j < dynamicBadFilterRules.length; j += 1) {
                 const badFilterRule = dynamicBadFilterRules[j];
-                // eslint-disable-next-line no-await-in-loop
-                const hashMap = await staticRuleSet.getRulesHashMap();
+                const hashMap = staticRuleSet.getRulesHashMap();
                 const fastMatchedRulesByHash = hashMap.findRules(badFilterRule.hash);
 
                 if (fastMatchedRulesByHash.length === 0) {
@@ -475,9 +470,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                     // of applying $badfilter rules.
                     const someRulesMatched = indexedRulesWithHash
                         .flat()
-                        .some((r) => {
-                            const { rule } = r;
-
+                        .some((rule) => {
                             if (rule instanceof NetworkRule && badFilterRule.rule instanceof NetworkRule) {
                                 return badFilterRule.rule.negatesBadfilter(rule);
                             }

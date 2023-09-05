@@ -15,6 +15,17 @@ type RuleWithHash = {
     source: SourceRuleIdxAndFilterId,
 };
 
+// TODO: Uncomment after debug.
+// type SerializedSource = [
+//     SourceRuleIdxAndFilterId['filterId'],
+//     SourceRuleIdxAndFilterId['sourceRuleIndex'],
+// ];
+
+// type SerializedHashWithSource = [
+//     RuleHash,
+//     SerializedSource[],
+// ];
+
 export interface IRulesHashMap {
     /**
      * Tries to find rules with same hash and if found - returns theirs sources:
@@ -34,8 +45,6 @@ export interface IRulesHashMap {
  * Contains a dictionary where the key is the hash of the rule and the value is
  * a list of sources for the rule. Storing this dictionary is necessary for fast
  * rule matching, which can be negated by $badfilter.
- *
- * FIXME: Create serializable class to remove keys and reduce usage of disk space.
  */
 export class RulesHashMap implements IRulesHashMap {
     private map: RuleHashToRuleIdx = new Map();
@@ -69,18 +78,45 @@ export class RulesHashMap implements IRulesHashMap {
      *
      * @returns Deserialized dictionary.
      */
-    static deserializeSources(rawString: string): RuleHashToRuleIdx {
-        return JSON.parse(rawString) as RuleHashToRuleIdx;
+    static deserializeSources(rawString: string): RuleWithHash[] {
+        return JSON.parse(rawString);
     }
 
     /**
      * Serializes source map to JSON string.
      *
+     * @todo (FIXME:) Create serializable class to remove keys and reduce usage of disk space.
      * @todo (TODO:) Can use protocol VLQ.
      *
      * @returns JSON string.
      */
     serialize(): string {
-        return JSON.stringify(this.map);
+        const allValues = Array.from(this.map);
+
+        const valuesAsPlainArray: RuleWithHash[] = allValues
+            .map(([hash, sources]) => {
+                return sources.map((source) => ({
+                    hash,
+                    source,
+                }));
+            })
+            .flat();
+
+        return JSON.stringify(valuesAsPlainArray);
     }
+
+    // FIXME: Uncomment after debug.
+    // serialize(): string {
+    //     const arr = Array.from(this.map);
+
+    //     const serializedValues: SerializedHashWithSource[] = arr.map(([hash, source]) => {
+    //         const sources: SerializedSource[] = source.map((s) => {
+    //             return [s.filterId, s.sourceRuleIndex];
+    //         });
+
+    //         return [hash, sources];
+    //     });
+
+    //     return JSON.stringify(serializedValues);
+    // }
 }

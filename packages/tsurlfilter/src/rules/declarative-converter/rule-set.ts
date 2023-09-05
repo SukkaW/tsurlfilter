@@ -1,11 +1,11 @@
-import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
+import { NetworkRule } from '../network-rule';
 
+import { IndexedRuleWithHash } from './indexed-rule-with-hash';
 import { DeclarativeRule } from './declarative-rule';
 import { IFilter } from './filter';
 import { UnavailableRuleSetSourceError } from './errors/unavailable-sources-errors/unavailable-rule-set-source-error';
 import { ISourceMap, SourceRuleIdxAndFilterId } from './source-map';
-import { IRulesHashMap } from './rule-hash-map';
-import { FilterScanner } from './filter-scanner';
+import { IRulesHashMap } from './rules-hash-map';
 
 /**
  * The OriginalSource contains the text of the original rule and the filter
@@ -66,7 +66,7 @@ export interface IRuleSet {
     /**
      * Returns dictionary with hashes of all ruleset's source rules.
      */
-    getRulesHashMap(): Promise<IRulesHashMap>;
+    getRulesHashMap(): IRulesHashMap;
 
     /**
      * For provided source return list of ids of converted declarative rule.
@@ -95,7 +95,6 @@ export type IRuleSetContentProvider = {
     getSourceMap: () => Promise<ISourceMap>,
     getFilterList: () => Promise<IFilter[]>,
     getDeclarativeRules: () => Promise<DeclarativeRule[]>,
-    getRulesHashMap: () => Promise<IRulesHashMap>,
 };
 
 /**
@@ -146,7 +145,7 @@ export class RuleSet implements IRuleSet {
     /**
      * Dictionary which helps to fast find rule by it's hash.
      */
-    private rulesHashMap: IRulesHashMap | undefined;
+    private rulesHashMap: IRulesHashMap;
 
     /**
      * List of network rules with $badfilter option.
@@ -181,6 +180,7 @@ export class RuleSet implements IRuleSet {
      * @param regexpRulesCount Number of regexp rules.
      * @param ruleSetContentProvider Rule set content provider.
      * @param badFilterRules List of rules with $badfilter modifier.
+     * @param rulesHashMap Dictionary with hashes for all source rules.
      */
     constructor(
         id: string,
@@ -188,12 +188,14 @@ export class RuleSet implements IRuleSet {
         regexpRulesCount: number,
         ruleSetContentProvider: IRuleSetContentProvider,
         badFilterRules: IndexedRuleWithHash[],
+        rulesHashMap: IRulesHashMap,
     ) {
         this.id = id;
         this.rulesCount = rulesCount;
         this.regexpRulesCount = regexpRulesCount;
         this.ruleSetContentProvider = ruleSetContentProvider;
         this.badFilterRules = badFilterRules;
+        this.rulesHashMap = rulesHashMap;
     }
 
     /**
@@ -273,7 +275,6 @@ export class RuleSet implements IRuleSet {
             getSourceMap,
             getFilterList,
             getDeclarativeRules,
-            getRulesHashMap,
         } = this.ruleSetContentProvider;
 
         this.sourceMap = await getSourceMap();
@@ -282,7 +283,6 @@ export class RuleSet implements IRuleSet {
         filtersList.forEach((filter) => {
             this.filterList.set(filter.getId(), filter);
         });
-        this.rulesHashMap = await getRulesHashMap();
 
         this.initialized = true;
     }
@@ -311,15 +311,7 @@ export class RuleSet implements IRuleSet {
 
     // TODO: Error catch.
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
-    public async getRulesHashMap(): Promise<IRulesHashMap> {
-        if (!this.initialized) {
-            await this.loadContent();
-        }
-
-        if (!this.rulesHashMap) {
-            throw Error();
-        }
-
+    public getRulesHashMap(): IRulesHashMap {
         return this.rulesHashMap;
     }
 
@@ -343,41 +335,32 @@ export class RuleSet implements IRuleSet {
      *
      * @param source Source rule and filter id.
      *
-     * @returns List of {@link IndexedRuleWithHash} which should contain
-     * {@link NetworkRule}.
+     * @returns List of {@link NetworkRule}.
      */
     public static getNetworkRuleBySourceRule(
         source: SourceRuleAndFilterId,
-    ): IndexedRuleWithHash[] {
+    ): NetworkRule[] {
         const { sourceRule, filterId } = source;
 
+        let indexedRulesWithHash: IndexedRuleWithHash[] = [];
+
         try {
-            const rules = FilterScanner.convertRuleToAGSyntax(sourceRule);
-
-            if (rules instanceof Error) {
-                return [];
-            }
-
-            const indexedRulesWithHash = rules
-                .map((convertedRule) => {
-                    const rule = FilterScanner.createIndexedRuleWithHash(
-                        filterId,
-                        0,
-                        convertedRule,
-                    );
-
-                    if (rule instanceof Error) {
-                        return null;
-                    }
-
-                    return rule;
-                })
-                .filter((r): r is IndexedRuleWithHash => r !== null);
-
-            return indexedRulesWithHash;
+            // We don't need line index because this indexedRulesWithHash will
+            // be used only for matching $badfilter rules.
+            indexedRulesWithHash = IndexedRuleWithHash.createFromRawString(
+                filterId,
+                0,
+                sourceRule,
+            );
         } catch (e) {
             return [];
         }
+
+        const networkRules = indexedRulesWithHash
+            .map(({ rule }) => rule)
+            .filter((rule): rule is NetworkRule => rule instanceof NetworkRule);
+
+        return networkRules;
     }
 
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
@@ -398,7 +381,7 @@ export class RuleSet implements IRuleSet {
             rulesCount: this.rulesCount,
             sourceMapRaw: this.sourceMap?.serialize() || '',
             filterListsIds: Array.from(this.filterList.keys()),
-            ruleSetHashMapRaw: this.rulesHashMap?.serialize() || '',
+            ruleSetHashMapRaw: this.rulesHashMap.serialize(),
             badFilterRules: this.badFilterRules.map((r) => r.rule.getText()) || [],
         };
 

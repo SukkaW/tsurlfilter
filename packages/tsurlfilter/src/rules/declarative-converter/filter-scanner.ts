@@ -1,7 +1,4 @@
-import { IndexedRuleWithHash } from '../indexed-rule-with-hash';
-import { RuleConverter } from '../rule-converter';
-import { RuleFactory } from '../rule-factory';
-
+import { IndexedRuleWithHash } from './indexed-rule-with-hash';
 import { IFilter } from './filter';
 
 /**
@@ -51,88 +48,17 @@ export class FilterScanner implements IFilterScanner {
     }
 
     /**
-     * Converts a raw string rule to AG syntax (apply aliases, etc.). If an error
-     * was detected during the conversion - return it.
-     *
-     * @param rawStringRule Raw string rule.
-     *
-     * @returns Rule converted to AG syntax or Error.
-     */
-    public static convertRuleToAGSyntax(rawStringRule: string): string[] | Error {
-        // Try to convert to AG syntax.
-        try {
-            return RuleConverter.convertRule(rawStringRule);
-        } catch (e: unknown) {
-            if (e instanceof Error) {
-                return e;
-            }
-            return new Error(`Unknown error during conversion rule to AG syntax: ${e}`);
-        }
-    }
-
-    /**
-     * Create {@link IndexedRuleWithHash} from rule. If an error
-     * was detected during the conversion - return it.
-     *
-     * @param filterId Filter id.
-     * @param lineIndex Rule's line index in that filter.
-     * @param ruleConvertedToAGSyntax Rule which was converted to AG syntax.
-     *
-     * @returns Item of {@link IndexedRuleWithHash} or Error.
-     */
-    public static createIndexedRuleWithHash(
-        filterId: number,
-        lineIndex: number,
-        ruleConvertedToAGSyntax: string,
-    ): IndexedRuleWithHash | Error {
-        try {
-            // Create IndexedRule from AG rule
-            const rule = RuleFactory.createRule(
-                ruleConvertedToAGSyntax,
-                filterId,
-                false,
-                true, // ignore cosmetic rules
-                true, // ignore host rules
-                false, // throw exception on creating rule error.
-            );
-
-            if (!rule) {
-                return new Error(`Cannot create IRule from filter "${filterId}" and line "${lineIndex}"`);
-            }
-
-            const hash = IndexedRuleWithHash.createRuleHash(rule);
-
-            // If rule is not empty - pack to IndexedRule
-            // and add it to the result array.
-            const indexedRuleWithHash = new IndexedRuleWithHash(rule, lineIndex, hash);
-
-            if (!indexedRuleWithHash) {
-                // eslint-disable-next-line max-len
-                return new Error(`Cannot create indexed rule with hash from filter "${filterId}" and line "${lineIndex}"`);
-            }
-
-            return indexedRuleWithHash;
-        } catch (e: unknown) {
-            if (e instanceof Error) {
-                return e;
-            }
-            // eslint-disable-next-line max-len
-            return new Error(`Unknown error during creating indexed with hash from filter "${filterId}" and line "${lineIndex}". ${e}`);
-        }
-    }
-
-    /**
      * Gets the entire contents of the filter, extracts only the network rules
      * (ignore cosmetic and host rules) and tries to convert each line into an
-     * indexed rule.
+     * indexed rule with hash.
      *
      * @param filterFn If this function is specified, it will be applied to each
      * rule after it has been parsed and transformed. This function is needed
      * for example to apply $badfilter: to exclude negated rules from the array
      * of rules that will be returned.
      *
-     * @returns List of indexed rules with filtered values,
-     * if filterFn was specified.
+     * @returns List of indexed rules with hash. If filterFn was specified then
+     * out values will be filtered with this function.
      */
     public getIndexedRules(
         filterFn?: (r: IndexedRuleWithHash) => boolean,
@@ -150,37 +76,26 @@ export class FilterScanner implements IFilterScanner {
                 continue;
             }
 
-            // Try to convert to AG syntax.
-            const rulesConvertedToAGSyntaxOrError = FilterScanner.convertRuleToAGSyntax(line);
-            if (rulesConvertedToAGSyntaxOrError instanceof Error) {
-                result.errors.push(rulesConvertedToAGSyntaxOrError);
+            let indexedRulesWithHash: IndexedRuleWithHash[] = [];
 
-                // Skip this line because it does not convert to AG syntax.
+            try {
+                indexedRulesWithHash = IndexedRuleWithHash.createFromRawString(
+                    filterId,
+                    lineIndex,
+                    line,
+                );
+            } catch (e) {
+                if (e instanceof Error) {
+                    result.errors.push(e);
+                }
                 continue;
             }
 
-            const convertedAGRules = rulesConvertedToAGSyntaxOrError;
-            // Now convert to IRule and then IndexedRule.
-            for (let rulesIndex = 0; rulesIndex < convertedAGRules.length; rulesIndex += 1) {
-                const ruleConvertedToAGSyntax = convertedAGRules[rulesIndex];
+            const filteredRules = filterFn
+                ? indexedRulesWithHash.filter(filterFn)
+                : indexedRulesWithHash;
 
-                const indexedRuleWithHashOrError = FilterScanner.createIndexedRuleWithHash(
-                    filterId,
-                    lineIndex,
-                    ruleConvertedToAGSyntax,
-                );
-
-                if (indexedRuleWithHashOrError instanceof Error) {
-                    result.errors.push(indexedRuleWithHashOrError);
-                    continue;
-                }
-
-                if (filterFn && filterFn(indexedRuleWithHashOrError)) {
-                    continue;
-                }
-
-                result.rules.push(indexedRuleWithHashOrError);
-            }
+            result.rules.push(...filteredRules);
         }
 
         return result;
