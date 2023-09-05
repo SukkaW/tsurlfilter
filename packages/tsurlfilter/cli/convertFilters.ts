@@ -75,7 +75,7 @@ export const convertFilters = async (
         const converter = new DeclarativeFilterConverter();
 
         const convertingTasks = await Promise.all(
-            filters.map((filter) => converter.convertStaticRuleset(
+            filters.map((filter) => converter.convertStaticRuleSet(
                 filter,
                 { resourcesPath },
             )),
