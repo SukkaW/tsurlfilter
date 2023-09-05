@@ -91,7 +91,7 @@ export interface IRuleSet {
 /**
  * Rule set content's provider.
  */
-export type IRuleSetContentProvider = {
+export type RuleSetContentProvider = {
     getSourceMap: () => Promise<ISourceMap>,
     getFilterList: () => Promise<IFilter[]>,
     getDeclarativeRules: () => Promise<DeclarativeRule[]>,
@@ -165,7 +165,7 @@ export class RuleSet implements IRuleSet {
      * If request the source rules from rule set, the content provider will be
      * called to load the source map, filter list and declarative rules list.
      */
-    private readonly ruleSetContentProvider: IRuleSetContentProvider;
+    private readonly ruleSetContentProvider: RuleSetContentProvider;
 
     /**
      * Whether the content is loaded or not.
@@ -186,7 +186,7 @@ export class RuleSet implements IRuleSet {
         id: string,
         rulesCount: number,
         regexpRulesCount: number,
-        ruleSetContentProvider: IRuleSetContentProvider,
+        ruleSetContentProvider: RuleSetContentProvider,
         badFilterRules: IndexedRuleWithHash[],
         rulesHashMap: IRulesHashMap,
     ) {

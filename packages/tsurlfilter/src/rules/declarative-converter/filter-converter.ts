@@ -7,7 +7,7 @@ import { NetworkRule, NetworkRuleOption } from '../network-rule';
 
 import {
     IRuleSet,
-    IRuleSetContentProvider,
+    RuleSetContentProvider,
     RuleSet,
     UpdateStaticRulesOptions,
 } from './rule-set';
@@ -53,7 +53,7 @@ interface IFilterConverter {
      *
      * @returns Item of {@link ConversionResult}.
      */
-    convertStaticRuleset(
+    convertStaticRuleSet(
         filterList: IFilter,
         options?: DeclarativeConverterOptions,
     ): Promise<ConversionResult>;
@@ -79,7 +79,7 @@ interface IFilterConverter {
      *
      * @returns Item of {@link ConversionResult}.
      */
-    convertDynamicRulesets(
+    convertDynamicRuleSets(
         filterList: IFilter[],
         staticRuleSets: IRuleSet[],
         options?: DeclarativeConverterOptions,
@@ -193,9 +193,9 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description
     /**
-     * @see {@link IFilterConverter#convertStaticRuleset}
+     * @see {@link IFilterConverter#convertStaticRuleSet}
      */
-    public async convertStaticRuleset(
+    public async convertStaticRuleSet(
         filter: IFilter,
         options?: DeclarativeConverterOptions,
     ): Promise<ConversionResult> {
@@ -219,6 +219,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                 rules,
                 badFilterRules,
             } = filterIdWithRules;
+
             const {
                 sourceMapValues,
                 declarativeRules,
@@ -229,16 +230,10 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                 options,
             );
 
-            const ruleSetContent: IRuleSetContentProvider = {
-                getSourceMap: async () => {
-                    return new SourceMap(sourceMapValues);
-                },
-                getFilterList: async () => {
-                    return [filter];
-                },
-                getDeclarativeRules: async () => {
-                    return declarativeRules;
-                },
+            const ruleSetContent: RuleSetContentProvider = {
+                getSourceMap: async () => new SourceMap(sourceMapValues),
+                getFilterList: async () => [filter],
+                getDeclarativeRules: async () => declarativeRules,
             };
 
             const listOfRulesWithHash = rules.map((r) => ({
@@ -272,9 +267,9 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description
     /**
-     * @see {@link IFilterConverter#convertDynamicRulesets}
+     * @see {@link IFilterConverter#convertDynamicRuleSets}
      */
-    public async convertDynamicRulesets(
+    public async convertDynamicRuleSets(
         filterList: IFilter[],
         staticRuleSets: IRuleSet[],
         options?: DeclarativeConverterOptions,
@@ -326,16 +321,10 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             limitations = [],
         } = combinedConvertedRules;
 
-        const ruleSetContent: IRuleSetContentProvider = {
-            getSourceMap: async () => {
-                return new SourceMap(sourceMapValues);
-            },
-            getFilterList: async () => {
-                return filterList;
-            },
-            getDeclarativeRules: async () => {
-                return declarativeRules;
-            },
+        const ruleSetContent: RuleSetContentProvider = {
+            getSourceMap: async () => new SourceMap(sourceMapValues),
+            getFilterList: async () => filterList,
+            getDeclarativeRules: async () => declarativeRules,
         };
 
         const listOfRulesWithHash = scanned.filters
