@@ -15,7 +15,7 @@ const createFilter = (
 ) => {
     return new Filter(
         filterId,
-        { getContent: () => Promise.resolve(rules) },
+        { getContent: async () => rules },
     );
 };
 
