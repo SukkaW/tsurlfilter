@@ -3,6 +3,7 @@ import {
     Filter,
     ConversionResult,
     IFilter,
+    IRuleSet,
 } from '@adguard/tsurlfilter/es/declarative-converter';
 
 export { ConversionResult };
@@ -26,6 +27,8 @@ export default class UserRulesApi {
      *
      * @param userRules String[] contains user rules.
      * @param customFilters List of custom filters.
+     * @param staticRuleSets List of static rule sets to apply $badfilter rules
+     * from dynamic rules to static.
      * @param resourcesPath String path to web accessible resources,
      * relative to the extension root dir. Should start with leading slash '/'.
      *
@@ -35,6 +38,7 @@ export default class UserRulesApi {
     public static async updateDynamicFiltering(
         userRules: string[],
         customFilters: IFilter[],
+        staticRuleSets: IRuleSet[],
         resourcesPath?: string,
     ): Promise<ConversionResult> {
         const filterList = [
@@ -47,8 +51,9 @@ export default class UserRulesApi {
 
         // Create filter and convert into single rule set
         const converter = new DeclarativeFilterConverter();
-        const conversionResult = await converter.convertToSingle(
+        const conversionResult = await converter.convertDynamicRuleSets(
             filterList,
+            staticRuleSets,
             {
                 resourcesPath,
                 maxNumberOfRules: MAX_NUMBER_OF_DYNAMIC_AND_SESSION_RULES,
