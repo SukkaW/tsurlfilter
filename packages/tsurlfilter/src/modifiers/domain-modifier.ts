@@ -93,7 +93,6 @@ export class DomainModifier {
             }
         }
 
-        // FIXME improve typings to state that domains list cannot be empty
         this.restrictedDomains = restrictedDomains.length > 0 ? restrictedDomains : null;
         this.permittedDomains = permittedDomains.length > 0 ? permittedDomains : null;
     }
