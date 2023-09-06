@@ -4,7 +4,6 @@ import { DomainModifier } from '../../modifiers/domain-modifier';
 import { fastHash } from '../../utils/string-utils';
 import { RuleStorage } from '../../filterlist/rule-storage';
 import { Request } from '../../request';
-import { SimpleRegex } from '../../rules/simple-regex';
 
 /**
  * CosmeticLookupTable lets quickly lookup cosmetic rules for the specified hostname.
