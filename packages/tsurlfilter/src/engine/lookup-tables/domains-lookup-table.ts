@@ -46,10 +46,7 @@ export class DomainsLookupTable implements ILookupTable {
             return false;
         }
 
-        const hasWildcardOrRegexpDomain = permittedDomains.some((d) => {
-            return DomainModifier.isWildcardDomain(d) || SimpleRegex.isRegexPattern(d);
-        });
-        if (hasWildcardOrRegexpDomain) {
+        if (permittedDomains.some(DomainModifier.isNonPlainDomain)) {
             return false;
         }
 

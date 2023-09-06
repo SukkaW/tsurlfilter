@@ -212,12 +212,12 @@ describe('Domain modifier', () => {
         });
     });
 
-    describe('DomainModifier.isPlainDomain', () => {
-        const { isPlainDomain } = DomainModifier;
+    describe('DomainModifier.isNonPlainDomain', () => {
+        const { isNonPlainDomain } = DomainModifier;
         it('distinguishes plain domains from patterns', () => {
-            expect(isPlainDomain('example.co.uk')).toBeTruthy();
-            expect(isPlainDomain('example.*')).toBeFalsy();
-            expect(isPlainDomain(String.raw`/another\.(org|com)/`)).toBeFalsy();
+            expect(isNonPlainDomain('example.co.uk')).toBeFalsy();
+            expect(isNonPlainDomain('example.*')).toBeTruthy();
+            expect(isNonPlainDomain(String.raw`/another\.(org|com)/`)).toBeTruthy();
         });
     });
 });

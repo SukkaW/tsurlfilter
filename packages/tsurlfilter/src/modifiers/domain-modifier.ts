@@ -206,8 +206,8 @@ export class DomainModifier {
      *
      * @returns true if given domain string is plain
      */
-    public static isPlainDomain(domain: string): boolean {
-        return !DomainModifier.isWildcardDomain(domain) && !SimpleRegex.isRegexPattern(domain);
+    public static isNonPlainDomain(domain: string): boolean {
+        return DomainModifier.isWildcardDomain(domain) || SimpleRegex.isRegexPattern(domain);
     }
 
     /**
