@@ -4,7 +4,6 @@ import { Request } from '../../request';
 import { DomainModifier } from '../../modifiers/domain-modifier';
 import { fastHash } from '../../utils/string-utils';
 import { NetworkRule } from '../../rules/network-rule';
-import { SimpleRegex } from '../../rules/simple-regex';
 
 /**
  * Domain lookup table. Key is the domain name hash.
