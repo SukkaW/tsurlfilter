@@ -1230,10 +1230,8 @@ export class NetworkRule implements rule.IRule {
         }
 
         if (domainModifier.permittedDomains) {
-            const hasNonPlainDomain = domainModifier.permittedDomains.some((d) => {
-                return d.includes(SimpleRegex.MASK_ANY_CHARACTER) || SimpleRegex.isRegexPattern(d);
-            });
-            if (hasNonPlainDomain) {
+            const hasPatternDomain = domainModifier.permittedDomains.some((d) => !DomainModifier.isPlainDomain(d));
+            if (hasPatternDomain) {
                 throw new SyntaxError(
                     'Invalid modifier: $denyallow does not support wildcards and regex domains',
                 );

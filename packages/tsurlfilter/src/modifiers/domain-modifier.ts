@@ -4,6 +4,21 @@ import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
 import { SimpleRegex } from '../rules/simple-regex';
 
 /**
+ * Comma separator
+ */
+export const COMMA_SEPARATOR = ',';
+
+/**
+ * Pipe separator
+ */
+export const PIPE_SEPARATOR = '|';
+
+/**
+ * Wildcard character
+ */
+const WILDCARD_CHARACTER = '*';
+
+/**
  * This is a helper class that is used specifically to work
  * with domains restrictions.
  *
@@ -56,6 +71,15 @@ export class DomainModifier {
             if (domain.startsWith('~')) {
                 restricted = true;
                 domain = domain.substring(1);
+            }
+
+            // Regexp pattern check prevents regexp rules being rejected, as they could contain
+            // unescaped wildcards as special characters.
+            if (!SimpleRegex.isRegexPattern(domain)
+                && domain.includes(WILDCARD_CHARACTER)
+                && !domain.endsWith(WILDCARD_CHARACTER)
+            ) {
+                throw new SyntaxError(`Wildcards are only supported for top-level domains: "${domainsStr}"`);
             }
 
             if (domain === '') {
@@ -153,7 +177,7 @@ export class DomainModifier {
             }
 
             if (SimpleRegex.isRegexPattern(d)) {
-                // FIXME SimpleRegex.patternFromString(d); use this after it is refactored to not add 'g' flag
+                // TODO SimpleRegex.patternFromString(d); use this after it is refactored to not add 'g' flag
                 const domainPattern = new RegExp(d.slice(1, -1));
                 if (domainPattern.test(domain)) {
                     return true;
@@ -168,10 +192,23 @@ export class DomainModifier {
     /**
      * Checks if domain ends with wildcard
      *
-     * @param domain
+     * @param domain domain string to check
+     *
+     * @returns true if domain ends with wildcard
      */
     public static isWildcardDomain(domain: string): boolean {
         return domain.endsWith('.*');
+    }
+
+    /**
+     * Checks if domain string does not ends with wildcard and is not regex pattern
+     *
+     * @param domain domain string to check
+     *
+     * @returns true if given domain string is plain
+     */
+    public static isPlainDomain(domain: string): boolean {
+        return !DomainModifier.isWildcardDomain(domain) && !SimpleRegex.isRegexPattern(domain);
     }
 
     /**
@@ -210,13 +247,3 @@ export class DomainModifier {
         return '';
     }
 }
-
-/**
- * Comma separator
- */
-export const COMMA_SEPARATOR = ',';
-
-/**
- * Pipe separator
- */
-export const PIPE_SEPARATOR = '|';

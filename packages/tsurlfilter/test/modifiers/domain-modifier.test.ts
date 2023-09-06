@@ -131,6 +131,7 @@ describe('Domain modifier', () => {
         const COMMA_SEPARATOR = ',';
         const EMPTY_DOMAIN_ERROR = 'Empty domain specified in';
         const STARTS_WITH_SEPARATOR_ERROR = `Modifier $domain cannot start with "${COMMA_SEPARATOR}"`;
+        const HAS_INVALID_WILDCARD = 'Wildcards are only supported for top-level domains:';
         const invalidCases = [
             {
                 actual: '',
@@ -172,6 +173,10 @@ describe('Domain modifier', () => {
                 actual: ',',
                 error: STARTS_WITH_SEPARATOR_ERROR,
             },
+            {
+                actual: 'example.com,*.org',
+                error: HAS_INVALID_WILDCARD,
+            },
         ];
         test.each(invalidCases)('%s', ({ actual, error }) => {
             expect(() => {
@@ -180,24 +185,39 @@ describe('Domain modifier', () => {
         });
     });
 
-    it('works in common cases', () => {
-        expect(DomainModifier.isDomainOrSubdomainOfAny('example.org', ['example.org'])).toBeTruthy();
+    describe('DomainModifier.isDomainOrSubdomainOfAny', () => {
+        const { isDomainOrSubdomainOfAny } = DomainModifier;
+        it('works in common cases', () => {
+            expect(isDomainOrSubdomainOfAny('example.org', ['example.org'])).toBeTruthy();
 
-        expect(DomainModifier.isDomainOrSubdomainOfAny('example.com', ['example.org'])).toBeFalsy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('', ['example.org'])).toBeFalsy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('example.org', [])).toBeFalsy();
+            expect(isDomainOrSubdomainOfAny('example.com', ['example.org'])).toBeFalsy();
+            expect(isDomainOrSubdomainOfAny('', ['example.org'])).toBeFalsy();
+            expect(isDomainOrSubdomainOfAny('example.org', [])).toBeFalsy();
+        });
+
+        it('works in wildcard cases', () => {
+            expect(isDomainOrSubdomainOfAny('example.org', ['example.*', 'test.com'])).toBeTruthy();
+            expect(isDomainOrSubdomainOfAny('sub.example.org', ['example.*', 'test.com'])).toBeTruthy();
+            expect(isDomainOrSubdomainOfAny(
+                'example.org',
+                ['one.*', 'example.*', 'test.com'],
+            )).toBeTruthy();
+            expect(isDomainOrSubdomainOfAny('www.chrono24.ch', ['chrono24.*'])).toBeTruthy();
+
+            expect(isDomainOrSubdomainOfAny('example.com', ['test.*'])).toBeFalsy();
+            expect(isDomainOrSubdomainOfAny('subexample.org', ['example.*'])).toBeFalsy();
+            expect(isDomainOrSubdomainOfAny('example.eu.uk', ['example.*'])).toBeFalsy();
+            expect(isDomainOrSubdomainOfAny('example.org', ['sub.example.*', 'test.com'])).toBeFalsy();
+            expect(isDomainOrSubdomainOfAny('', ['example.*', 'test.com'])).toBeFalsy();
+        });
     });
 
-    it('works in wildcard cases', () => {
-        expect(DomainModifier.isDomainOrSubdomainOfAny('example.org', ['example.*', 'test.com'])).toBeTruthy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('sub.example.org', ['example.*', 'test.com'])).toBeTruthy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('example.org', ['one.*', 'example.*', 'test.com'])).toBeTruthy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('www.chrono24.ch', ['chrono24.*'])).toBeTruthy();
-
-        expect(DomainModifier.isDomainOrSubdomainOfAny('example.com', ['test.*'])).toBeFalsy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('subexample.org', ['example.*'])).toBeFalsy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('example.eu.uk', ['example.*'])).toBeFalsy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('example.org', ['sub.example.*', 'test.com'])).toBeFalsy();
-        expect(DomainModifier.isDomainOrSubdomainOfAny('', ['example.*', 'test.com'])).toBeFalsy();
+    describe('DomainModifier.isPlainDomain', () => {
+        const { isPlainDomain } = DomainModifier;
+        it('distinguishes plain domains from patterns', () => {
+            expect(isPlainDomain('example.co.uk')).toBeTruthy();
+            expect(isPlainDomain('example.*')).toBeFalsy();
+            expect(isPlainDomain(String.raw`/another\.(org|com)/`)).toBeFalsy();
+        });
     });
 });
