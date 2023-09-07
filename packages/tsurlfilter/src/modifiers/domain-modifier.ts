@@ -104,7 +104,6 @@ export class DomainModifier {
      *
      * @returns True if the filtering rule is allowed on this domain.
      */
-
     public matchDomain(domain: string): boolean {
         if (this.hasRestrictedDomains()) {
             if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.restrictedDomains!)) {
@@ -204,9 +203,9 @@ export class DomainModifier {
      *
      * @param domain domain string to check
      *
-     * @returns true if given domain string is plain
+     * @returns true if given domain is a wildcard or regexp pattern
      */
-    public static isNonPlainDomain(domain: string): boolean {
+    public static isWildcardOrRegexDomain(domain: string): boolean {
         return DomainModifier.isWildcardDomain(domain) || SimpleRegex.isRegexPattern(domain);
     }
 

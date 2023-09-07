@@ -213,11 +213,11 @@ describe('Domain modifier', () => {
     });
 
     describe('DomainModifier.isNonPlainDomain', () => {
-        const { isNonPlainDomain } = DomainModifier;
+        const { isWildcardOrRegexDomain } = DomainModifier;
         it('distinguishes plain domains from patterns', () => {
-            expect(isNonPlainDomain('example.co.uk')).toBeFalsy();
-            expect(isNonPlainDomain('example.*')).toBeTruthy();
-            expect(isNonPlainDomain(String.raw`/another\.(org|com)/`)).toBeTruthy();
+            expect(isWildcardOrRegexDomain('example.co.uk')).toBeFalsy();
+            expect(isWildcardOrRegexDomain('example.*')).toBeTruthy();
+            expect(isWildcardOrRegexDomain(String.raw`/another\.(org|com)/`)).toBeTruthy();
         });
     });
 });

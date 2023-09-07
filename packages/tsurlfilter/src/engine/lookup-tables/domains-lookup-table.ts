@@ -45,7 +45,7 @@ export class DomainsLookupTable implements ILookupTable {
             return false;
         }
 
-        if (permittedDomains.some(DomainModifier.isNonPlainDomain)) {
+        if (permittedDomains.some(DomainModifier.isWildcardOrRegexDomain)) {
             return false;
         }
 
