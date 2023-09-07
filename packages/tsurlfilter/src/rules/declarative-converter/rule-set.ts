@@ -309,7 +309,6 @@ export class RuleSet implements IRuleSet {
         return this.badFilterRules;
     }
 
-    // TODO: Error catch.
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
     public getRulesHashMap(): IRulesHashMap {
         return this.rulesHashMap;
