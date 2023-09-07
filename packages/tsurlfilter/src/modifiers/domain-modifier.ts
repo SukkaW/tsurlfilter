@@ -175,11 +175,13 @@ export class DomainModifier {
             }
 
             if (SimpleRegex.isRegexPattern(d)) {
-                // TODO SimpleRegex.patternFromString(d); use this after it is refactored to not add 'g' flag
-                const domainPattern = new RegExp(d.slice(1, -1));
-                if (domainPattern.test(domain)) {
-                    return true;
-                }
+                try {
+                    // TODO use SimpleRegex.patternFromString(d) after it is refactored to not add 'g' flag
+                    const domainPattern = new RegExp(d.slice(1, -1));
+                    if (domainPattern.test(domain)) {
+                        return true;
+                    }
+                } catch { /* do nothing */ }
                 continue;
             }
         }
