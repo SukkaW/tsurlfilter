@@ -231,6 +231,8 @@ export class RuleSet implements IRuleSet {
      *
      * @param declarativeRuleId {@link DeclarativeRule|declarative rule} Id.
      *
+     * @throws An error when filter is not found or filter content is unavailable.
+     *
      * @returns Promise with list of source rules.
      */
     private findSourceRules(declarativeRuleId: number): Promise<SourceRuleAndFilterId[]> {
@@ -292,11 +294,12 @@ export class RuleSet implements IRuleSet {
             }
 
             const originalRules = await this.findSourceRules(declarativeRuleId);
+
             return originalRules;
         } catch (e) {
             const id = this.getId();
-            const msg = 'Cannot extract source rule for given '
-            + `declarativeRuleId ${declarativeRuleId} in rule set '${id}'`;
+            // eslint-disable-next-line max-len
+            const msg = `Cannot extract source rule for given declarativeRuleId ${declarativeRuleId} in rule set '${id}'`;
             throw new UnavailableRuleSetSourceError(msg, id, e as Error);
         }
     }

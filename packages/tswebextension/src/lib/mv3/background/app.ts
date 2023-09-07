@@ -1,6 +1,6 @@
 import { IFilter, IRuleSet } from '@adguard/tsurlfilter/es/declarative-converter';
 
-import { AppInterface, defaultFilteringLog } from '../../common';
+import { AppInterface, defaultFilteringLog, getErrorMessage } from '../../common';
 import { logger } from '../utils/logger';
 import { FailedEnableRuleSetsError } from '../errors/failed-enable-rule-sets-error';
 
@@ -434,10 +434,17 @@ MessagesHandlerMV3
             return ruleSetsLoaderApi.createRuleSet(id, staticFilters);
         });
 
-        // TODO: Error catching
-        const staticRuleSets = await Promise.all(staticRuleSetsTasks);
+        try {
+            const staticRuleSets = await Promise.all(staticRuleSetsTasks);
 
-        return staticRuleSets;
+            return staticRuleSets;
+        } catch (e) {
+            const filterListIds = staticFilters.map((f) => f.getId());
+
+            logger.error(`Cannot scan rules of filter list with ids ${filterListIds} due to: ${getErrorMessage(e)}`);
+
+            return [];
+        }
     }
 
     /**

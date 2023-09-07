@@ -134,8 +134,17 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             };
         });
 
-        // FIXME: Add error catching
-        res.filters = await Promise.all(promises);
+        try {
+            res.filters = await Promise.all(promises);
+        } catch (e) {
+            const filterListIds = filterList.map((f) => f.getId());
+
+            if (e instanceof Error) {
+                res.errors.push(new Error(`Cannot scan rules of filter list with ids ${filterListIds}`, { cause: e }));
+            } else {
+                res.errors.push(new Error(`Cannot scan rules of filter list with ids ${filterListIds} due to: ${e}`));
+            }
+        }
 
         return res;
     }
@@ -433,6 +442,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                 // eslint-disable-next-line max-len
                 console.log(`rule ${badFilterRule.rule.getText()} matched ${JSON.stringify(fastMatchedRulesByHash[0])}`);
 
+                // FIXME: Error catch
                 // eslint-disable-next-line no-await-in-loop
                 const ids = await Promise.all(
                     fastMatchedRulesByHash.map(async (source) => {
@@ -448,6 +458,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                     // eslint-disable-next-line no-await-in-loop
                     const matchedSourceRules = await staticRuleSet.getRulesById(id);
 
+                    // FIXME: Error catch
                     // eslint-disable-next-line no-await-in-loop
                     const indexedRulesWithHash = await Promise.all(
                         matchedSourceRules.map((source) => {

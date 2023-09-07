@@ -6,6 +6,8 @@ import {
     IRuleSet,
     UpdateStaticRulesOptions,
 } from '@adguard/tsurlfilter/es/declarative-converter';
+import { logger } from '../utils/logger';
+import { getErrorMessage } from '../../common/error';
 
 export { ConversionResult };
 
@@ -106,7 +108,11 @@ export default class UserRulesApi {
             });
         });
 
-        await Promise.all(tasks);
+        try {
+            await Promise.all(tasks);
+        } catch (e) {
+            logger.error(`Cannot cancel all updates to static rules due to: ${getErrorMessage(e)}`);
+        }
     }
 
     /**
@@ -138,7 +144,11 @@ export default class UserRulesApi {
             });
         });
 
-        await Promise.all(tasks);
+        try {
+            await Promise.all(tasks);
+        } catch (e) {
+            logger.error(`Cannot apply updates to static rules due to: ${getErrorMessage(e)}`);
+        }
     }
 
     /**
