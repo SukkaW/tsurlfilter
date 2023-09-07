@@ -4,6 +4,7 @@ import fs from 'fs';
 
 import {
     BAD_FILTER_RULES_FILENAME,
+    type ConversionResult,
     DeclarativeFilterConverter,
     Filter,
     FILTER_LIST_IDS_FILENAME_JSON,
@@ -72,27 +73,34 @@ export const convertFilters = async (
             })
             .filter((filter): filter is Filter => filter !== null);
 
+        const result: ConversionResult = {
+            ruleSets: [],
+            errors: [],
+            limitations: [],
+        };
+
         const converter = new DeclarativeFilterConverter();
 
         const convertingTasks = await Promise.all(
-            filters.map((filter) => converter.convertStaticRuleSet(
-                filter,
-                { resourcesPath },
-            )),
+            filters.map(async (filter) => {
+                const converted = await converter.convertStaticRuleSet(
+                    filter,
+                    { resourcesPath },
+                );
+
+                result.ruleSets.concat(converted.ruleSets);
+                result.errors.concat(converted.errors);
+                result.limitations.concat(converted.limitations);
+            }),
         );
 
-        // FIXME: This part looks very ugly.
         const {
             ruleSets,
             errors,
             limitations,
-        } = convertingTasks.reduce((prev, cur) => {
-            return {
-                ruleSets: prev.ruleSets.concat(cur.ruleSets),
-                errors: prev.errors.concat(cur.errors),
-                limitations: prev.limitations.concat(cur.limitations),
-            };
-        }, { ruleSets: [], errors: [], limitations: [] });
+        } = result;
+
+        await Promise.all(convertingTasks);
 
         console.log(`Converted with errors: ${errors.length}`);
 
