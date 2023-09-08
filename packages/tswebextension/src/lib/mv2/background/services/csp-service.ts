@@ -55,6 +55,7 @@ export class CspService {
                     defaultFilteringLog.publishEvent({
                         type: FilteringEventType.ApplyCspRule,
                         data: {
+                            csp: true,
                             tabId,
                             eventId: nanoid(),
                             requestUrl,

@@ -95,6 +95,7 @@ export type ApplyBasicRuleEvent = {
  * {@link ApplyCspRuleEvent} Event data.
  */
 export type ApplyCspRuleEventData = {
+    csp: boolean,
     tabId: number,
     eventId: string,
     rule: NetworkRule,
