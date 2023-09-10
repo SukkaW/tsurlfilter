@@ -65,7 +65,7 @@ export default class UserRulesApi {
         );
         const { ruleSets: [ruleSet], declarativeRulesToCancel } = conversionResult;
 
-        const { declarativeRules } = await ruleSet.serialize();
+        const declarativeRules = await ruleSet.getDeclarativeRules();
 
         // Remove existing dynamic rules, in order their ids not interfere
         // with new

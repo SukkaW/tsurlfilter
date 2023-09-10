@@ -1,10 +1,12 @@
+import { z as zod } from 'zod';
+
 import { NetworkRule } from '../network-rule';
 
 import { IndexedRuleWithHash } from './indexed-rule-with-hash';
-import { DeclarativeRule } from './declarative-rule';
+import { DeclarativeRule, DeclarativeRuleValidator } from './declarative-rule';
 import { IFilter } from './filter';
 import { UnavailableRuleSetSourceError } from './errors/unavailable-sources-errors/unavailable-rule-set-source-error';
-import { ISourceMap, SourceRuleIdxAndFilterId } from './source-map';
+import { ISourceMap, SourceMap, SourceRuleIdxAndFilterId } from './source-map';
 import { IRulesHashMap } from './rules-hash-map';
 
 /**
@@ -60,22 +62,35 @@ export interface IRuleSet {
 
     /**
      * Returns list of network rules with $badfilter option.
+     *
+     * @returns List of network rules with $badfilter option.
      */
     getBadFilterRules(): IndexedRuleWithHash[];
 
     /**
      * Returns dictionary with hashes of all ruleset's source rules.
+     *
+     * @returns Dictionary with hashes of all ruleset's source rules.
      */
     getRulesHashMap(): IRulesHashMap;
 
     /**
-     * For provided source return list of ids of converted declarative rule.
+     * For provided source returns list of ids of converted declarative rule.
      *
      * @param source Source rule index and filter id.
+     *
+     * @returns List of ids of converted declarative rule.
      */
     getDeclarativeRulesIdsBySourceRuleIndex(
         source: SourceRuleIdxAndFilterId,
     ): Promise<number[]>;
+
+    /**
+     * Returns list of ruleset's declarative rules.
+     *
+     * @returns List of ruleset's declarative rules.
+     */
+    getDeclarativeRules(): Promise<DeclarativeRule[]>;
 
     /**
      * Serializes rule set to primitives values with lazy load.
@@ -89,26 +104,47 @@ export interface IRuleSet {
 }
 
 /**
- * Rule set content's provider.
+ * Rule set content's provider for lazy load data.
  */
 export type RuleSetContentProvider = {
-    getSourceMap: () => Promise<ISourceMap>,
-    getFilterList: () => Promise<IFilter[]>,
-    getDeclarativeRules: () => Promise<DeclarativeRule[]>,
+    loadSourceMap: () => Promise<ISourceMap>,
+    loadFilterList: () => Promise<IFilter[]>,
+    loadDeclarativeRules: () => Promise<DeclarativeRule[]>,
 };
+
+const serializedRuleSetLazyDataValidator = zod.strictObject({
+    sourceMapRaw: zod.string(),
+    filterIds: zod.number().array(),
+    declarativeRules: DeclarativeRuleValidator.array(),
+});
+
+type SerializedRuleSetLazyData = zod.infer<typeof serializedRuleSetLazyDataValidator>;
+
+const serializedRuleSetDataValidator = zod.strictObject({
+    regexpRulesCount: zod.number(),
+    rulesCount: zod.number(),
+    ruleSetHashMapRaw: zod.string(),
+    badFilterRulesRaw: zod.string().array(),
+});
+
+type SerializedRuleSetData = zod.infer<typeof serializedRuleSetDataValidator>;
 
 /**
  * A serialized rule set with primitive values.
  */
 export type SerializedRuleSet = {
     id: string,
-    declarativeRules: DeclarativeRule[],
-    regexpRulesCount: number,
-    rulesCount: number,
-    sourceMapRaw: string,
-    ruleSetHashMapRaw: string,
-    filterListsIds: number[],
-    badFilterRules: string[],
+    data: string,
+    lazyData: string,
+};
+
+/**
+ * A deserialized rule set with loaded data and provider for lazy loading data.
+ */
+export type DeserializedRuleSet = {
+    id: string,
+    data: SerializedRuleSetData,
+    ruleSetContentProvider: RuleSetContentProvider,
 };
 
 /**
@@ -262,7 +298,8 @@ export class RuleSet implements IRuleSet {
     }
 
     /**
-     * Run inner deserialization from rule set content provider to load
+     * Run inner lazy deserialization from rule set content provider to load
+     * data which is not needed on the creation of rule set:
      * the source map, filter list and declarative rules list.
      */
     private async loadContent(): Promise<void> {
@@ -271,14 +308,14 @@ export class RuleSet implements IRuleSet {
         }
 
         const {
-            getSourceMap,
-            getFilterList,
-            getDeclarativeRules,
+            loadSourceMap,
+            loadFilterList,
+            loadDeclarativeRules,
         } = this.ruleSetContentProvider;
 
-        this.sourceMap = await getSourceMap();
-        this.declarativeRules = await getDeclarativeRules();
-        const filtersList = await getFilterList();
+        this.sourceMap = await loadSourceMap();
+        this.declarativeRules = await loadDeclarativeRules();
+        const filtersList = await loadFilterList();
         filtersList.forEach((filter) => {
             this.filterList.set(filter.getId(), filter);
         });
@@ -289,9 +326,7 @@ export class RuleSet implements IRuleSet {
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
     public async getRulesById(declarativeRuleId: number): Promise<SourceRuleAndFilterId[]> {
         try {
-            if (!this.initialized) {
-                await this.loadContent();
-            }
+            await this.loadContent();
 
             const originalRules = await this.findSourceRules(declarativeRuleId);
 
@@ -318,15 +353,20 @@ export class RuleSet implements IRuleSet {
     public async getDeclarativeRulesIdsBySourceRuleIndex(
         source: SourceRuleIdxAndFilterId,
     ): Promise<number[]> {
-        if (!this.initialized) {
-            await this.loadContent();
-        }
+        await this.loadContent();
 
         if (!this.sourceMap) {
             throw Error();
         }
 
         return this.sourceMap.getBySourceRuleIndex(source) || [];
+    }
+
+    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    public async getDeclarativeRules(): Promise<DeclarativeRule[]> {
+        await this.loadContent();
+
+        return this.declarativeRules;
     }
 
     /**
@@ -362,26 +402,107 @@ export class RuleSet implements IRuleSet {
         return networkRules;
     }
 
+    // FIXME: Split into two functions: loadData and createRuleSetProvider
+    /**
+     * Deserializes rule set to primitives values with lazy load.
+     *
+     * @param id
+     * @param rawData
+     * @param loadLazyData
+     * @param filterList List of {@link IFilter}.
+     *
+     * @returns Deserialized rule set.
+     *
+     * @throws Error {@link UnavailableRuleSetSourceError} if rule set source
+     * is not available.
+     */
+    public static async deserialize(
+        id: string,
+        rawData: string,
+        loadLazyData: () => Promise<string>,
+        filterList: IFilter[],
+    ): Promise<DeserializedRuleSet> {
+        let data: SerializedRuleSetData | undefined;
+
+        try {
+            const objectFromString = JSON.parse(rawData);
+            data = serializedRuleSetDataValidator.parse(objectFromString);
+        } catch (e) {
+            // eslint-disable-next-line max-len
+            const msg = `Cannot parse serialized ruleset's data with id "${id}" because of not available source`;
+
+            throw new UnavailableRuleSetSourceError(msg, id, e as Error);
+        }
+
+        // FIXME: Create singletone for lazyData
+        const getLazyData = async (): Promise<SerializedRuleSetLazyData> => {
+            try {
+                const lazyData = await loadLazyData();
+
+                const objectFromString = JSON.parse(lazyData);
+
+                return serializedRuleSetLazyDataValidator.parse(objectFromString);
+            } catch (e) {
+                // eslint-disable-next-line max-len
+                const msg = `Cannot parse data for lazy load for rule set with id "${id}" because of not available source`;
+
+                throw new UnavailableRuleSetSourceError(msg, id, e as Error);
+            }
+        };
+
+        const deserialized: DeserializedRuleSet = {
+            id,
+            data,
+            ruleSetContentProvider: {
+                loadSourceMap: async () => {
+                    const { sourceMapRaw } = await getLazyData();
+                    const sources = SourceMap.deserializeSources(sourceMapRaw);
+
+                    return new SourceMap(sources);
+                },
+                loadFilterList: async () => {
+                    const { filterIds } = await getLazyData();
+
+                    return filterList.filter((filter) => filterIds.includes(filter.getId()));
+                },
+                loadDeclarativeRules: async () => {
+                    const { declarativeRules } = await getLazyData();
+
+                    return declarativeRules;
+                },
+            },
+        };
+
+        return deserialized;
+    }
+
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
     public async serialize(): Promise<SerializedRuleSet> {
         try {
             await this.loadContent();
         } catch (e) {
             const id = this.getId();
-            const msg = `Cannot serialize rule set '${id}' because of not `
-            + 'available source';
+            const msg = `Cannot serialize rule set '${id}' because of not available source`;
             throw new UnavailableRuleSetSourceError(msg, id, e as Error);
         }
 
-        const serialized: SerializedRuleSet = {
-            id: this.id,
-            declarativeRules: this.declarativeRules,
+        const data: SerializedRuleSetData = {
             regexpRulesCount: this.regexpRulesCount,
             rulesCount: this.rulesCount,
-            sourceMapRaw: this.sourceMap?.serialize() || '',
-            filterListsIds: Array.from(this.filterList.keys()),
             ruleSetHashMapRaw: this.rulesHashMap.serialize(),
-            badFilterRules: this.badFilterRules.map((r) => r.rule.getText()) || [],
+            badFilterRulesRaw: this.badFilterRules.map((r) => r.rule.getText()) || [],
+        };
+
+        const lazyData: SerializedRuleSetLazyData = {
+            declarativeRules: this.declarativeRules,
+            sourceMapRaw: this.sourceMap?.serialize() || '',
+            filterIds: Array.from(this.filterList.keys()),
+        };
+
+        const serialized: SerializedRuleSet = {
+            id: this.id,
+            data: JSON.stringify(data),
+            lazyData: JSON.stringify(lazyData),
         };
 
         return serialized;

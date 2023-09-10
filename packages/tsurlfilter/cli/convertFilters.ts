@@ -3,15 +3,11 @@ import path from 'path';
 import fs from 'fs';
 
 import {
-    BAD_FILTER_RULES_FILENAME,
     type ConversionResult,
     DeclarativeFilterConverter,
     Filter,
-    FILTER_LIST_IDS_FILENAME_JSON,
-    HASH_MAP_FILENAME_JSON,
-    REGEXP_RULES_COUNT_FILENAME,
-    RULES_COUNT_FILENAME,
-    SOURCE_MAP_FILENAME_JSON,
+    METADATA_FILENAME,
+    LAZY_METADATA_FILENAME,
 } from '../src/rules/declarative-converter';
 
 const ensureDirSync = (dirPath: string) => {
@@ -43,120 +39,136 @@ export const convertFilters = async (
     const resourcesPath = path.resolve(process.cwd(), resourcesDir);
     const destRuleSetsPath = path.resolve(process.cwd(), destRuleSetsDir);
 
-    try {
-        ensureDirSync(filtersPath);
-        ensureDirSync(destRuleSetsPath);
+    ensureDirSync(filtersPath);
+    ensureDirSync(destRuleSetsPath);
 
-        const filtersPaths = new Map<number, string>();
+    const filtersPaths = new Map<number, string>();
 
-        const files = fs.readdirSync(filtersPath);
-        const filters = files
-            .map((filePath: string) => {
-                console.info(`Parsing ${filePath}...`);
-                const index = filePath.match(/\d+/);
+    const files = fs.readdirSync(filtersPath);
+    const filters = files
+        .map((filePath: string) => {
+            console.info(`Parsing ${filePath}...`);
+            const index = filePath.match(/\d+/);
 
-                if (!index) {
-                    console.info(`${filePath} skipped`);
-                    return null;
-                }
+            if (!index) {
+                console.info(`${filePath} skipped`);
+                return null;
+            }
 
-                const filterId = Number(index);
+            const filterId = Number(index);
 
-                filtersPaths.set(filterId, filePath);
-                const data = fs.readFileSync(`${filtersPath}/${filePath}`, { encoding: 'utf-8' });
+            filtersPaths.set(filterId, filePath);
+            const data = fs.readFileSync(`${filtersPath}/${filePath}`, { encoding: 'utf-8' });
 
-                console.info(`Preparing filter #${filterId} to convert`);
+            console.info(`Preparing filter #${filterId} to convert`);
 
-                return new Filter(filterId, {
-                    getContent: async () => data.split('\n'),
-                });
-            })
-            .filter((filter): filter is Filter => filter !== null);
+            return new Filter(filterId, {
+                getContent: async () => data.split('\n'),
+            });
+        })
+        .filter((filter): filter is Filter => filter !== null);
 
-        const result: ConversionResult = {
-            ruleSets: [],
-            errors: [],
-            limitations: [],
-        };
+    const result: ConversionResult = {
+        ruleSets: [],
+        errors: [],
+        limitations: [],
+    };
 
-        const converter = new DeclarativeFilterConverter();
+    const converter = new DeclarativeFilterConverter();
 
-        const convertingTasks = await Promise.all(
-            filters.map(async (filter) => {
-                const converted = await converter.convertStaticRuleSet(
-                    filter,
-                    { resourcesPath },
-                );
+    for (let i = 0; i < filters.length; i += 1) {
+        const filter = filters[i];
 
-                result.ruleSets.concat(converted.ruleSets);
-                result.errors.concat(converted.errors);
-                result.limitations.concat(converted.limitations);
-            }),
+        // eslint-disable-next-line no-await-in-loop
+        const converted = await converter.convertStaticRuleSet(
+            filter,
+            { resourcesPath },
         );
 
+        result.ruleSets = result.ruleSets.concat(converted.ruleSets);
+        result.errors = result.errors.concat(converted.errors);
+        result.limitations = result.limitations.concat(converted.limitations);
+
+        if (debug) {
+            console.log('======================================');
+            console.log(`Filter #${filter.getId()} info`);
+            console.log('======================================');
+
+            console.log(`Errors: ${converted.errors.length}`);
+            if (converted.errors.length > 0) {
+                console.log('======================================');
+                console.log('Converted with following errors: ');
+                console.log('======================================');
+                converted.errors.forEach((e) => console.log(e.message));
+            }
+
+            console.log(`Skipped converting for rules: ${converted.limitations.length}`);
+            if (converted.limitations.length > 0) {
+                console.log('======================================');
+                console.log('Converted with following limitations: ');
+                console.log('======================================');
+                converted.limitations.forEach((e) => console.log(e.message));
+            }
+        }
+    }
+
+    const {
+        ruleSets,
+        errors,
+        limitations,
+    } = result;
+
+    console.log('======================================');
+    console.log('Common info');
+    console.log('======================================');
+
+    console.log(`Converted rule sets: ${ruleSets.length}`);
+
+    console.log(`Errors: ${errors.length}`);
+
+    if (debug && errors.length > 0) {
+        console.log('======================================');
+        console.log('Converted with following errors: ');
+        console.log('======================================');
+        errors.forEach((e) => console.log(e.message));
+    }
+
+    console.log(`Skipped converting for rules: ${limitations.length}`);
+
+    if (debug && limitations.length > 0) {
+        console.log('======================================');
+        console.log('Converted with following limitations: ');
+        console.log('======================================');
+        limitations.forEach((e) => console.log(e.message));
+    }
+
+    for (let i = 0; i < ruleSets.length; i += 1) {
+        const ruleSet = ruleSets[i];
+
         const {
-            ruleSets,
-            errors,
-            limitations,
-        } = result;
+            id,
+            data,
+            lazyData,
+            // eslint-disable-next-line no-await-in-loop
+        } = await ruleSet.serialize();
 
-        await Promise.all(convertingTasks);
+        // eslint-disable-next-line no-await-in-loop
+        const declarativeRules = await ruleSet.getDeclarativeRules();
 
-        console.log(`Converted with errors: ${errors.length}`);
+        const ruleSetDir = `${destRuleSetsPath}/${id}`;
+        ensureDirSync(ruleSetDir);
 
-        if (debug) {
-            console.log('======================================');
-            console.log('Converted with following errors: ');
-            console.log('======================================');
-            errors.forEach((e) => console.log(e.message));
-        }
+        // eslint-disable-next-line no-await-in-loop
+        await Promise.all([
+            fs.promises.writeFile(`${ruleSetDir}/${id}.json`, JSON.stringify(declarativeRules, null, '\t')),
+            fs.promises.writeFile(`${ruleSetDir}/${METADATA_FILENAME}`, data),
+            fs.promises.writeFile(`${ruleSetDir}/${LAZY_METADATA_FILENAME}`, lazyData),
+        ]);
 
-        console.log(`Skipped converting for rules: ${limitations.length}`);
-
-        if (debug) {
-            console.log('======================================');
-            console.log('Converted with following limitations: ');
-            console.log('======================================');
-            limitations.forEach((e) => console.log(e.message));
-        }
-
-        const promises = ruleSets.map(async (ruleSet) => {
-            const {
-                id,
-                declarativeRules,
-                regexpRulesCount,
-                rulesCount,
-                sourceMapRaw,
-                filterListsIds,
-                ruleSetHashMapRaw,
-                badFilterRules,
-            } = await ruleSet.serialize();
-
-            const ruleSetDir = `${destRuleSetsPath}/${id}`;
-            ensureDirSync(ruleSetDir);
-
-            await Promise.all([
-                fs.promises.writeFile(`${ruleSetDir}/${id}.json`, JSON.stringify(declarativeRules, null, '\t')),
-
-                // These two files need for every run of engine.configure to calculate $badfilter rules.
-                fs.promises.writeFile(`${ruleSetDir}/${HASH_MAP_FILENAME_JSON}`, ruleSetHashMapRaw),
-                fs.promises.writeFile(`${ruleSetDir}/${BAD_FILTER_RULES_FILENAME}`, badFilterRules),
-
-                fs.promises.writeFile(`${ruleSetDir}/${SOURCE_MAP_FILENAME_JSON}`, sourceMapRaw),
-
-                // FIXME: Combine all these files together
-                fs.promises.writeFile(`${ruleSetDir}/${REGEXP_RULES_COUNT_FILENAME}`, regexpRulesCount.toString()),
-                fs.promises.writeFile(`${ruleSetDir}/${RULES_COUNT_FILENAME}`, rulesCount.toString()),
-                fs.promises.writeFile(`${ruleSetDir}/${FILTER_LIST_IDS_FILENAME_JSON}`, JSON.stringify(filterListsIds)),
-            ]);
-
-            console.log('======================================');
-            console.info(`Rule set with id ${id} and all rule set info (counters, source map, filter list) was saved`);
-            console.info(`to ${destRuleSetsDir}/${id}`);
-            console.log('======================================');
-        });
-        await Promise.all(promises);
-    } catch (e) {
-        console.error(e);
+        console.log('======================================');
+        console.info(`Rule set with id ${id} and all rule set info`);
+        console.info('(counters, source map, filter list) was saved');
+        console.info(`to ${destRuleSetsDir}/${id}`);
+        console.log('======================================');
     }
 };

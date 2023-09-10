@@ -240,9 +240,9 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             );
 
             const ruleSetContent: RuleSetContentProvider = {
-                getSourceMap: async () => new SourceMap(sourceMapValues),
-                getFilterList: async () => [filter],
-                getDeclarativeRules: async () => declarativeRules,
+                loadSourceMap: async () => new SourceMap(sourceMapValues),
+                loadFilterList: async () => [filter],
+                loadDeclarativeRules: async () => declarativeRules,
             };
 
             const listOfRulesWithHash = rules.map((r) => ({
@@ -331,9 +331,9 @@ export class DeclarativeFilterConverter implements IFilterConverter {
         } = combinedConvertedRules;
 
         const ruleSetContent: RuleSetContentProvider = {
-            getSourceMap: async () => new SourceMap(sourceMapValues),
-            getFilterList: async () => filterList,
-            getDeclarativeRules: async () => declarativeRules,
+            loadSourceMap: async () => new SourceMap(sourceMapValues),
+            loadFilterList: async () => filterList,
+            loadDeclarativeRules: async () => declarativeRules,
         };
 
         const listOfRulesWithHash = scanned.filters
