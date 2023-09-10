@@ -85,7 +85,7 @@ class DeclarativeFilteringLog implements IDeclarativeFilteringLog {
         }
 
         const sourceRules = await ruleSet.getRulesById(ruleId);
-        const { declarativeRules } = await ruleSet.serialize();
+        const declarativeRules = await ruleSet.getDeclarativeRules();
         const declarativeRule = declarativeRules.find((r) => r.id === ruleId);
         const declarativeRuleJson = declarativeRule && JSON.stringify(declarativeRule);
 

@@ -118,6 +118,7 @@ export class SourceMap implements ISourceMap {
      * @returns List of sources.
      */
     static deserializeSources(sourceString: string): Source[] {
+        // TODO: Add validation
         const arr: number[][] = JSON.parse(sourceString);
 
         return arr.map((item) => ({
