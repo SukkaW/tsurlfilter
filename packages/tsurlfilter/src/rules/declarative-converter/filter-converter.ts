@@ -441,10 +441,6 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                     continue;
                 }
 
-                // FIXME: Remove
-                // eslint-disable-next-line max-len
-                console.log(`rule ${badFilterRule.rule.getText()} matched ${JSON.stringify(fastMatchedRulesByHash[0])}`);
-
                 // FIXME: Error catch
                 // eslint-disable-next-line no-await-in-loop
                 const ids = await Promise.all(
