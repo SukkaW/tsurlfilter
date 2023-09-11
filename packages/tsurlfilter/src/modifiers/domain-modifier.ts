@@ -1,5 +1,6 @@
 import { getPublicSuffix } from 'tldts';
 
+import { logger } from '../utils/logger';
 import { splitByDelimiterWithEscapeCharacter } from '../utils/string-utils';
 import { SimpleRegex } from '../rules/simple-regex';
 
@@ -181,7 +182,9 @@ export class DomainModifier {
                     if (domainPattern.test(domain)) {
                         return true;
                     }
-                } catch { /* do nothing */ }
+                } catch {
+                    logger.error(`Invalid regular expression as domain pattern: ${d}`);
+                }
                 continue;
             }
         }
