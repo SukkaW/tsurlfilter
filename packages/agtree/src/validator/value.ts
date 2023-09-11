@@ -15,13 +15,28 @@ import { DomainListParser } from '../parser/misc/domain-list';
 import { MethodListParser } from '../parser/misc/method-list';
 import { StealthOptionListParser } from '../parser/misc/stealth-option-list';
 import { DomainUtils } from '../utils/domain';
-import { QuoteUtils } from '../utils/quotes';
-import { DOT, PIPE_MODIFIER_SEPARATOR, WILDCARD } from '../utils/constants';
+import { QuoteType, QuoteUtils } from '../utils/quotes';
+import {
+    BACKSLASH,
+    CLOSE_PARENTHESIS,
+    COMMA,
+    DOT,
+    EQUALS,
+    OPEN_PARENTHESIS,
+    PIPE_MODIFIER_SEPARATOR,
+    SEMICOLON,
+    SPACE,
+    WILDCARD,
+} from '../utils/constants';
 import { type ValidationResult, getInvalidValidationResult, getValueRequiredValidationResult } from './helpers';
 import {
+    ALLOWED_CSP_DIRECTIVES,
     ALLOWED_METHODS,
+    ALLOWED_PERMISSION_DIRECTIVES,
     ALLOWED_STEALTH_OPTIONS,
     APP_NAME_ALLOWED_CHARS,
+    EMPTY_PERMISSIONS_ALLOWLIST,
+    PERMISSIONS_TOKEN_SELF,
     SOURCE_DATA_ERROR_PREFIX,
     VALIDATION_ERROR_PREFIX,
 } from './constants';
@@ -36,10 +51,12 @@ type PipeSeparatedList = AppList | DomainList | MethodList | StealthOptionList;
  */
 const enum CustomValueFormatValidatorName {
     App = 'pipe_separated_apps',
+    Csp = 'csp_value',
     // there are some differences between $domain and $denyallow
     DenyAllow = 'pipe_separated_denyallow_domains',
     Domain = 'pipe_separated_domains',
     Method = 'pipe_separated_methods',
+    Permissions = 'permissions_value',
     StealthOption = 'pipe_separated_stealth_options',
 }
 
@@ -106,6 +123,34 @@ const isValidMethodModifierValue = (value: string): boolean => {
  */
 const isValidStealthModifierValue = (value: string): boolean => {
     return ALLOWED_STEALTH_OPTIONS.has(value);
+};
+
+/**
+ * Checks whether the given `rawOrigin` is valid as Permissions Allowlist origin.
+ *
+ * @see {@link https://w3c.github.io/webappsec-permissions-policy/#allowlists}
+ *
+ * @param rawOrigin The raw origin.
+ *
+ * @returns True if the origin is valid, false otherwise.
+ */
+const isValidPermissionsOrigin = (rawOrigin: string): boolean => {
+    // origins should be quoted by double quote
+    const actualQuoteType = QuoteUtils.getStringQuoteType(rawOrigin);
+    if (actualQuoteType !== QuoteType.Double) {
+        return false;
+    }
+
+    const origin = QuoteUtils.removeQuotes(rawOrigin);
+    try {
+        // validate the origin by URL constructor
+        // https://w3c.github.io/webappsec-permissions-policy/#algo-parse-policy-directive
+        new URL(origin);
+    } catch (e) {
+        return false;
+    }
+
+    return true;
 };
 
 /**
@@ -221,7 +266,7 @@ const customConsistentExceptionsValidator = (modifierName: string, listItems: Li
 const validateListItemsModifier = (
     modifier: Modifier,
     listParser: (raw: string, separator?: PipeSeparator) => PipeSeparatedList,
-    isValidListItem: (domain: string) => boolean,
+    isValidListItem: (listItem: string) => boolean,
     customListValidator?: (modifierName: string, list: ListItem[]) => ValidationResult,
 ): ValidationResult => {
     const modifierName = modifier.modifier.value;
@@ -355,13 +400,251 @@ const validatePipeSeparatedStealthOptions = (modifier: Modifier): ValidationResu
 };
 
 /**
+ * Validates `csp_value` custom value format.
+ * Used for $csp modifier.
+ *
+ * @param modifier Modifier AST node.
+ *
+ * @returns Validation result.
+ */
+const validateCspValue = (modifier: Modifier): ValidationResult => {
+    const modifierName = modifier.modifier.value;
+    if (!modifier.value?.value) {
+        return getValueRequiredValidationResult(modifierName);
+    }
+
+    // $csp modifier value may contain multiple directives
+    // e.g. "csp=child-src 'none'; frame-src 'self' *; worker-src 'none'"
+    const policyDirectives = modifier.value.value
+        .split(SEMICOLON)
+        // rule with $csp modifier may end with semicolon
+        // e.g. "$csp=sandbox allow-same-origin;"
+        // TODO: add predicate helper for `(i) => !!i`
+        .filter((i) => !!i);
+
+    const invalidValueValidationResult = getInvalidValidationResult(
+        `${VALIDATION_ERROR_PREFIX.VALUE_INVALID}: '${modifierName}': "${modifier.value.value}"`,
+    );
+
+    if (policyDirectives.length === 0) {
+        return invalidValueValidationResult;
+    }
+
+    const invalidDirectives: string[] = [];
+
+    for (let i = 0; i < policyDirectives.length; i += 1) {
+        const policyDirective = policyDirectives[i].trim();
+        if (!policyDirective) {
+            return invalidValueValidationResult;
+        }
+
+        const chunks = policyDirective.split(SPACE);
+        const [directive, ...valueChunks] = chunks;
+
+        // e.g. "csp=child-src 'none'; ; worker-src 'none'"
+        // validator it here          ↑
+        if (!directive) {
+            return invalidValueValidationResult;
+        }
+
+        if (!ALLOWED_CSP_DIRECTIVES.has(directive)) {
+            // e.g. "csp='child-src' 'none'"
+            if (ALLOWED_CSP_DIRECTIVES.has(QuoteUtils.removeQuotes(directive))) {
+                return getInvalidValidationResult(
+                    `${VALIDATION_ERROR_PREFIX.NO_CSP_DIRECTIVE_QUOTE}: '${modifierName}': ${directive}`,
+                );
+            }
+
+            invalidDirectives.push(directive);
+            continue;
+        }
+
+        if (valueChunks.length === 0) {
+            return getInvalidValidationResult(
+                `${VALIDATION_ERROR_PREFIX.NO_CSP_VALUE}: '${modifierName}': '${directive}'`,
+            );
+        }
+    }
+
+    if (invalidDirectives.length > 0) {
+        const directivesToStr = QuoteUtils.quoteAndJoinStrings(invalidDirectives, QuoteType.Double);
+        return getInvalidValidationResult(
+            `${VALIDATION_ERROR_PREFIX.INVALID_CSP_DIRECTIVES}: '${modifierName}': ${directivesToStr}`,
+        );
+    }
+
+    return { valid: true };
+};
+
+/**
+ * Validates permission allowlist origins in the value of $permissions modifier.
+ *
+ * @see {@link https://w3c.github.io/webappsec-permissions-policy/#allowlists}
+ *
+ * @param allowlistChunks Array of allowlist chunks.
+ * @param directive Permission directive name.
+ * @param modifierName Modifier name.
+ *
+ * @returns Validation result.
+ */
+const validatePermissionAllowlistOrigins = (
+    allowlistChunks: string[],
+    directive: string,
+    modifierName: string,
+): ValidationResult => {
+    const invalidOrigins: string[] = [];
+
+    for (let i = 0; i < allowlistChunks.length; i += 1) {
+        const chunk = allowlistChunks[i].trim();
+        // skip few spaces between origins (they were splitted by space)
+        // e.g. 'geolocation=("https://example.com"  "https://*.example.com")'
+        if (chunk.length === 0) {
+            continue;
+        }
+        /**
+         * 'self' should be checked case-insensitively
+         *
+         * @see {@link https://w3c.github.io/webappsec-permissions-policy/#algo-parse-policy-directive}
+         *
+         * @example 'geolocation=(self)'
+         */
+        if (chunk.toLowerCase() === PERMISSIONS_TOKEN_SELF) {
+            continue;
+        }
+        if (QuoteUtils.getStringQuoteType(chunk) !== QuoteType.Double) {
+            return getInvalidValidationResult(
+                // eslint-disable-next-line max-len
+                `${VALIDATION_ERROR_PREFIX.INVALID_PERMISSION_ORIGIN_QUOTES}: '${modifierName}': '${directive}': '${QuoteUtils.removeQuotes(chunk)}'`,
+            );
+        }
+        if (!isValidPermissionsOrigin(chunk)) {
+            invalidOrigins.push(chunk);
+        }
+    }
+
+    if (invalidOrigins.length > 0) {
+        const originsToStr = QuoteUtils.quoteAndJoinStrings(invalidOrigins);
+        return getInvalidValidationResult(
+            // eslint-disable-next-line max-len
+            `${VALIDATION_ERROR_PREFIX.INVALID_PERMISSION_ORIGINS}: '${modifierName}': '${directive}': ${originsToStr}`,
+        );
+    }
+
+    return { valid: true };
+};
+
+/**
+ * Validates permission allowlist in the modifier value.
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy#allowlists}
+ * @see {@link https://w3c.github.io/webappsec-permissions-policy/#allowlists}
+ *
+ * @param allowlist Allowlist value.
+ * @param directive Permission directive name.
+ * @param modifierName Modifier name.
+ *
+ * @returns Validation result.
+ */
+const validatePermissionAllowlist = (
+    allowlist: string,
+    directive: string,
+    modifierName: string,
+): ValidationResult => {
+    // `*` is one of available permissions tokens
+    // e.g. 'fullscreen=*'
+    // https://w3c.github.io/webappsec-permissions-policy/#structured-header-serialization
+    if (allowlist === WILDCARD
+        // e.g. 'autoplay=()'
+        || allowlist === EMPTY_PERMISSIONS_ALLOWLIST) {
+        return { valid: true };
+    }
+
+    if (!(allowlist.startsWith(OPEN_PARENTHESIS) && allowlist.endsWith(CLOSE_PARENTHESIS))) {
+        return getInvalidValidationResult(`${VALIDATION_ERROR_PREFIX.VALUE_INVALID}: '${modifierName}'`);
+    }
+
+    const allowlistChunks = allowlist.slice(1, -1).split(SPACE);
+    return validatePermissionAllowlistOrigins(allowlistChunks, directive, modifierName);
+};
+
+/**
+ * Validates single permission in the modifier value.
+ *
+ * @param permission Single permission value.
+ * @param modifierName Modifier name.
+ * @param modifierValue Modifier value.
+ *
+ * @returns Validation result.
+ */
+const validateSinglePermission = (
+    permission: string,
+    modifierName: string,
+    modifierValue: string,
+): ValidationResult => {
+    // empty permission in the rule
+    // e.g. 'permissions=storage-access=()\\, \\, camera=()'
+    // the validator is here                 ↑
+    if (!permission) {
+        return getInvalidValidationResult(`${VALIDATION_ERROR_PREFIX.VALUE_INVALID}: '${modifierName}'`);
+    }
+
+    if (permission.includes(COMMA)) {
+        return getInvalidValidationResult(
+            `${VALIDATION_ERROR_PREFIX.NO_UNESCAPED_PERMISSION_COMMA}: '${modifierName}': '${modifierValue}'`,
+        );
+    }
+
+    const [directive, allowlist] = permission.split(EQUALS);
+    if (!ALLOWED_PERMISSION_DIRECTIVES.has(directive)) {
+        return getInvalidValidationResult(
+            `${VALIDATION_ERROR_PREFIX.INVALID_PERMISSION_DIRECTIVE}: '${modifierName}': '${directive}'`,
+        );
+    }
+
+    return validatePermissionAllowlist(allowlist, directive, modifierName);
+};
+
+/**
+ * Validates `permissions_value` custom value format.
+ * Used for $permissions modifier.
+ *
+ * @param modifier Modifier AST node.
+ *
+ * @returns Validation result.
+ */
+const validatePermissions = (modifier: Modifier): ValidationResult => {
+    if (!modifier.value?.value) {
+        return getValueRequiredValidationResult(modifier.modifier.value);
+    }
+
+    const modifierName = modifier.modifier.value;
+    const modifierValue = modifier.value.value;
+
+    // multiple permissions may be separated by escaped commas
+    const permissions = modifier.value.value.split(`${BACKSLASH}${COMMA}`);
+
+    for (let i = 0; i < permissions.length; i += 1) {
+        const permission = permissions[i].trim();
+
+        const singlePermissionValidationResult = validateSinglePermission(permission, modifierName, modifierValue);
+        if (!singlePermissionValidationResult.valid) {
+            return singlePermissionValidationResult;
+        }
+    }
+
+    return { valid: true };
+};
+
+/**
  * Map of all available pre-defined validators for modifiers with custom `value_format`.
  */
 const CUSTOM_VALUE_FORMAT_MAP = {
     [CustomValueFormatValidatorName.App]: validatePipeSeparatedApps,
+    [CustomValueFormatValidatorName.Csp]: validateCspValue,
     [CustomValueFormatValidatorName.DenyAllow]: validatePipeSeparatedDenyAllowDomains,
     [CustomValueFormatValidatorName.Domain]: validatePipeSeparatedDomains,
     [CustomValueFormatValidatorName.Method]: validatePipeSeparatedMethods,
+    [CustomValueFormatValidatorName.Permissions]: validatePermissions,
     [CustomValueFormatValidatorName.StealthOption]: validatePipeSeparatedStealthOptions,
 };
 
