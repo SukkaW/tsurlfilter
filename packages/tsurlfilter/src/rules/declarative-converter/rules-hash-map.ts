@@ -44,8 +44,6 @@ export interface IRulesHashMap {
  * Contains a dictionary where the key is the hash of the rule and the value is
  * a list of sources for the rule. Storing this dictionary is necessary for fast
  * rule matching, which can be negated by $badfilter.
- *
- * TODO: Add tests.
  */
 export class RulesHashMap implements IRulesHashMap {
     private map: RuleHashToRuleIdx = new Map();
