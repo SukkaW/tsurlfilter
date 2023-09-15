@@ -177,13 +177,7 @@ export class DomainModifier {
 
             if (SimpleRegex.isRegexPattern(d)) {
                 try {
-                    /**
-                     * Regular expressions are cached internally by the browser
-                     * (for instance, they're stored in the CompilationCache in V8/Chromium),
-                     * so calling the constructor here should not be a problem.
-                     *
-                     * TODO use SimpleRegex.patternFromString(d) after it is refactored to not add 'g' flag
-                     */
+                    // TODO use SimpleRegex.patternFromString(d) after it is refactored to not add 'g' flag
                     const domainPattern = new RegExp(d.slice(1, -1));
                     if (domainPattern.test(domain)) {
                         return true;
