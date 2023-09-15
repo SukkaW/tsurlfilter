@@ -325,12 +325,13 @@ export class TabsApi {
      *
      * @param tabId Tab ID.
      * @param changeInfo Tab change info.
+     * @param tabInfo Tab info.
      */
-    private handleTabUpdate(tabId: number, changeInfo: Tabs.OnUpdatedChangeInfoType): void {
+    private handleTabUpdate(tabId: number, changeInfo: Tabs.OnUpdatedChangeInfoType, tabInfo: Tabs.Tab): void {
         // TODO: we can ignore some events (favicon url update etc.)
         const tabContext = this.context.get(tabId);
-        if (tabContext) {
-            tabContext.updateTabInfo(changeInfo);
+        if (tabContext && TabContext.isBrowserTab(tabInfo)) {
+            tabContext.updateTabInfo(changeInfo, tabInfo);
             this.onUpdate.dispatch(tabContext);
         }
     }

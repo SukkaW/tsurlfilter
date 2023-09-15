@@ -175,12 +175,8 @@ import { isHttpOrWsRequest, getDomain } from '../../common/utils/url';
 import { logger } from '../../common/utils/logger';
 import { defaultFilteringLog, FilteringEventType } from '../../common/filtering-log';
 
-import {
-    CosmeticApi,
-    type ApplyJsRulesParams,
-    type ApplyCssRulesParams,
-} from './cosmetic-api';
 import { removeHeadersService } from './services/remove-headers-service';
+import { CosmeticApi } from './cosmetic-api';
 import { paramsService } from './services/params-service';
 import { cookieFiltering } from './services/cookie-filtering/cookie-filtering';
 import { ContentFiltering } from './services/content-filtering/content-filtering';
@@ -587,15 +583,7 @@ export class WebRequestApi {
             return;
         }
 
-        const { cosmeticResult } = frame;
-
-        const injectionParams: ApplyJsRulesParams = {
-            tabId,
-            frameId,
-            cosmeticResult,
-        };
-
-        CosmeticApi.applyFrameJsRules(injectionParams);
+        CosmeticApi.applyFrameJsRules(frameId, tabId);
     }
 
     /**
@@ -712,7 +700,7 @@ export class WebRequestApi {
          * Cosmetic result may not be committed to frame context during worker request processing.
          * We use engine request as a fallback for this case.
          */
-        if (!frame.cosmeticResult) {
+        if (!frame.cosmeticResult && isHttpOrWsRequest(url)) {
             frame.cosmeticResult = engineApi.matchCosmetic({
                 requestUrl: url,
                 frameUrl: url,
@@ -721,22 +709,8 @@ export class WebRequestApi {
             });
         }
 
-        const { cosmeticResult } = frame;
-
-        const cssInjectionParams: ApplyCssRulesParams = {
-            tabId,
-            frameId,
-            cosmeticResult,
-        };
-
-        const jsInjectionParams: ApplyJsRulesParams = {
-            tabId,
-            frameId,
-            cosmeticResult,
-        };
-
-        CosmeticApi.applyFrameCssRules(cssInjectionParams);
-        CosmeticApi.applyFrameJsRules(jsInjectionParams);
+        CosmeticApi.applyFrameCssRules(frameId, tabId);
+        CosmeticApi.applyFrameJsRules(frameId, tabId);
     }
 
     /**
