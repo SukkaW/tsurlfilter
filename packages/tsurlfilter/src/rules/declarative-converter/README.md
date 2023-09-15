@@ -75,8 +75,8 @@ For a full description of each modifier, see the knowledgebase https://adguard.c
 # MV3 specific limitations
 <a name="mv3_specific_limitations__$badfilter"></a>
 ## $badfilter
-In current implementation rules with `$badfilter` works across all filters:
-From these three filters
+In current implementation rules with `$badfilter` works across all filters.
+From these three filters:
 ```adblock
 !filter 1
 ||example.org^
@@ -108,8 +108,8 @@ Output result will contain only one rule:
 
 <a name="mv3_specific_limitations__$badfilter__problem_1"></a>
 ### Problem 1
-But current algorithm not covers rules with `$domain` instersections, for example:
-For these two rules
+But current algorithm not covers rules with `$domain` instersections, for example,
+for these two rules:
 ```adblock
 /some$domain=example.com|example.org
 /some$domain=example.com,badfilter
