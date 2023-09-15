@@ -78,7 +78,7 @@
     "precommit": "lint-staged",
     "prepublishOnly": "yarn build",
     "increment": "yarn version --patch --no-git-tag-version",
-    "examples": "ts-node tasks/generate-examples"
+    "examples": "node -r esbuild-register tasks/generate-examples"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": [
@@ -112,6 +112,8 @@
     "@typescript-eslint/eslint-plugin": "5.33.0",
     "@typescript-eslint/parser": "5.33.0",
     "coveralls": "3.1.1",
+    "esbuild": "^0.19.3",
+    "esbuild-register": "^3.5.0",
     "eslint": "8.21.0",
     "eslint-config-airbnb-typescript": "17.0.0",
     "eslint-plugin-import": "2.26.0",
@@ -126,7 +128,6 @@
     "rollup-plugin-node-globals": "1.4.0",
     "rollup-plugin-preserve-shebangs": "0.2.0",
     "rollup-plugin-terser": "7.0.2",
-    "ts-node": "^10.9.1",
     "tslib": "2.4.0",
     "typedoc": "0.23.10",
     "typescript": "4.7.4"
