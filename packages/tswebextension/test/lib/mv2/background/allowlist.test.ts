@@ -38,7 +38,7 @@ describe('Allowlist Api', () => {
                 inverted: false,
                 expected: new StringRuleList(
                     ALLOWLIST_FILTER_ID,
-                    '@@///(www\\.)?example\\.com/$document,important',
+                    '@@///(www\\.)?example.com/$document,important',
                 ),
             },
             {
@@ -80,9 +80,11 @@ describe('Allowlist Api', () => {
 
     describe('static createAllowlistRule method', () => {
         it('should return allowlist rule, when domain is specified', () => {
-            expect(Allowlist.createAllowlistRule('example.com')).toStrictEqual(
+            const domain = 'example.com';
+
+            expect(Allowlist.createAllowlistRule(domain)).toStrictEqual(
                 new NetworkRule(
-                    String.raw`@@///(www\.)?example\.com/$document,important`,
+                    String.raw`@@///(www\.)?${domain}/$document,important`,
                     ALLOWLIST_FILTER_ID,
                 ),
             );

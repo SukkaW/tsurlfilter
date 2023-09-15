@@ -62,7 +62,6 @@ export { CosmeticRuleParser } from './parser/cosmetic';
 export { AppListParser } from './parser/misc/app-list';
 export { DomainListParser } from './parser/misc/domain-list';
 export { MethodListParser } from './parser/misc/method-list';
-export { StealthOptionListParser } from './parser/misc/stealth-option-list';
 export { FilterListParser } from './parser/filterlist';
 export { HintCommentRuleParser } from './parser/comment/hint-rule';
 export { HintParser } from './parser/comment/hint';

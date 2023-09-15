@@ -56,7 +56,6 @@ module.exports = {
         ],
         'no-restricted-syntax': ['error', 'LabeledStatement', 'WithStatement'],
         'no-continue': 'off',
-        'no-new': 'off',
         'jsdoc/require-param-type': 'off',
         'jsdoc/require-returns-type': 'off',
         'jsdoc/tag-lines': [

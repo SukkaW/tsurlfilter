@@ -3,10 +3,6 @@
  */
 
 // General
-
-/**
- * Empty string.
- */
 export const EMPTY = '';
 export const SPACE = ' ';
 export const TAB = '\t';

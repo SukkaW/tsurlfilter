@@ -3,7 +3,7 @@ import type { CosmeticResult, MatchingResult, NetworkRule } from '@adguard/tsurl
 
 import { EventChannel } from '../../../common/utils/channels';
 import type { DocumentApi } from '../document-api';
-import { FrameRequestContext, TabContext, type TabInfo } from './tab-context';
+import { FrameRequestContext, TabContext } from './tab-context';
 import { type Frame, MAIN_FRAME_ID } from './frame';
 
 /**
@@ -134,9 +134,8 @@ export class TabsApi {
      * Records request context to the tab context.
      *
      * @param requestContext Tab's frame's request context.
-     * @param isRemoveparamRedirect Indicates whether the request is a $removeparam redirect.
      */
-    public handleFrameRequest(requestContext: TabFrameRequestContext, isRemoveparamRedirect = false): void {
+    public handleFrameRequest(requestContext: TabFrameRequestContext): void {
         const { tabId } = requestContext;
 
         const tabContext = this.context.get(tabId);
@@ -145,7 +144,7 @@ export class TabsApi {
             return;
         }
 
-        tabContext.handleFrameRequest(requestContext, isRemoveparamRedirect);
+        tabContext.handleFrameRequest(requestContext);
     }
 
     /**
@@ -326,13 +325,12 @@ export class TabsApi {
      *
      * @param tabId Tab ID.
      * @param changeInfo Tab change info.
-     * @param tabInfo Tab info.
      */
-    private handleTabUpdate(tabId: number, changeInfo: Tabs.OnUpdatedChangeInfoType, tabInfo: Tabs.Tab): void {
+    private handleTabUpdate(tabId: number, changeInfo: Tabs.OnUpdatedChangeInfoType): void {
         // TODO: we can ignore some events (favicon url update etc.)
         const tabContext = this.context.get(tabId);
-        if (tabContext && TabContext.isBrowserTab(tabInfo)) {
-            tabContext.updateTabInfo(changeInfo, tabInfo);
+        if (tabContext) {
+            tabContext.updateTabInfo(changeInfo);
             this.onUpdate.dispatch(tabContext);
         }
     }

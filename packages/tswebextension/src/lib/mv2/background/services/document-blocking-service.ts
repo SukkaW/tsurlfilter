@@ -1,4 +1,4 @@
-import browser, { type WebRequest } from 'webextension-polyfill';
+import browser from 'webextension-polyfill';
 import { getDomain } from 'tldts';
 import type { NetworkRule } from '@adguard/tsurlfilter';
 
@@ -7,18 +7,7 @@ import { logger } from '../../../common/utils/logger';
 import { isChromium } from '../utils/browser-detector';
 import { tabsApi } from '../api';
 import type { ConfigurationMV2 } from '../configuration';
-import { ContentType } from '..';
-
-/**
- * Params for {@link DocumentBlockingService.getDocumentBlockingResponse}.
- */
-type GetDocumentBlockingResponseParams = {
-    tabId: number,
-    eventId: string,
-    rule: NetworkRule,
-    referrerUrl: string,
-    requestUrl: string,
-};
+import type { WebRequestBlockingResponse } from '../request/request-blocking-api';
 
 /**
  * This service encapsulate processing of $document modifier rules.
@@ -59,18 +48,18 @@ export class DocumentBlockingService {
     /**
      * Processes $document modifier rule matched request in {@link RequestBlockingApi.getBlockingResponse}.
      *
-     * @param data Data for document request processing.
+     * @param eventId Request event id.
+     * @param requestUrl Url of processed request.
+     * @param rule {@link NetworkRule} Instance of matched rule.
+     * @param tabId TabId of processed request.
      * @returns Blocking response or null {@link WebRequestApi.onBeforeRequest}.
      */
-    public getDocumentBlockingResponse(data: GetDocumentBlockingResponseParams): WebRequest.BlockingResponse | void {
-        const {
-            tabId,
-            eventId,
-            rule,
-            referrerUrl,
-            requestUrl,
-        } = data;
-
+    public getDocumentBlockingResponse(
+        eventId: string,
+        requestUrl: string,
+        rule: NetworkRule,
+        tabId: number,
+    ): WebRequestBlockingResponse {
         // if request url domain is trusted, ignore document blocking rule
         if (this.isTrustedDomain(requestUrl)) {
             return undefined;
@@ -83,9 +72,6 @@ export class DocumentBlockingService {
                 eventId,
                 tabId,
                 rule,
-                requestUrl,
-                frameUrl: referrerUrl,
-                requestType: ContentType.Document,
             },
         });
 

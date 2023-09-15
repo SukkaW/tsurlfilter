@@ -81,9 +81,6 @@ export type ApplyBasicRuleEventData = {
     tabId: number,
     eventId: string,
     rule: NetworkRule,
-    requestUrl: string,
-    frameUrl: string,
-    requestType: ContentType,
 };
 
 /**

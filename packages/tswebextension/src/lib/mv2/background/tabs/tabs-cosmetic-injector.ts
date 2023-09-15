@@ -4,7 +4,10 @@ import { RequestType } from '@adguard/tsurlfilter/es/request-type';
 import { isHttpOrWsRequest } from '../../../common/utils/url';
 import { logger } from '../../../common/utils/logger';
 import { ContentType } from '../../../common/request-type';
-import { CosmeticApi } from '../cosmetic-api';
+import {
+    type ApplyCssRulesParams,
+    CosmeticApi,
+} from '../cosmetic-api';
 import { Frame, MAIN_FRAME_ID } from './frame';
 import { TabContext } from './tab-context';
 import type { EngineApi } from '../engine-api';
@@ -102,9 +105,19 @@ export class TabsCosmeticInjector {
 
             const { cosmeticResult } = frame;
 
-            CosmeticApi.applyFrameCssRules(frameId, tabId);
+            const cssInjectionParams: ApplyCssRulesParams = {
+                tabId,
+                frameId,
+                cosmeticResult,
+            };
 
-            CosmeticApi.applyFrameJsRules(frameId, tabId);
+            CosmeticApi.applyFrameCssRules(cssInjectionParams);
+
+            CosmeticApi.applyFrameJsRules({
+                tabId,
+                frameId,
+                cosmeticResult,
+            });
 
             CosmeticApi.logScriptRules({
                 url,

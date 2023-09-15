@@ -8424,8 +8424,7 @@ var RequestType = {
     Font: 256,
     WebSocket: 512,
     Ping: 1024,
-    CspReport: 2048,
-    Other: 4096,
+    Other: 2048,
 };
 
 /**
@@ -8802,33 +8801,29 @@ initAssistant();
             documentUrl: window.location.href,
         },
     });
-    // In some cases response can be undefined due to broken message channel.
-    if (!response || response.length === 0) {
+    if (!response) {
         return;
     }
-    try {
-        const cookieController = new CookieController(({ cookieName, cookieValue, cookieDomain, cookieRuleText, thirdParty, filterId, }) => {
-            sendAppMessage({
-                type: MessageType.SaveCookieLogEvent,
-                payload: {
-                    cookieName,
-                    cookieValue,
-                    cookieDomain,
-                    cookieRuleText,
-                    thirdParty,
-                    filterId,
-                },
+    if (response.rulesData) {
+        try {
+            const cookieController = new CookieController(({ cookieName, cookieValue, cookieDomain, cookieRuleText, thirdParty, filterId, }) => {
+                sendAppMessage({
+                    type: MessageType.SaveCookieLogEvent,
+                    payload: {
+                        cookieName,
+                        cookieValue,
+                        cookieDomain,
+                        cookieRuleText,
+                        thirdParty,
+                        filterId,
+                    },
+                });
             });
-        });
-        cookieController.apply(response);
-    }
-    catch (e) {
-        /**
-         * Content script injected on in every frame, but document cookie API in
-         * iframes can be blocked by website CSP policy. We ignore this cases.
-         * Content script matching defined in browser extension.
-         * TODO: move error handling to it.
-         */
+            cookieController.apply(response.rulesData);
+        }
+        catch (e) {
+            // Ignore exceptions
+        }
     }
 }))();
 

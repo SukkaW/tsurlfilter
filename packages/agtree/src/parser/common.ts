@@ -126,7 +126,6 @@ export const enum ListNodeType {
     AppList = 'AppList',
     DomainList = 'DomainList',
     MethodList = 'MethodList',
-    StealthOptionList = 'StealthOptionList',
 }
 
 /**
@@ -136,7 +135,6 @@ export const enum ListItemNodeType {
     App = 'App',
     Domain = 'Domain',
     Method = 'Method',
-    StealthOption = 'StealthOption',
 }
 
 /**
@@ -843,13 +841,6 @@ export interface Method extends ListItem {
 }
 
 /**
- * Represents an element of the stealth option list — $stealth.
- */
-export interface StealthOption extends ListItem {
-    type: ListItemNodeType.StealthOption;
-}
-
-/**
  * Represents a list of domains.
  * Needed for $domain and $denyallow.
  *
@@ -892,13 +883,13 @@ export interface AppList extends Node {
     separator: PipeSeparator;
 
     /**
-     * List of apps
+     * List of domains
      */
     children: App[];
 }
 
 /**
- * Represents a list of methods.
+ * Represents a list of apps.
  * Needed for $method.
  *
  * @example
@@ -911,38 +902,14 @@ export interface MethodList extends Node {
     type: ListNodeType.MethodList;
 
     /**
-     * Separator used in the method list.
+     * Separator used in the app list.
      */
     separator: PipeSeparator;
 
     /**
-     * List of methods
+     * List of domains
      */
     children: Method[];
-}
-
-/**
- * Represents a list of stealth options.
- * Needed for $stealth.
- *
- * @example
- * `referrer|ip`.
- */
-export interface StealthOptionList extends Node {
-    /**
-     * Type of the node. Basically, the idea is that each main AST part should have a type
-     */
-    type: ListNodeType.StealthOptionList;
-
-    /**
-     * Separator used in the stealth option list.
-     */
-    separator: PipeSeparator;
-
-    /**
-     * List of stealth options
-     */
-    children: StealthOption[];
 }
 
 /**

@@ -15,9 +15,7 @@ import {
  * We need tab id in the tab information, otherwise we do not process it.
  * For example developer tools tabs.
  */
-export type TabInfo = Tabs.Tab & {
-    id: number,
-};
+export type TabInfo = Tabs.Tab & { id: number };
 
 /**
  * Request context data related to the frame.
@@ -27,7 +25,6 @@ export type FrameRequestContext = {
     requestId: string;
     requestUrl: string;
     requestType: RequestType;
-    isRemoveparamRedirect?: boolean;
 };
 
 /**
@@ -78,10 +75,9 @@ export class TabContext {
      * Updates tab info.
      *
      * @param changeInfo Tab change info.
-     * @param tabInfo Tab info.
      */
-    public updateTabInfo(changeInfo: Tabs.OnUpdatedChangeInfoType, tabInfo: TabInfo): void {
-        this.info = tabInfo;
+    public updateTabInfo(changeInfo: Tabs.OnUpdatedChangeInfoType): void {
+        this.info = Object.assign(this.info, changeInfo);
 
         // If the tab was updated it means that it wasn't used to send requests in the background.
         this.isSyntheticTab = false;
@@ -128,13 +124,11 @@ export class TabContext {
      * and store it in the {@link mainFrameRule} property.
      * This method is called before filtering processing in WebRequest onBeforeRequest handler.
      * MatchingResult is handled in {@link handleFrameMatchingResult}.
-     *
      * CosmeticResult is handled in {@link handleFrameCosmeticResult}.
      *
      * @param requestContext Request context data.
-     * @param isRemoveparamRedirect Indicates whether the request is a $removeparam redirect.
      */
-    public handleFrameRequest(requestContext: FrameRequestContext, isRemoveparamRedirect = false): void {
+    public handleFrameRequest(requestContext: FrameRequestContext): void {
         // This method is called in the WebRequest onBeforeRequest handler.
         // It means that the request is being processed.
         this.isDocumentRequestCached = false;
@@ -147,7 +141,7 @@ export class TabContext {
         } = requestContext;
 
         if (requestType === RequestType.Document) {
-            this.handleMainFrameRequest(requestUrl, requestId, isRemoveparamRedirect);
+            this.handleMainFrameRequest(requestUrl, requestId);
         } else {
             this.frames.set(frameId, new Frame(requestUrl, requestId));
         }
@@ -193,13 +187,8 @@ export class TabContext {
      *
      * @param requestUrl Request url.
      * @param requestId Request id.
-     * @param isRemoveparamRedirect Indicates whether the request is a $removeparam redirect.
      */
-    private handleMainFrameRequest(
-        requestUrl: string,
-        requestId?: string,
-        isRemoveparamRedirect = false,
-    ): void {
+    private handleMainFrameRequest(requestUrl: string, requestId?: string): void {
         // Clear frames data on tab reload.
         this.frames.clear();
 
@@ -211,15 +200,13 @@ export class TabContext {
         // Reset tab blocked count.
         this.blockedRequestCount = 0;
 
-        if (!isRemoveparamRedirect) {
-            // dispatch filtering log reload event
-            this.filteringLog.publishEvent({
-                type: FilteringEventType.TabReload,
-                data: {
-                    tabId: this.info.id,
-                },
-            });
-        }
+        // dispatch filtering log reload event
+        this.filteringLog.publishEvent({
+            type: FilteringEventType.TabReload,
+            data: {
+                tabId: this.info.id,
+            },
+        });
     }
 
     /**

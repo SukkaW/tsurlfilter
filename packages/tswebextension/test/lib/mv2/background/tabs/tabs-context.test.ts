@@ -54,17 +54,13 @@ describe('TabContext', () => {
                 url: 'https://another.com',
                 status: 'loading',
             };
-            const newTabInfo = {
-                ...tabInfo,
-                url: 'https://another.com',
-                title: 'Page Title',
-            } as TabInfo;
 
-            tabContext.updateTabInfo(changeInfo, newTabInfo);
+            const expectedInfo = { ...tabInfo, ...changeInfo };
 
-            expect(tabContext.info).toEqual(newTabInfo);
-            expect(tabContext.info).toBe(newTabInfo);
-            expect(tabContext.info.title).toBe(newTabInfo.title);
+            tabContext.updateTabInfo(changeInfo);
+
+            expect(tabContext.info).toEqual(expectedInfo);
+            expect(tabContext.info).toBe(tabInfo);
             expect(tabContext.isSyntheticTab).toBe(false);
         });
 
@@ -73,22 +69,18 @@ describe('TabContext', () => {
                 url: 'https://another.com',
                 status: 'loading',
             };
-            const newTabInfo = {
-                ...tabInfo,
-                url: 'https://another.com',
-            } as TabInfo;
 
-            tabContext.updateTabInfo(changeInfo, newTabInfo);
+            tabContext.updateTabInfo(changeInfo);
 
             expect(tabContext.isDocumentRequestCached).toBe(true);
             expect(documentApi.matchFrame).toBeCalledWith(changeInfo.url);
         });
 
-        it('should handle cached document page reload on tab update', () => {
+        it('should handle cached document page relaod on tab update', () => {
             const changeInfo = { status: 'loading' };
 
             tabContext.isDocumentRequestCached = true;
-            tabContext.updateTabInfo(changeInfo, tabInfo);
+            tabContext.updateTabInfo(changeInfo);
 
             expect(documentApi.matchFrame).toBeCalledWith(tabInfo.url);
         });

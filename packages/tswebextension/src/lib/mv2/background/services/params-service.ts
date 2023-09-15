@@ -67,7 +67,6 @@ export class ParamsService {
             const modifiedUrl = modifier.removeParameters(url);
 
             if (url !== modifiedUrl) {
-                context.isRemoveparamRedirect = true;
                 this.filteringLog.publishEvent({
                     type: FilteringEventType.RemoveParam,
                     data: {

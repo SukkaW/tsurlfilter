@@ -3,19 +3,13 @@
  */
 
 import cloneDeep from 'clone-deep';
-import scriptlets from '@adguard/scriptlets';
+import { redirects } from '@adguard/scriptlets';
 
 import { type ModifierList } from '../../parser/common';
 import { SEMICOLON, SPACE } from '../../utils/constants';
 import { createModifierListNode, createModifierNode } from '../../ast-utils/modifiers';
 import { ConverterBase } from '../base-interfaces/converter-base';
 import { RuleConversionError } from '../../errors/rule-conversion-error';
-
-// Since scriptlets library doesn't have ESM exports, we should import
-// the whole module and then extract the required functions from it here.
-// Otherwise importing AGTree will cause an error in ESM environment,
-// because scriptlets library doesn't support named exports.
-const { redirects } = scriptlets;
 
 /**
  * Modifier conversion interface.
