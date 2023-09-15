@@ -347,13 +347,15 @@ export class WebRequestApi {
 
         // For a $replace rule, response will be undefined since we need to get
         // the response in order to actually apply $replace rules to it.
-        const response = RequestBlockingApi.getBlockingResponse(
-            basicResult,
+        const response = RequestBlockingApi.getBlockingResponse({
+            rule: basicResult,
             eventId,
             requestUrl,
+            referrerUrl,
             requestType,
+            contentType,
             tabId,
-        );
+        });
 
         if (!response) {
             /*
@@ -471,6 +473,7 @@ export class WebRequestApi {
             requestUrl,
             referrerUrl,
             requestType,
+            contentType,
             responseHeaders,
             matchingResult,
             requestFrameId,
@@ -480,12 +483,15 @@ export class WebRequestApi {
 
         const headerResult = matchingResult.getResponseHeadersResult(responseHeaders);
 
-        const response = RequestBlockingApi.getResponseOnHeadersReceived(
-            headerResult,
-            responseHeaders,
-            requestId,
+        const response = RequestBlockingApi.getResponseOnHeadersReceived(responseHeaders, {
             tabId,
-        );
+            eventId: context.eventId,
+            rule: headerResult,
+            referrerUrl,
+            requestUrl,
+            requestType,
+            contentType,
+        });
 
         if (response?.cancel) {
             tabsApi.incrementTabBlockedRequestCount(tabId);
@@ -798,6 +804,7 @@ export class WebRequestApi {
                 tabId,
                 frameId,
                 cosmeticResult,
+                url,
             })
             .catch(logger.debug);
     }
