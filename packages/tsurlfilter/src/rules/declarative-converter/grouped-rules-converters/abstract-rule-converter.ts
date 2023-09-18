@@ -125,12 +125,13 @@ import {
     UnsupportedRegexpError,
 } from '../errors/conversion-errors';
 import { ConvertedRules } from '../converted-result';
-import { IRule, IndexedRule } from '../../rule';
+import type { IRule } from '../../rule';
 import { ResourcesPathError } from '../errors/converter-options-errors';
 import { RedirectModifier } from '../../../modifiers/redirect-modifier';
 import { RemoveHeaderModifier } from '../../../modifiers/remove-header-modifier';
 import { CSP_HEADER_NAME } from '../../../modifiers/csp-modifier';
 import { HTTPMethod } from '../../../modifiers/method-modifier';
+import type { IndexedNetworkRuleWithHash } from '../network-indexed-rule-with-hash';
 
 /**
  * Contains the generic logic for converting a {@link NetworkRule}
@@ -950,7 +951,7 @@ export abstract class DeclarativeRuleConverter {
      * the original rule, packages it into a new error and returns it.
      *
      * @param rule An error was caught while converting this rule.
-     * @param index Index of {@link IndexedRule}.
+     * @param index Index of {@link IndexedNetworkRuleWithHash}.
      * @param id Identifier of the desired declarative rule.
      * @param e Captured error.
      *
@@ -990,7 +991,7 @@ export abstract class DeclarativeRuleConverter {
      */
     protected convertRules(
         filterId: number,
-        rules: IndexedRule[],
+        rules: IndexedNetworkRuleWithHash[],
         offsetId: number,
     ): ConvertedRules {
         const res: ConvertedRules = {
@@ -999,13 +1000,13 @@ export abstract class DeclarativeRuleConverter {
             sourceMapValues: [],
         };
 
-        rules.forEach(({ rule, index }: IndexedRule) => {
+        rules.forEach(({ rule, index }: IndexedNetworkRuleWithHash) => {
             const id = offsetId + index;
             let converted: DeclarativeRule[] = [];
 
             try {
                 converted = this.convertRule(
-                    rule as NetworkRule,
+                    rule,
                     id,
                 );
             } catch (e) {
@@ -1111,7 +1112,7 @@ export abstract class DeclarativeRuleConverter {
      * via generating source map for it and catching errors of conversations.
      *
      * @param filterId Filter id.
-     * @param rules Indexed rules.
+     * @param rules Indexed network rules with hashes.
      * @param offsetId Offset for the IDs of the converted rules.
      *
      * @returns Object of {@link ConvertedRules} which containing declarative
@@ -1119,7 +1120,7 @@ export abstract class DeclarativeRuleConverter {
      */
     abstract convert(
         filterId: number,
-        rules: IndexedRule[],
+        rules: IndexedNetworkRuleWithHash[],
         offsetId: number,
     ): ConvertedRules;
 }
