@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import path from 'path';
 import fs from 'fs';
+import { ensureDirSync } from 'fs-extra';
 
 import {
     type ConversionResult,
@@ -9,15 +10,6 @@ import {
     METADATA_FILENAME,
     LAZY_METADATA_FILENAME,
 } from '../src/rules/declarative-converter';
-
-const ensureDirSync = (dirPath: string) => {
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, {
-            recursive: true,
-            mode: 0o2775,
-        });
-    }
-};
 
 /**
  * Converts filters with textual rules from the provided path to declarative
@@ -58,12 +50,15 @@ export const convertFilters = async (
             const filterId = Number(index);
 
             filtersPaths.set(filterId, filePath);
-            const data = fs.readFileSync(`${filtersPath}/${filePath}`, { encoding: 'utf-8' });
+            const data = fs.readFileSync(
+                path.resolve(filtersPath, filePath),
+                { encoding: 'utf-8' },
+            );
 
             console.info(`Preparing filter #${filterId} to convert`);
 
             return new Filter(filterId, {
-                getContent: async () => data.split('\n'),
+                getContent: async () => data.split(/\r?\n/),
             });
         })
         .filter((filter): filter is Filter => filter !== null);
