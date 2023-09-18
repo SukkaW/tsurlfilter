@@ -2,7 +2,7 @@ import { z as zod } from 'zod';
 
 import { NetworkRule } from '../network-rule';
 
-import { IndexedRuleWithHash } from './indexed-rule-with-hash';
+import { IndexedNetworkRuleWithHash } from './network-indexed-rule-with-hash';
 import { DeclarativeRule, DeclarativeRuleValidator } from './declarative-rule';
 import { IFilter } from './filter';
 import { UnavailableRuleSetSourceError } from './errors/unavailable-sources-errors/unavailable-rule-set-source-error';
@@ -65,7 +65,7 @@ export interface IRuleSet {
      *
      * @returns List of network rules with $badfilter option.
      */
-    getBadFilterRules(): IndexedRuleWithHash[];
+    getBadFilterRules(): IndexedNetworkRuleWithHash[];
 
     /**
      * Returns dictionary with hashes of all ruleset's source rules.
@@ -130,11 +130,21 @@ const serializedRuleSetDataValidator = zod.strictObject({
 type SerializedRuleSetData = zod.infer<typeof serializedRuleSetDataValidator>;
 
 /**
- * A serialized rule set with primitive values.
+ * A serialized rule set with primitive values separated into two parts: one is
+ * needed for instant creating ruleset, while the other is needed only when
+ * declarative filtering log is enabled - to find and display source rules from
+ * raw filters.
  */
 export type SerializedRuleSet = {
     id: string,
+    /**
+     * Metadata needed for instant creating ruleset.
+     */
     data: string,
+    /**
+     * Metadata needed for lazy load some data to ruleset to find and show
+     * source rules when declarative filtering log is enabled.
+     */
     lazyData: string,
 };
 
@@ -143,7 +153,14 @@ export type SerializedRuleSet = {
  */
 export type DeserializedRuleSet = {
     id: string,
+    /**
+     * Metadata needed for instant creating ruleset.
+     */
     data: SerializedRuleSetData,
+    /**
+     * Metadata needed for lazy load some data to ruleset to find and show
+     * source rules when declarative filtering log is enabled.
+     */
     ruleSetContentProvider: RuleSetContentProvider,
 };
 
@@ -179,14 +196,14 @@ export class RuleSet implements IRuleSet {
     private sourceMap: ISourceMap | undefined;
 
     /**
-     * Dictionary which helps to fast find rule by it's hash.
+     * Dictionary which helps to fast find rule by its hash.
      */
     private rulesHashMap: IRulesHashMap;
 
     /**
      * List of network rules with $badfilter option.
      */
-    private badFilterRules: IndexedRuleWithHash[];
+    private badFilterRules: IndexedNetworkRuleWithHash[];
 
     /**
      * Keeps array of source filter lists
@@ -223,7 +240,7 @@ export class RuleSet implements IRuleSet {
         rulesCount: number,
         regexpRulesCount: number,
         ruleSetContentProvider: RuleSetContentProvider,
-        badFilterRules: IndexedRuleWithHash[],
+        badFilterRules: IndexedNetworkRuleWithHash[],
         rulesHashMap: IRulesHashMap,
     ) {
         this.id = id;
@@ -340,7 +357,7 @@ export class RuleSet implements IRuleSet {
     }
 
     // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
-    public getBadFilterRules(): IndexedRuleWithHash[] {
+    public getBadFilterRules(): IndexedNetworkRuleWithHash[] {
         return this.badFilterRules;
     }
 
@@ -371,23 +388,27 @@ export class RuleSet implements IRuleSet {
 
     /**
      * For provided source rule and filter id return network rule.
+     * This method is needed for checking the applicability of $badfilter after
+     * a fast-check of rules by comparing only hashes. Afterward, we should
+     * build the 'full' Network rule from provided source, not just the hash,
+     * to determine the applicability of $badfilter.
      *
      * @param source Source rule and filter id.
      *
-     * @returns List of {@link NetworkRule}.
+     * @returns List of {@link NetworkRule | network rules}.
      */
     public static getNetworkRuleBySourceRule(
         source: SourceRuleAndFilterId,
     ): NetworkRule[] {
         const { sourceRule, filterId } = source;
 
-        let indexedRulesWithHash: IndexedRuleWithHash[] = [];
+        let networkIndexedRulesWithHash: IndexedNetworkRuleWithHash[] = [];
 
         try {
-            // We don't need line index because this indexedRulesWithHash will
-            // be used only for matching $badfilter rules.
-            indexedRulesWithHash = IndexedRuleWithHash.createFromRawString(
+            networkIndexedRulesWithHash = IndexedNetworkRuleWithHash.createFromRawString(
                 filterId,
+                // We don't need line index because this indexedNetworkRulesWithHash
+                // will be used only for matching $badfilter rules.
                 0,
                 sourceRule,
             );
@@ -395,9 +416,7 @@ export class RuleSet implements IRuleSet {
             return [];
         }
 
-        const networkRules = indexedRulesWithHash
-            .map(({ rule }) => rule)
-            .filter((rule): rule is NetworkRule => rule instanceof NetworkRule);
+        const networkRules = networkIndexedRulesWithHash.map(({ rule }) => rule);
 
         return networkRules;
     }
@@ -406,9 +425,15 @@ export class RuleSet implements IRuleSet {
     /**
      * Deserializes rule set to primitives values with lazy load.
      *
-     * @param id
-     * @param rawData
-     * @param loadLazyData
+     * @param id Id of rule set.
+     * @param rawData An item of {@link SerializedRuleSetData} for instant
+     * creating ruleset. It contains counters for regular declarative and regexp
+     * declarative rules, a map of hashes for all rules, and a list of rules
+     * with the `$badfilter` modifier.
+     * @param loadLazyData An item of {@link SerializedRuleSetLazyData} for lazy
+     * loading ruleset data to find and display source rules when declarative
+     * filtering log is enabled. It includes a map of sources for all rules,
+     * a list of declarative rules, and a list of source filter IDs.
      * @param filterList List of {@link IFilter}.
      *
      * @returns Deserialized rule set.

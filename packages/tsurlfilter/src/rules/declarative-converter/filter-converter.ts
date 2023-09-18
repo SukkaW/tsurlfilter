@@ -3,15 +3,12 @@
  * to rule sets {@link IRuleSet} with declarative rules {@link DeclarativeRule}.
  */
 
-import { NetworkRule, NetworkRuleOption } from '../network-rule';
-
 import {
     IRuleSet,
     RuleSetContentProvider,
     RuleSet,
     UpdateStaticRulesOptions,
 } from './rule-set';
-import { FilterScanner } from './filter-scanner';
 import { SourceMap } from './source-map';
 import type { IFilter } from './filter';
 import { DeclarativeRulesConverter } from './rules-converter';
@@ -22,15 +19,10 @@ import {
 } from './errors/converter-options-errors';
 import type { ConversionResult } from './conversion-result';
 import type { DeclarativeConverterOptions } from './declarative-converter-options';
-import type { ScannedFilter, ScannedFilters } from './rules-converter';
 import { RulesHashMap } from './rules-hash-map';
-import { IndexedRuleWithHash } from './indexed-rule-with-hash';
+import { IndexedNetworkRuleWithHash } from './network-indexed-rule-with-hash';
 import { type ConvertedRules } from './converted-result';
-
-type ScannedFiltersWithErrors = {
-    errors: Error[],
-    filters: ScannedFilters,
-};
+import { NetworkRulesScanner, ScannedFilter } from './network-rules-scanner';
 
 /**
  * The interface for the declarative filter converter describes what the filter
@@ -97,60 +89,6 @@ export class DeclarativeFilterConverter implements IFilterConverter {
     public static readonly COMBINED_RULESET_ID = '_dynamic';
 
     /**
-     * Asynchronous scans the list of filters for rules.
-     *
-     * @param filterList List of {@link IFilter}.
-     * @param filterFn If this function is specified, it will be applied to each
-     * rule after it has been parsed and transformed. This function is needed
-     * for example to apply $badfilter: to exclude negated rules from the array
-     * of rules that will be returned.
-     *
-     * @returns Map, where the key is the filter identifier and the value is the
-     * indexed filter rules {@link IndexedRule}.
-     */
-    // eslint-disable-next-line class-methods-use-this
-    private async scanRules(
-        filterList: IFilter[],
-        filterFn?: (r: IndexedRuleWithHash) => boolean,
-    ): Promise<ScannedFiltersWithErrors> {
-        const res: ScannedFiltersWithErrors = {
-            errors: [],
-            filters: [],
-        };
-
-        const promises = filterList.map(async (filter): Promise<ScannedFilter> => {
-            const scanner = await FilterScanner.createNew(filter);
-            const { errors, rules } = scanner.getIndexedRules(filterFn);
-
-            res.errors = res.errors.concat(errors);
-
-            const badFilterRules = rules.filter(({ rule }) => {
-                return rule instanceof NetworkRule && rule.isOptionEnabled(NetworkRuleOption.Badfilter);
-            });
-
-            return {
-                id: filter.getId(),
-                rules,
-                badFilterRules,
-            };
-        });
-
-        try {
-            res.filters = await Promise.all(promises);
-        } catch (e) {
-            const filterListIds = filterList.map((f) => f.getId());
-
-            if (e instanceof Error) {
-                res.errors.push(new Error(`Cannot scan rules of filter list with ids ${filterListIds}`, { cause: e }));
-            } else {
-                res.errors.push(new Error(`Cannot scan rules of filter list with ids ${filterListIds} due to: ${e}`));
-            }
-        }
-
-        return res;
-    }
-
-    /**
      * Checks that provided converter options are correct.
      *
      * @param options Contains path to web accessible resources,
@@ -201,10 +139,8 @@ export class DeclarativeFilterConverter implements IFilterConverter {
         }
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description
-    /**
-     * @see {@link IFilterConverter#convertStaticRuleSet}
-     */
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line jsdoc/require-param, class-methods-use-this, jsdoc/require-description, jsdoc/require-jsdoc
     public async convertStaticRuleSet(
         filter: IFilter,
         options?: DeclarativeConverterOptions,
@@ -219,7 +155,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             limitations: [],
         };
 
-        const scanned = await this.scanRules([filter]);
+        const scanned = await NetworkRulesScanner.scanRules([filter]);
 
         converted.errors = scanned.errors;
 
@@ -238,7 +174,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
             converted.ruleSets = converted.ruleSets.concat(conversionResult.ruleSets);
             converted.errors = converted.errors.concat(conversionResult.errors);
-            if (conversionResult.limitations) {
+            if (conversionResult.limitations.length > 0) {
                 converted.limitations = converted.limitations.concat(conversionResult.limitations);
             }
         });
@@ -246,10 +182,8 @@ export class DeclarativeFilterConverter implements IFilterConverter {
         return converted;
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description
-    /**
-     * @see {@link IFilterConverter#convertDynamicRuleSets}
-     */
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line jsdoc/require-param, class-methods-use-this, jsdoc/require-description, jsdoc/require-jsdoc
     public async convertDynamicRuleSets(
         filterList: IFilter[],
         staticRuleSets: IRuleSet[],
@@ -261,7 +195,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
         const allStaticBadFilterRules = DeclarativeFilterConverter.createBadFilterRulesHashMap(staticRuleSets);
 
-        const skipNegatedRulesFn = (r: IndexedRuleWithHash): boolean => {
+        const skipNegatedRulesFn = (r: IndexedNetworkRuleWithHash): boolean => {
             const fastMatchedBadFilterRules = allStaticBadFilterRules.get(r.hash);
 
             if (!fastMatchedBadFilterRules) {
@@ -270,10 +204,6 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
             for (let i = 0; i < fastMatchedBadFilterRules.length; i += 1) {
                 const rule = fastMatchedBadFilterRules[i];
-
-                if (!(rule.rule instanceof NetworkRule) || !(r.rule instanceof NetworkRule)) {
-                    return true;
-                }
 
                 const badFilterRule = rule.rule;
                 const ruleToCheck = r.rule;
@@ -288,7 +218,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
         // Note: if we drop some rules because of applying $badfilter - we
         // cannot show info about it to user.
-        const scanned = await this.scanRules(filterList, skipNegatedRulesFn);
+        const scanned = await NetworkRulesScanner.scanRules(filterList, skipNegatedRulesFn);
 
         const convertedRules = DeclarativeRulesConverter.convert(
             scanned.filters,
@@ -332,9 +262,9 @@ export class DeclarativeFilterConverter implements IFilterConverter {
      */
     private static collectConvertedResult(
         filterList: IFilter[],
-        scannedFilters: ScannedFilters,
+        scannedFilters: ScannedFilter[],
         convertedRules: ConvertedRules,
-        badFilterRules: IndexedRuleWithHash[],
+        badFilterRules: IndexedNetworkRuleWithHash[],
     ): ConversionResult {
         const {
             sourceMapValues,
@@ -391,8 +321,8 @@ export class DeclarativeFilterConverter implements IFilterConverter {
      */
     private static createBadFilterRulesHashMap(
         ruleSets: IRuleSet[],
-    ): Map<number, IndexedRuleWithHash[]> {
-        const allStaticBadFilterRules: Map<number, IndexedRuleWithHash[]> = new Map();
+    ): Map<number, IndexedNetworkRuleWithHash[]> {
+        const allStaticBadFilterRules: Map<number, IndexedNetworkRuleWithHash[]> = new Map();
 
         ruleSets.forEach((ruleSet) => {
             ruleSet.getBadFilterRules().forEach((r) => {
@@ -420,7 +350,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
      */
     private static async collectDeclarativeRulesToCancel(
         staticRuleSets: IRuleSet[],
-        dynamicBadFilterRules: IndexedRuleWithHash[],
+        dynamicBadFilterRules: IndexedNetworkRuleWithHash[],
     ): Promise<UpdateStaticRulesOptions[]> {
         const declarativeRulesToCancel: UpdateStaticRulesOptions[] = [];
 
@@ -459,7 +389,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
                     // FIXME: Error catch
                     // eslint-disable-next-line no-await-in-loop
-                    const indexedRulesWithHash = await Promise.all(
+                    const indexedNetworkRulesWithHash = await Promise.all(
                         matchedSourceRules.map((source) => {
                             return RuleSet.getNetworkRuleBySourceRule(source);
                         }),
@@ -467,15 +397,9 @@ export class DeclarativeFilterConverter implements IFilterConverter {
 
                     // NOTE: Here we use .some but not .every to simplify first version
                     // of applying $badfilter rules.
-                    const someRulesMatched = indexedRulesWithHash
+                    const someRulesMatched = indexedNetworkRulesWithHash
                         .flat()
-                        .some((rule) => {
-                            if (rule instanceof NetworkRule && badFilterRule.rule instanceof NetworkRule) {
-                                return badFilterRule.rule.negatesBadfilter(rule);
-                            }
-
-                            return false;
-                        });
+                        .some((rule) => badFilterRule.rule.negatesBadfilter(rule));
 
                     if (someRulesMatched) {
                         disableRuleIds.push(id);

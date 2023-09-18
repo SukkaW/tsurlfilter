@@ -1,40 +1,30 @@
 /**
- * @file Describes the conversion process from {@link IndexedRule} to
- * declarative rules {@link DeclarativeRule} via applying $badfilter-rules
+ * @file Describes the conversion process from {@link IndexedNetworkRuleWithHash}
+ * to declarative rules {@link DeclarativeRule} via applying $badfilter-rules
  * {@link DeclarativeRulesConverter#applyBadFilter} and checks for specified
  * limitations {@link DeclarativeRulesConverter#checkLimitations}.
  */
 
-import { NetworkRule } from '../network-rule';
-import { IndexedRule } from '../rule';
-
-import { DeclarativeRule } from './declarative-rule';
+import type { DeclarativeRule } from './declarative-rule';
 import { ConvertedRules } from './converted-result';
 import { RegularRulesConverter } from './grouped-rules-converters/regular-converter';
 import { RemoveParamRulesConverter } from './grouped-rules-converters/remove-param-converter';
 import { RemoveHeaderRulesConverter } from './grouped-rules-converters/remove-header-converter';
 import { CspRulesConverter } from './grouped-rules-converters/csp-converter';
 import { Source } from './source-map';
-import { IndexedRuleWithHash } from './indexed-rule-with-hash';
+import type { IndexedNetworkRuleWithHash } from './network-indexed-rule-with-hash';
 import { LimitationError, TooManyRulesError, TooManyRegexpRulesError } from './errors/limitation-errors';
 import { BadFilterRulesConverter } from './grouped-rules-converters/bad-filter-converter';
 import { DeclarativeRulesGrouper, GroupedRules, RulesGroup } from './rules-grouper';
 import { DeclarativeConverterOptions } from './declarative-converter-options';
 import { ConversionError, InvalidDeclarativeRuleError } from './errors/conversion-errors';
-
-export type ScannedFilter = {
-    id: number,
-    rules: IndexedRuleWithHash[],
-    badFilterRules: IndexedRuleWithHash[],
-};
-
-export type ScannedFilters = ScannedFilter[];
+import { ScannedFilter } from './network-rules-scanner';
 
 type FiltersIdsWithGroupedRules = [number, GroupedRules][];
 
 /**
- * Describes how to convert {@link IndexedRuleWithHash|indexed rules} into list of
- * {@link DeclarativeRule|declarative rules}.
+ * Describes how to convert {@link IndexedNetworkRuleWithHash|indexed network rules}
+ * into list of {@link DeclarativeRule|declarative rules}.
  */
 export class DeclarativeRulesConverter {
     /**
@@ -71,7 +61,7 @@ export class DeclarativeRulesConverter {
      * transformed declarative rule and the source rule.
      */
     public static convert(
-        filtersWithRules: ScannedFilters,
+        filtersWithRules: ScannedFilter[],
         options?: DeclarativeConverterOptions,
     ): ConvertedRules {
         const filters = this.applyBadFilter(filtersWithRules);
@@ -334,8 +324,8 @@ export class DeclarativeRulesConverter {
      *
      * @returns List with filters ids and grouped indexed rules.
      */
-    private static applyBadFilter(filtersWithRules: ScannedFilters): FiltersIdsWithGroupedRules {
-        let allBadFilterRules: IndexedRule[] = [];
+    private static applyBadFilter(filtersWithRules: ScannedFilter[]): FiltersIdsWithGroupedRules {
+        let allBadFilterRules: IndexedNetworkRuleWithHash[] = [];
 
         // Group rules
         const filterIdsWithGroupedRules = filtersWithRules
@@ -348,12 +338,11 @@ export class DeclarativeRulesConverter {
             });
 
         // Define filter function
-        const filterByBadFilterFn = (ruleToTest: IndexedRule): boolean => {
-            const networkRuleToTest = ruleToTest.rule as NetworkRule;
+        const filterByBadFilterFn = (ruleToTest: IndexedNetworkRuleWithHash): boolean => {
+            const networkRuleToTest = ruleToTest.rule;
 
             for (const { rule } of allBadFilterRules) {
-                const badFilterRule = rule as NetworkRule;
-                if (badFilterRule.negatesBadfilter(networkRuleToTest)) {
+                if (rule.negatesBadfilter(networkRuleToTest)) {
                     return false;
                 }
             }

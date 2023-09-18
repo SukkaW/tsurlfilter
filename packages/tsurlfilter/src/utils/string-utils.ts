@@ -153,7 +153,7 @@ export function hasUnquotedSubstring(str: string, substr: string): boolean {
  * @param str string to get hash
  * @return {number} hash
  */
-export function fastHash(str: string) {
+export function fastHash(str: string): number {
     if (str.length === 0) {
         return 0;
     }

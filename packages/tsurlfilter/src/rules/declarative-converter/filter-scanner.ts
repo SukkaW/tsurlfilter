@@ -1,16 +1,20 @@
-import { IndexedRuleWithHash } from './indexed-rule-with-hash';
+import { IndexedNetworkRuleWithHash } from './network-indexed-rule-with-hash';
 import { IFilter } from './filter';
 
 /**
- * IFilterScanner describes a method that should return indexed rules.
+ * IFilterScanner describes a method that should return indexed network rules
+ * with theirs hashes.
  */
 interface IFilterScanner {
     getIndexedRules(): ScannedRulesWithErrors;
 }
 
-export type ScannedRulesWithErrors = {
+/**
+ * Contains scanned indexed rules with theirs hashes and list of errors.
+ */
+type ScannedRulesWithErrors = {
+    rules: IndexedNetworkRuleWithHash[],
     errors: Error[],
-    rules: IndexedRuleWithHash[],
 };
 
 /**
@@ -61,7 +65,7 @@ export class FilterScanner implements IFilterScanner {
      * out values will be filtered with this function.
      */
     public getIndexedRules(
-        filterFn?: (r: IndexedRuleWithHash) => boolean,
+        filterFn?: (r: IndexedNetworkRuleWithHash) => boolean,
     ): ScannedRulesWithErrors {
         const { filterContent, filterId } = this;
 
@@ -76,10 +80,10 @@ export class FilterScanner implements IFilterScanner {
                 continue;
             }
 
-            let indexedRulesWithHash: IndexedRuleWithHash[] = [];
+            let indexedNetworkRulesWithHash: IndexedNetworkRuleWithHash[] = [];
 
             try {
-                indexedRulesWithHash = IndexedRuleWithHash.createFromRawString(
+                indexedNetworkRulesWithHash = IndexedNetworkRuleWithHash.createFromRawString(
                     filterId,
                     lineIndex,
                     line,
@@ -87,13 +91,17 @@ export class FilterScanner implements IFilterScanner {
             } catch (e) {
                 if (e instanceof Error) {
                     result.errors.push(e);
+                } else {
+                    // eslint-disable-next-line max-len
+                    const err = new Error(`Unknown error during creating indexed rule with hash from raw string: filter id - ${filterId}, line index - ${lineIndex}, line - ${line}`);
+                    result.errors.push(err);
                 }
                 continue;
             }
 
             const filteredRules = filterFn
-                ? indexedRulesWithHash.filter(filterFn)
-                : indexedRulesWithHash;
+                ? indexedNetworkRulesWithHash.filter(filterFn)
+                : indexedNetworkRulesWithHash;
 
             result.rules.push(...filteredRules);
         }
