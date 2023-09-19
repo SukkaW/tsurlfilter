@@ -65,7 +65,7 @@ const convertTxtToRules = async (
     );
 
     try {
-        const { ruleSets: [ruleSet] } = await filterConverter.convertDynamicRuleSets(
+        const { ruleSet } = await filterConverter.convertDynamicRuleSets(
             [filter],
             [],
             { resourcesPath: '/path/to/resources' },

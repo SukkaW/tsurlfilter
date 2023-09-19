@@ -106,6 +106,10 @@ Output result will contain only one rule:
 }
 ```
 
+<b> Please note </b> that in the current approach, the application of
+`$badfilter` rules affects the filtering process, but we do not currently
+display this in the declarative filtering log, as declarative rules are canceled.
+
 <a name="mv3_specific_limitations__$badfilter__problem_1"></a>
 ### Problem 1
 But current algorithm not covers rules with `$domain` instersections, for example,
