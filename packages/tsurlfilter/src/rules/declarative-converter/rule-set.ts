@@ -367,7 +367,9 @@ export class RuleSet implements IRuleSet {
         await this.loadContent();
 
         if (!this.sourceMap) {
-            throw Error();
+            const { filterId, sourceRuleIndex } = source;
+            // eslint-disable-next-line max-len
+            throw new Error(`Cannot find declarative rules for filter id - ${filterId}, rule index - ${sourceRuleIndex} because source map is undefined in ruleset: ${this.getId()}`);
         }
 
         return this.sourceMap.getBySourceRuleIndex(source);
