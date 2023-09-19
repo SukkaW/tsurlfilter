@@ -266,7 +266,7 @@ MessagesHandlerMV3
         ];
 
         // Update rulesets in declarative filtering log.
-        await TsWebExtension.updateRuleSetsForFilteringLog(
+        TsWebExtension.updateRuleSetsForFilteringLog(
             ruleSets,
             configuration.filteringLogEnabled,
         );
@@ -400,9 +400,9 @@ MessagesHandlerMV3
         );
         const filtersIdsToEnable = staticFilters
             .map((filter) => filter.getId());
-        const currentFiltersIds = await FiltersApi.getEnabledRuleSets();
-        const filtersIdsToDisable = currentFiltersIds
-            .filter((f) => !filtersIdsToEnable.includes(f)) || [];
+        const enabledRuleSetsIds = await FiltersApi.getEnabledRuleSets();
+        const filtersIdsToDisable = enabledRuleSetsIds
+            .filter((id) => !filtersIdsToEnable.includes(id));
 
         return {
             staticFilters,
@@ -418,7 +418,8 @@ MessagesHandlerMV3
      * @param ruleSetsPath Path to the rule set metadata.
      * @param staticFilters List of static {@link IFilter}.
      *
-     * @returns List of static {@link IRuleSet}.
+     * @returns A list of static {@link IRuleSet}, or an empty list if an error
+     * occurred during the rule scanning step.
      */
     private static async loadStaticRuleSets(
         ruleSetsPath: ConfigurationMV3['ruleSetsPath'],
@@ -453,17 +454,17 @@ MessagesHandlerMV3
      * @param allRuleSets List of {@link IRuleSet}.
      * @param filteringLogEnabled Preferred status for filtering log.
      */
-    private static async updateRuleSetsForFilteringLog(
+    private static updateRuleSetsForFilteringLog(
         allRuleSets: IRuleSet[],
         filteringLogEnabled: boolean,
-    ): Promise<void> {
+    ): void {
         declarativeFilteringLog.ruleSets = allRuleSets;
 
         // Starts or stop declarative filtering log.
         if (filteringLogEnabled) {
-            await declarativeFilteringLog.start();
+            declarativeFilteringLog.start();
         } else {
-            await declarativeFilteringLog.stop();
+            declarativeFilteringLog.stop();
         }
     }
 }

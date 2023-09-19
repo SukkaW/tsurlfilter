@@ -370,7 +370,7 @@ export class RuleSet implements IRuleSet {
             throw Error();
         }
 
-        return this.sourceMap.getBySourceRuleIndex(source) || [];
+        return this.sourceMap.getBySourceRuleIndex(source);
     }
 
     /** @inheritdoc */
