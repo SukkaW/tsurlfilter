@@ -34,16 +34,22 @@ export type UpdateStaticRulesOptions = {
 export interface IRuleSet {
     /**
      * Number of converted declarative rules.
+     *
+     * @returns Number of converted declarative rules.
      */
     getRulesCount(): number;
 
     /**
      * Number of converted declarative regexp rules.
+     *
+     * @returns Number of converted declarative regexp rules.
      */
     getRegexpRulesCount(): number;
 
     /**
      * Returns rule set id.
+     *
+     * @returns Rule set id.
      */
     getId(): string;
 
@@ -61,9 +67,9 @@ export interface IRuleSet {
     getRulesById(declarativeRuleId: number): Promise<SourceRuleAndFilterId[]>;
 
     /**
-     * Returns list of network rules with $badfilter option.
+     * Returns list of network rules with `$badfilter` option.
      *
-     * @returns List of network rules with $badfilter option.
+     * @returns List of network rules with `$badfilter` option.
      */
     getBadFilterRules(): IndexedNetworkRuleWithHash[];
 
@@ -251,29 +257,17 @@ export class RuleSet implements IRuleSet {
         this.rulesHashMap = rulesHashMap;
     }
 
-    /**
-     * Number of converted declarative rules.
-     *
-     * @returns Number of converted declarative rules.
-     */
+    /** @inheritdoc */
     public getRulesCount(): number {
         return this.rulesCount || this.declarativeRules.length;
     }
 
-    /**
-     * Number of converted declarative regexp rules.
-     *
-     * @returns Number of converted declarative regexp rules.
-     */
+    /** @inheritdoc */
     public getRegexpRulesCount(): number {
         return this.regexpRulesCount;
     }
 
-    /**
-     * Rule set id.
-     *
-     * @returns Rule set id.
-     */
+    /** @inheritdoc */
     public getId(): string {
         return this.id;
     }
@@ -340,7 +334,7 @@ export class RuleSet implements IRuleSet {
         this.initialized = true;
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
     public async getRulesById(declarativeRuleId: number): Promise<SourceRuleAndFilterId[]> {
         try {
             await this.loadContent();
@@ -356,17 +350,17 @@ export class RuleSet implements IRuleSet {
         }
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
     public getBadFilterRules(): IndexedNetworkRuleWithHash[] {
         return this.badFilterRules;
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
     public getRulesHashMap(): IRulesHashMap {
         return this.rulesHashMap;
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
     public async getDeclarativeRulesIdsBySourceRuleIndex(
         source: SourceRuleIdxAndFilterId,
     ): Promise<number[]> {
@@ -379,7 +373,7 @@ export class RuleSet implements IRuleSet {
         return this.sourceMap.getBySourceRuleIndex(source) || [];
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
     public async getDeclarativeRules(): Promise<DeclarativeRule[]> {
         await this.loadContent();
 
@@ -501,7 +495,7 @@ export class RuleSet implements IRuleSet {
         return deserialized;
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
     public async serialize(): Promise<SerializedRuleSet> {
         try {
             await this.loadContent();

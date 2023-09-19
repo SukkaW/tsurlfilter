@@ -10,16 +10,28 @@ type RuleHash = number;
  */
 type RuleHashToRuleIdx = Map<RuleHash, SourceRuleIdxAndFilterId[]>;
 
+/**
+ * Contains a hash of the rule and the 'coordinates' of this rule: the source
+ * filter ID and the rule index within this filter.
+ */
 type HashWithSource = {
     hash: RuleHash,
     source: SourceRuleIdxAndFilterId,
 };
 
+/**
+ * Contains the 'coordinates' of a rule: the source filter ID
+ * and the rule index within this filter.
+ */
 type SerializedSource = [
     SourceRuleIdxAndFilterId['filterId'],
     SourceRuleIdxAndFilterId['sourceRuleIndex'],
 ];
 
+/**
+ * Describes {@link RulesHashMap} which is serialized to primitive values for
+ * possible saving and loading.
+ */
 type SerializedHashWithSource = [
     RuleHash,
     SerializedSource[],
@@ -37,6 +49,13 @@ export interface IRulesHashMap {
      */
     findRules(hash: number): SourceRuleIdxAndFilterId[];
 
+    /**
+     * Serializes map of rules hashes to JSON string.
+     *
+     * @todo (TODO:) Can use protocol VLQ.
+     *
+     * @returns JSON string.
+     */
     serialize(): string;
 }
 
@@ -65,7 +84,7 @@ export class RulesHashMap implements IRulesHashMap {
         });
     }
 
-    // eslint-disable-next-line jsdoc/require-param, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
     findRules(hash: number): SourceRuleIdxAndFilterId[] {
         return this.map.get(hash) || [];
     }
@@ -97,13 +116,7 @@ export class RulesHashMap implements IRulesHashMap {
         return allPairs;
     }
 
-    /**
-     * Serializes source map to JSON string.
-     *
-     * @todo (TODO:) Can use protocol VLQ.
-     *
-     * @returns JSON string.
-     */
+    /** @inheritdoc */
     serialize(): string {
         const arr = Array.from(this.map);
 

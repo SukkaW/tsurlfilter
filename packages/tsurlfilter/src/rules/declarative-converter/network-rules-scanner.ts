@@ -68,14 +68,17 @@ export class NetworkRulesScanner {
             };
         });
 
-        try {
-            res.filters = await Promise.all(promises);
-        } catch (e) {
-            const filterListIds = filterList.map((f) => f.getId());
-            const errMessage = `Cannot scan rules of filter list with ids ${filterListIds}: ${getErrorMessage(e)}`;
+        const tasks = await Promise.allSettled(promises);
 
-            res.errors.push(new Error(errMessage));
-        }
+        tasks.forEach((task, index) => {
+            if (task.status === 'rejected') {
+                const filterId = filterList[index].getId();
+                res.errors.push(new Error(`Cannot scan rules from filter ${filterId}: ${task.reason}`));
+                return;
+            }
+
+            res.filters.push(task.value);
+        });
 
         return res;
     }

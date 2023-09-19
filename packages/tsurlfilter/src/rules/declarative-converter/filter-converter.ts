@@ -139,8 +139,8 @@ export class DeclarativeFilterConverter implements IFilterConverter {
         }
     }
 
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line jsdoc/require-param, class-methods-use-this, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
+    // eslint-disable-next-line class-methods-use-this
     public async convertStaticRuleSet(
         filter: IFilter,
         options?: DeclarativeConverterOptions,
@@ -182,8 +182,8 @@ export class DeclarativeFilterConverter implements IFilterConverter {
         return converted;
     }
 
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line jsdoc/require-param, class-methods-use-this, jsdoc/require-description, jsdoc/require-jsdoc
+    /** @inheritdoc */
+    // eslint-disable-next-line class-methods-use-this
     public async convertDynamicRuleSets(
         filterList: IFilter[],
         staticRuleSets: IRuleSet[],
