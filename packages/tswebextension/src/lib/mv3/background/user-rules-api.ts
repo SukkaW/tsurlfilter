@@ -63,7 +63,7 @@ export default class UserRulesApi {
                 maxNumberOfRegexpRules: MAX_NUMBER_OF_REGEX_RULES,
             },
         );
-        const { ruleSets: [ruleSet], declarativeRulesToCancel } = conversionResult;
+        const { ruleSet, declarativeRulesToCancel } = conversionResult;
 
         const declarativeRules = await ruleSet.getDeclarativeRules();
 
