@@ -153,21 +153,22 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             DeclarativeFilterConverter.checkConverterOptions(options);
         }
 
-        const {
-            errors,
-            filters: [filterIdWithRules],
-        } = await NetworkRulesScanner.scanRules([filter]);
+        const { errors, filters } = await NetworkRulesScanner.scanRules([filter]);
+
+        const [scannedStaticFilter] = filters;
+        const { id, badFilterRules } = scannedStaticFilter;
 
         const convertedRules = DeclarativeRulesConverter.convert(
-            [filterIdWithRules],
+            filters,
             options,
         );
 
         const conversionResult = DeclarativeFilterConverter.collectConvertedResult(
+            `ruleset_${id}`,
             [filter],
-            [filterIdWithRules],
+            filters,
             convertedRules,
-            filterIdWithRules.badFilterRules,
+            badFilterRules,
         );
 
         return {
@@ -225,6 +226,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             .flat();
 
         const conversionResult = DeclarativeFilterConverter.collectConvertedResult(
+            DeclarativeFilterConverter.COMBINED_RULESET_ID,
             filterList,
             scanned.filters,
             convertedRules,
@@ -249,6 +251,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
      * scanned filters, converted rules and bad filter rules.
      * Creates new {@link RuleSet} and wrap all data for {@link RuleSetContentProvider}.
      *
+     * @param ruleSetId Rule set id.
      * @param filterList List of raw filters.
      * @param scannedFilters Already scanned filters.
      * @param convertedRules Converted rules.
@@ -257,6 +260,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
      * @returns Item of {@link ConversionResult}.
      */
     private static collectConvertedResult(
+        ruleSetId: string,
         filterList: IFilter[],
         scannedFilters: ScannedFilter[],
         convertedRules: ConvertedRules,
@@ -290,7 +294,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
         const rulesHashMap = new RulesHashMap(listOfRulesWithHash);
 
         const ruleSet = new RuleSet(
-            DeclarativeFilterConverter.COMBINED_RULESET_ID,
+            ruleSetId,
             declarativeRules.length,
             declarativeRules.filter((d) => d.condition.regexFilter).length,
             ruleSetContent,

@@ -101,8 +101,9 @@ export const convertFilters = async (
                 converted.errors.forEach((e) => console.log(e.message));
             }
 
-            console.log(`Skipped converting for rules: ${converted.limitations.length}`);
             if (converted.limitations.length > 0) {
+                // eslint-disable-next-line max-len
+                console.log(`Some converted rules were discarded to fit within the limits: ${converted.limitations.length}`);
                 console.log('======================================');
                 console.log('Converted with following limitations: ');
                 console.log('======================================');
@@ -158,10 +159,10 @@ export const convertFilters = async (
             fs.promises.writeFile(`${ruleSetDir}/${LAZY_METADATA_FILENAME}`, lazyData),
         ]);
 
-        console.log('======================================');
+        console.log('===============================================');
         console.info(`Rule set with id ${id} and all rule set info`);
         console.info('(counters, source map, filter list) was saved');
         console.info(`to ${destRuleSetsDir}/${id}`);
-        console.log('======================================');
+        console.log('===============================================');
     }
 };

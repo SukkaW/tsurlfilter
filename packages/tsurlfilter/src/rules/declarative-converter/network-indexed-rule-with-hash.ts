@@ -1,7 +1,7 @@
 import { getErrorMessage } from '../../common/error';
 import { fastHash } from '../../utils/string-utils';
 import { NetworkRule } from '../network-rule';
-import { IndexedRule } from '../rule';
+import { IndexedRule, type IRule } from '../rule';
 import { RuleConverter } from '../rule-converter';
 import { RuleFactory } from '../rule-factory';
 
@@ -61,24 +61,6 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
     }
 
     /**
-     * Converts a raw string rule to AG syntax (apply aliases, etc.). If an error
-     * was detected during the conversion - return it.
-     *
-     * @param rawStringRule Raw string rule.
-     *
-     * @throws Error when conversion failed.
-     *
-     * @returns Rule converted to AG syntax or Error.
-     */
-    private static convertRuleToAGSyntax(rawStringRule: string): string[] {
-        try {
-            return RuleConverter.convertRule(rawStringRule);
-        } catch (e: unknown) {
-            throw new Error(`Unknown error during conversion rule to AG syntax: ${getErrorMessage(e)}`);
-        }
-    }
-
-    /**
      * Create {@link IndexedNetworkRuleWithHash} from rule. If an error
      * was detected during the conversion - return it.
      *
@@ -94,20 +76,30 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
         filterId: number,
         lineIndex: number,
         ruleConvertedToAGSyntax: string,
-    ): IndexedNetworkRuleWithHash {
+    ): IndexedNetworkRuleWithHash | null {
         // Create indexed network rule from AG rule. These rules will be used in
         // declarative rules, that's why we ignore cosmetic and host rules.
-        const networkRule = RuleFactory.createRule(
-            ruleConvertedToAGSyntax,
-            filterId,
-            false, // convert only network rules
-            true, // ignore cosmetic rules
-            true, // ignore host rules
-            false, // throw exception on creating rule error.
-        );
+        let networkRule: IRule | null;
+        try {
+            networkRule = RuleFactory.createRule(
+                ruleConvertedToAGSyntax,
+                filterId,
+                false, // convert only network rules
+                true, // ignore cosmetic rules
+                true, // ignore host rules
+                false, // do not use a logger and throw an exception on rule creation error
+            );
+        } catch (e) {
+            // eslint-disable-next-line max-len
+            throw new Error(`Cannot create IRule from filter "${filterId}" and line "${lineIndex}": ${getErrorMessage(e)}`);
+        }
 
-        if (!networkRule) {
-            throw new Error(`Cannot create IRule from filter "${filterId}" and line "${lineIndex}"`);
+        /**
+         * The converted rule will be null when there was a comment or
+         * an ignored cosmetic/host rule.
+         */
+        if (networkRule === null) {
+            return null;
         }
 
         if (!(networkRule instanceof NetworkRule)) {
@@ -146,13 +138,13 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
         lineIndex: number,
         rawString: string,
     ): IndexedNetworkRuleWithHash[] {
-        // Try to convert to AG syntax.
+        // Converts a raw string rule to AG syntax (apply aliases, etc.)
         let rulesConvertedToAGSyntax: string[];
         try {
-            rulesConvertedToAGSyntax = IndexedNetworkRuleWithHash.convertRuleToAGSyntax(rawString);
+            rulesConvertedToAGSyntax = RuleConverter.convertRule(rawString);
         } catch (e) {
             // eslint-disable-next-line max-len
-            throw new Error(`Error during creating indexed rule with hash from filter "${filterId}" and line "${lineIndex}": ${getErrorMessage(e)}`);
+            throw new Error(`Unknown error during conversion rule to AG syntax: ${getErrorMessage(e)}`);
         }
 
         const rules: IndexedNetworkRuleWithHash[] = [];
@@ -169,7 +161,9 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
                     ruleConvertedToAGSyntax,
                 );
 
-                rules.push(networkIndexedRuleWithHash);
+                if (networkIndexedRuleWithHash) {
+                    rules.push(networkIndexedRuleWithHash);
+                }
             } catch (e: unknown) {
                 // eslint-disable-next-line max-len
                 throw new Error(`Error during creating indexed rule with hash from filter "${filterId}" and line "${lineIndex}": ${getErrorMessage(e)}`);

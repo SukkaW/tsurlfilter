@@ -39,6 +39,10 @@
 ! }
 ! ```
 !
+! <b> Please note </b> that in the current approach, the application of
+! `$badfilter` rules affects the filtering process, but we do not currently
+! display this in the declarative filtering log, as declarative rules are canceled.
+!
 ! ### Problem 1
 ! But current algorithm not covers rules with `$domain` instersections, for example,
 ! for these two rules:
