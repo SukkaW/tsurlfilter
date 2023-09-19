@@ -8,8 +8,8 @@ export type SourceRuleIdxAndFilterId = {
 };
 
 /**
- * The Source contains the relationship between the original rules and
- * the converted rules.
+ * The Source contains the relationship between the original rules (filter id
+ * with rule index) and the converted rules (declarative rule id).
  */
 export type Source = { declarativeRuleId: number } & SourceRuleIdxAndFilterId;
 
