@@ -3,13 +3,17 @@
  * to rule sets {@link IRuleSet} with declarative rules {@link DeclarativeRule}.
  */
 
+import { getErrorMessage } from '../../common/error';
+import type { NetworkRule } from '../network-rule';
+
 import {
     IRuleSet,
     RuleSetContentProvider,
     RuleSet,
     UpdateStaticRulesOptions,
+    type SourceRuleAndFilterId,
 } from './rule-set';
-import { SourceMap } from './source-map';
+import { SourceMap, type SourceRuleIdxAndFilterId } from './source-map';
 import type { IFilter } from './filter';
 import { DeclarativeRulesConverter } from './rules-converter';
 import {
@@ -227,13 +231,14 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             dynamicBadFilterRules,
         );
 
-        conversionResult.errors = conversionResult.errors.concat(scanned.errors);
-
-        const declarativeRulesToCancel = await DeclarativeFilterConverter.collectDeclarativeRulesToCancel(
+        const { declarativeRulesToCancel, errors } = await DeclarativeFilterConverter.collectDeclarativeRulesToCancel(
             staticRuleSets,
             dynamicBadFilterRules,
         );
 
+        conversionResult.errors = conversionResult.errors
+            .concat(scanned.errors)
+            .concat(errors);
         conversionResult.declarativeRulesToCancel = declarativeRulesToCancel;
 
         return conversionResult;
@@ -330,6 +335,81 @@ export class DeclarativeFilterConverter implements IFilterConverter {
     }
 
     /**
+     * Checks if some rules (fastMatchedRulesByHash) from the staticRuleSet,
+     * which have been fast matched by hash, can be negated with the provided
+     * badFilterRule via the `$badfilter` option.
+     *
+     * @param badFilterRule Network rule with hash {@link IndexedNetworkRuleWithHash}
+     * and `$badfilter` option.
+     * @param staticRuleSet Static rule set which contains fast matched rules.
+     * @param fastMatchedRulesByHash Rules that have been fast matched by hash
+     * for potential negation.
+     *
+     * @returns List of declarative rule IDs that have been canceled by
+     * the provided badFilterRule.
+     */
+    private static async checkFastMatchedRulesCanBeCancelled(
+        badFilterRule: IndexedNetworkRuleWithHash,
+        staticRuleSet: IRuleSet,
+        fastMatchedRulesByHash: SourceRuleIdxAndFilterId[],
+    ): Promise<number[]> {
+        const fastMatchedDeclarativeRulesIds: number [] = [];
+
+        try {
+            const promises = fastMatchedRulesByHash.map(async (source) => {
+                return staticRuleSet.getDeclarativeRulesIdsBySourceRuleIndex(source);
+            });
+            const ids = await Promise.all(promises);
+
+            fastMatchedDeclarativeRulesIds.push(...ids.flat());
+        } catch (e) {
+            // eslint-disable-next-line max-len
+            throw new Error(`Not found declarative rule id for some source from list: ${JSON.stringify(fastMatchedDeclarativeRulesIds)}: ${getErrorMessage(e)}`);
+        }
+
+        const disableRuleIds: number[] = [];
+
+        for (let k = 0; k < fastMatchedDeclarativeRulesIds.length; k += 1) {
+            const id = fastMatchedDeclarativeRulesIds[k];
+
+            let matchedSourceRules: SourceRuleAndFilterId[] = [];
+            try {
+                // eslint-disable-next-line no-await-in-loop
+                matchedSourceRules = await staticRuleSet.getRulesById(id);
+            } catch (e) {
+                throw new Error(`Not found sources for declarative rule with id "${id}": ${getErrorMessage(e)}`);
+            }
+
+            let indexedNetworkRulesWithHash: NetworkRule[] = [];
+            try {
+                // eslint-disable-next-line no-await-in-loop
+                const arrayWithRules = await Promise.all(
+                    matchedSourceRules.map((source) => {
+                        return RuleSet.getNetworkRuleBySourceRule(source);
+                    }),
+                );
+
+                indexedNetworkRulesWithHash = arrayWithRules.flat();
+            } catch (e) {
+                // eslint-disable-next-line max-len
+                throw new Error(`Not found network rules from matched sources "${JSON.stringify(matchedSourceRules)}": ${getErrorMessage(e)}`);
+            }
+
+            // NOTE: Here we use .some but not .every to simplify first
+            // version of applying $badfilter rules.
+            const someRulesMatched = indexedNetworkRulesWithHash
+                .flat()
+                .some((rule) => badFilterRule.rule.negatesBadfilter(rule));
+
+            if (someRulesMatched) {
+                disableRuleIds.push(id);
+            }
+        }
+
+        return disableRuleIds;
+    }
+
+    /**
      * Applies rules with $badfilter modifier from dynamic rulesets to all rules
      * from static rulesets and returns list of ids of declarative rules to
      * disable them.
@@ -342,8 +422,10 @@ export class DeclarativeFilterConverter implements IFilterConverter {
     private static async collectDeclarativeRulesToCancel(
         staticRuleSets: IRuleSet[],
         dynamicBadFilterRules: IndexedNetworkRuleWithHash[],
-    ): Promise<UpdateStaticRulesOptions[]> {
+    ): Promise<Pick<ConversionResult, 'errors' | 'declarativeRulesToCancel'>> {
         const declarativeRulesToCancel: UpdateStaticRulesOptions[] = [];
+
+        const errors: Error[] = [];
 
         // Check every static ruleset.
         for (let i = 0; i < staticRuleSets.length; i += 1) {
@@ -362,39 +444,18 @@ export class DeclarativeFilterConverter implements IFilterConverter {
                     continue;
                 }
 
-                // FIXME: Error catch
-                // eslint-disable-next-line no-await-in-loop
-                const ids = await Promise.all(
-                    fastMatchedRulesByHash.map(async (source) => {
-                        return staticRuleSet.getDeclarativeRulesIdsBySourceRuleIndex(source);
-                    }),
-                );
-                const fastMatchedDeclarativeRulesIds = ids.flat();
-
-                // FIXME: Should fix this ugly way.
-                for (let k = 0; k < fastMatchedDeclarativeRulesIds.length; k += 1) {
-                    const id = fastMatchedDeclarativeRulesIds[k];
-
+                try {
                     // eslint-disable-next-line no-await-in-loop
-                    const matchedSourceRules = await staticRuleSet.getRulesById(id);
-
-                    // FIXME: Error catch
-                    // eslint-disable-next-line no-await-in-loop
-                    const indexedNetworkRulesWithHash = await Promise.all(
-                        matchedSourceRules.map((source) => {
-                            return RuleSet.getNetworkRuleBySourceRule(source);
-                        }),
+                    const ids = await DeclarativeFilterConverter.checkFastMatchedRulesCanBeCancelled(
+                        badFilterRule,
+                        staticRuleSet,
+                        fastMatchedRulesByHash,
                     );
 
-                    // NOTE: Here we use .some but not .every to simplify first version
-                    // of applying $badfilter rules.
-                    const someRulesMatched = indexedNetworkRulesWithHash
-                        .flat()
-                        .some((rule) => badFilterRule.rule.negatesBadfilter(rule));
-
-                    if (someRulesMatched) {
-                        disableRuleIds.push(id);
-                    }
+                    disableRuleIds.push(...ids);
+                } catch (e) {
+                    // eslint-disable-next-line max-len
+                    errors.push(new Error(`Cannot apply badfilter rule ${badFilterRule.rule.getText()}: ${getErrorMessage(e)}`));
                 }
             }
 
@@ -406,6 +467,9 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             }
         }
 
-        return declarativeRulesToCancel;
+        return {
+            errors,
+            declarativeRulesToCancel,
+        };
     }
 }
