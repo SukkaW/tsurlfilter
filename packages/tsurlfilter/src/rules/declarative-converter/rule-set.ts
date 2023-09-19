@@ -1,6 +1,7 @@
 import { z as zod } from 'zod';
 
-import { NetworkRule } from '../network-rule';
+import type { NetworkRule } from '../network-rule';
+import { getErrorMessage } from '../../common/error';
 
 import { IndexedNetworkRuleWithHash } from './network-indexed-rule-with-hash';
 import { DeclarativeRule, DeclarativeRuleValidator } from './declarative-rule';
@@ -417,7 +418,6 @@ export class RuleSet implements IRuleSet {
         return networkRules;
     }
 
-    // FIXME: Split into two functions: loadData and createRuleSetProvider
     /**
      * Deserializes rule set to primitives values with lazy load.
      *
@@ -455,17 +455,29 @@ export class RuleSet implements IRuleSet {
             throw new UnavailableRuleSetSourceError(msg, id, e as Error);
         }
 
-        // FIXME: Create singletone for lazyData
+        /**
+         * This variable is used as a singleton for all three functions
+         * (`loadSourceMap`, `loadFilterList`, `loadDeclarativeRules`) to load
+         * data only once.
+         */
+        let deserializedLazyData: SerializedRuleSetLazyData | undefined;
+
         const getLazyData = async (): Promise<SerializedRuleSetLazyData> => {
+            if (deserializedLazyData !== undefined) {
+                return deserializedLazyData;
+            }
+
             try {
                 const lazyData = await loadLazyData();
 
                 const objectFromString = JSON.parse(lazyData);
 
-                return serializedRuleSetLazyDataValidator.parse(objectFromString);
+                deserializedLazyData = serializedRuleSetLazyDataValidator.parse(objectFromString);
+
+                return deserializedLazyData;
             } catch (e) {
                 // eslint-disable-next-line max-len
-                const msg = `Cannot parse data for lazy load for rule set with id "${id}" because of not available source`;
+                const msg = `Cannot parse or load data for lazy metadata for rule set with id "${id}": ${getErrorMessage(e)}`;
 
                 throw new UnavailableRuleSetSourceError(msg, id, e as Error);
             }
