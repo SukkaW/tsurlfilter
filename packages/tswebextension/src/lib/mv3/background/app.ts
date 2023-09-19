@@ -263,7 +263,7 @@ MessagesHandlerMV3
         // TODO: Recreate only dynamic rule set, because static cannot be changed
         const ruleSets = [
             ...staticRuleSets,
-            ...dynamicRules.ruleSets,
+            dynamicRules.ruleSet,
         ];
 
         // Update rulesets in declarative filtering log.

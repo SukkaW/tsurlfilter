@@ -4,7 +4,7 @@ import {
     RuleSet,
     METADATA_FILENAME,
     LAZY_METADATA_FILENAME,
-    IndexedRuleWithHash,
+    IndexedNetworkRuleWithHash,
     RulesHashMap,
 } from '@adguard/tsurlfilter/es/declarative-converter';
 
@@ -73,7 +73,7 @@ export default class RuleSetsLoaderApi {
         // We don't need filter id and line index because this
         // indexedRulesWithHash will be used only for matching $badfilter rules.
         const badFilterRules = badFilterRulesRaw
-            .map((rawString) => IndexedRuleWithHash.createFromRawString(0, 0, rawString))
+            .map((rawString) => IndexedNetworkRuleWithHash.createFromRawString(0, 0, rawString))
             .flat();
 
         return new RuleSet(
