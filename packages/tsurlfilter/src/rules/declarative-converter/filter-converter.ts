@@ -149,37 +149,28 @@ export class DeclarativeFilterConverter implements IFilterConverter {
             DeclarativeFilterConverter.checkConverterOptions(options);
         }
 
-        const converted: ConversionResult = {
-            ruleSets: [],
-            errors: [],
-            limitations: [],
+        const {
+            errors,
+            filters: [filterIdWithRules],
+        } = await NetworkRulesScanner.scanRules([filter]);
+
+        const convertedRules = DeclarativeRulesConverter.convert(
+            [filterIdWithRules],
+            options,
+        );
+
+        const conversionResult = DeclarativeFilterConverter.collectConvertedResult(
+            [filter],
+            [filterIdWithRules],
+            convertedRules,
+            filterIdWithRules.badFilterRules,
+        );
+
+        return {
+            ruleSet: conversionResult.ruleSet,
+            errors: errors.concat(conversionResult.errors),
+            limitations: conversionResult.limitations,
         };
-
-        const scanned = await NetworkRulesScanner.scanRules([filter]);
-
-        converted.errors = scanned.errors;
-
-        scanned.filters.forEach((filterIdWithRules: ScannedFilter) => {
-            const convertedRules = DeclarativeRulesConverter.convert(
-                [filterIdWithRules],
-                options,
-            );
-
-            const conversionResult = DeclarativeFilterConverter.collectConvertedResult(
-                [filter],
-                [filterIdWithRules],
-                convertedRules,
-                filterIdWithRules.badFilterRules,
-            );
-
-            converted.ruleSets = converted.ruleSets.concat(conversionResult.ruleSets);
-            converted.errors = converted.errors.concat(conversionResult.errors);
-            if (conversionResult.limitations.length > 0) {
-                converted.limitations = converted.limitations.concat(conversionResult.limitations);
-            }
-        });
-
-        return converted;
     }
 
     /** @inheritdoc */
@@ -303,7 +294,7 @@ export class DeclarativeFilterConverter implements IFilterConverter {
         );
 
         return {
-            ruleSets: [ruleSet],
+            ruleSet,
             errors,
             limitations,
         };

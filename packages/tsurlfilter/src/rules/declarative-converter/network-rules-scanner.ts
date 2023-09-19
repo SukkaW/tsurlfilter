@@ -1,4 +1,3 @@
-import { getErrorMessage } from '../../common/error';
 import { NetworkRuleOption } from '../network-rule';
 
 import type { IFilter } from './filter';

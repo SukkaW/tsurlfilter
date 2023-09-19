@@ -152,7 +152,7 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
             rulesConvertedToAGSyntax = IndexedNetworkRuleWithHash.convertRuleToAGSyntax(rawString);
         } catch (e) {
             // eslint-disable-next-line max-len
-            throw new Error(`Unknown error during creating indexed with hash from filter "${filterId}" and line "${lineIndex}": ${getErrorMessage(e)}`);
+            throw new Error(`Error during creating indexed rule with hash from filter "${filterId}" and line "${lineIndex}": ${getErrorMessage(e)}`);
         }
 
         const rules: IndexedNetworkRuleWithHash[] = [];
@@ -172,7 +172,7 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
                 rules.push(networkIndexedRuleWithHash);
             } catch (e: unknown) {
                 // eslint-disable-next-line max-len
-                throw new Error(`Unknown error during creating indexed with hash from filter "${filterId}" and line "${lineIndex}": ${getErrorMessage(e)}`);
+                throw new Error(`Error during creating indexed rule with hash from filter "${filterId}" and line "${lineIndex}": ${getErrorMessage(e)}`);
             }
         }
 
