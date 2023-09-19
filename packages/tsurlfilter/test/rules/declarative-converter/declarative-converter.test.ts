@@ -82,6 +82,7 @@ describe('DeclarativeConverter', () => {
         });
     });
 
+    // TODO: Add cases for domain intersections
     describe('respects badfilter rules', () => {
         it('applies $badfilter to one filter', async () => {
             const filter = createFilter([
