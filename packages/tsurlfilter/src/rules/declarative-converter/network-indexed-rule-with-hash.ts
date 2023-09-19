@@ -19,8 +19,14 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
     /**
      * Overrided rule from {@link IndexedRule} with type {@link NetworkRule}
      * but not {@link IRule}.
+     *
+     * By using 'declare', we instruct the compiler not to generate runtime
+     * code. Instead, it will use the property of the base class with
+     * the overridden type.
+     *
+     * @see {@link https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#the-usedefineforclassfields-flag-and-the-declare-property-modifier}
      */
-    public rule: NetworkRule;
+    public declare rule: NetworkRule;
 
     /**
      * Constructor.

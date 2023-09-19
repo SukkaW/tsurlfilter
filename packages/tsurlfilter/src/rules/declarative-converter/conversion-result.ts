@@ -1,6 +1,6 @@
-import { ConversionError } from './errors/conversion-errors';
-import { LimitationError } from './errors/limitation-errors';
-import { IRuleSet, UpdateStaticRulesOptions } from './rule-set';
+import type { ConversionError } from './errors/conversion-errors';
+import type { LimitationError } from './errors/limitation-errors';
+import type { IRuleSet, UpdateStaticRulesOptions } from './rule-set';
 
 /**
  * The result of the conversion from filter with string rules to ruleset
