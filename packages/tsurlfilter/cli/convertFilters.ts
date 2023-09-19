@@ -1,15 +1,21 @@
 /* eslint-disable no-console */
 import path from 'path';
 import fs from 'fs';
-import { ensureDirSync } from 'fs-extra';
 
 import {
     type ConversionResult,
+    type IRuleSet,
     DeclarativeFilterConverter,
     Filter,
     METADATA_FILENAME,
     LAZY_METADATA_FILENAME,
 } from '../src/rules/declarative-converter';
+
+const ensureDirSync = (dirPath: string) => {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+};
 
 /**
  * Converts filters with textual rules from the provided path to declarative
@@ -63,11 +69,9 @@ export const convertFilters = async (
         })
         .filter((filter): filter is Filter => filter !== null);
 
-    const result: ConversionResult = {
-        ruleSets: [],
-        errors: [],
-        limitations: [],
-    };
+    const convertedRuleSets: IRuleSet[] = [];
+    let errors: ConversionResult['errors'] = [];
+    let limitations: ConversionResult['limitations'] = [];
 
     const converter = new DeclarativeFilterConverter();
 
@@ -80,9 +84,9 @@ export const convertFilters = async (
             { resourcesPath },
         );
 
-        result.ruleSets = result.ruleSets.concat(converted.ruleSets);
-        result.errors = result.errors.concat(converted.errors);
-        result.limitations = result.limitations.concat(converted.limitations);
+        convertedRuleSets.push(converted.ruleSet);
+        errors = errors.concat(converted.errors);
+        limitations = limitations.concat(converted.limitations);
 
         if (debug) {
             console.log('======================================');
@@ -107,17 +111,11 @@ export const convertFilters = async (
         }
     }
 
-    const {
-        ruleSets,
-        errors,
-        limitations,
-    } = result;
-
     console.log('======================================');
     console.log('Common info');
     console.log('======================================');
 
-    console.log(`Converted rule sets: ${ruleSets.length}`);
+    console.log(`Converted rule sets: ${convertedRuleSets.length}`);
 
     console.log(`Errors: ${errors.length}`);
 
@@ -137,8 +135,8 @@ export const convertFilters = async (
         limitations.forEach((e) => console.log(e.message));
     }
 
-    for (let i = 0; i < ruleSets.length; i += 1) {
-        const ruleSet = ruleSets[i];
+    for (let i = 0; i < convertedRuleSets.length; i += 1) {
+        const ruleSet = convertedRuleSets[i];
 
         const {
             id,

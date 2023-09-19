@@ -5,7 +5,8 @@ import {
     UnsupportedModifierError,
 } from '../../../src/rules/declarative-converter/errors/conversion-errors';
 import { FilterScanner } from '../../../src/rules/declarative-converter/filter-scanner';
-import { DeclarativeRulesConverter, ScannedFilter } from '../../../src/rules/declarative-converter/rules-converter';
+import { DeclarativeRulesConverter } from '../../../src/rules/declarative-converter/rules-converter';
+import type { ScannedFilter } from '../../../src/rules/declarative-converter/network-rules-scanner';
 import { NetworkRule, NetworkRuleOption } from '../../../src/rules/network-rule';
 
 const createFilter = async (

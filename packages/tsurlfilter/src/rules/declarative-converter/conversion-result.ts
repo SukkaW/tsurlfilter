@@ -8,9 +8,9 @@ import type { IRuleSet, UpdateStaticRulesOptions } from './rule-set';
  */
 export interface ConversionResult {
     /**
-     * A list of rule sets with all the information about the declarative rules.
+     * Rule set with all the information about the declarative rules.
      */
-    ruleSets: IRuleSet[],
+    ruleSet: IRuleSet,
     /**
      * Errors that may have occurred during the conversion.
      */
