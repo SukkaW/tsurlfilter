@@ -19,7 +19,8 @@
  *
  * At {@link RequestEvents.onBeforeSendHeaders}, the request headers are modified or deleted
  * based on the {@link MatchingResult} stored in {@link requestContextStorage}.
- * At {@link RequestEvents.onHeadersReceived}, the response headers are handled in the same way.
+ * At {@link RequestEvents.onHeadersReceived}, the response headers are handled in the same way,
+ * and also the 'trusted-types' directive is modified for CSP headers, @see {@link TrustedTypesService}.
  *
  * The specified {@link RequestContext} will be removed from {@link requestContextStorage}
  * on {@link RequestEvents.onCompleted} or {@link RequestEvents.onErrorOccurred} events.
@@ -80,7 +81,10 @@
  * Removes or modifies response          │                             │ ││
  * headers based on                    ┌─┤      onHeadersReceived      │ ││
  * {@link MatchingResult}.             │ │                             │ ││
- *                                     │ └─────────────────────────────┘ ││
+ * Modifies 'trusted-types' directive  │ └─────────────────────────────┘ ││
+ * for CSP headers:                    │                                 ││
+ * @see {@link TrustedTypesService}.   │                                 ││
+ *                                     │                                 ││
  *                                     │                                 ││
  *                                     │ ┌─────────────────────────────┐ ││
  *                                     │ │                             │ ││
@@ -169,7 +173,7 @@ import browser, { WebRequest, WebNavigation } from 'webextension-polyfill';
 import { RequestType } from '@adguard/tsurlfilter/es/request-type';
 
 import { tabsApi, engineApi } from './api';
-import { MAIN_FRAME_ID } from './tabs/frame';
+import { Frame, MAIN_FRAME_ID } from './tabs/frame';
 import { findHeaderByName } from './utils/headers';
 import { isHttpOrWsRequest, getDomain } from '../../common/utils/url';
 import { logger } from '../../common/utils/logger';
@@ -180,7 +184,8 @@ import { headersService } from './services/headers-service';
 import { paramsService } from './services/params-service';
 import { cookieFiltering } from './services/cookie-filtering/cookie-filtering';
 import { ContentFiltering } from './services/content-filtering/content-filtering';
-import { CspService } from './services/csp-service';
+import { cspService } from './services/csp-service';
+import { TrustedTypesService } from './services/trusted-types-service';
 import {
     hideRequestInitiatorElement,
     RequestEvents,
@@ -342,13 +347,15 @@ export class WebRequestApi {
 
         // For a $replace rule, response will be undefined since we need to get
         // the response in order to actually apply $replace rules to it.
-        const response = RequestBlockingApi.getBlockingResponse(
-            basicResult,
+        const response = RequestBlockingApi.getBlockingResponse({
+            rule: basicResult,
             eventId,
             requestUrl,
+            referrerUrl,
             requestType,
+            contentType,
             tabId,
-        );
+        });
 
         if (!response) {
             /*
@@ -477,7 +484,10 @@ export class WebRequestApi {
         let responseHeadersModified = false;
 
         if (requestUrl && (requestType === RequestType.Document || requestType === RequestType.SubDocument)) {
-            if (CspService.onHeadersReceived(context)) {
+            if (cspService.onHeadersReceived(context)) {
+                responseHeadersModified = true;
+            }
+            if (TrustedTypesService.onHeadersReceived(context)) {
                 responseHeadersModified = true;
             }
         }
@@ -649,10 +659,15 @@ export class WebRequestApi {
             return;
         }
 
-        const frame = tabContext.frames.get(frameId);
+        let frame = tabContext.frames.get(frameId);
 
+        /**
+         * Subdocument frame context may not be created durning worker request processing.
+         * We create new one in this case.
+         */
         if (!frame) {
-            return;
+            frame = new Frame(url);
+            tabContext.frames.set(frameId, frame);
         }
 
         /**
@@ -737,6 +752,7 @@ export class WebRequestApi {
                 tabId,
                 frameId,
                 cosmeticResult,
+                url,
             })
             .catch(logger.debug);
     }
