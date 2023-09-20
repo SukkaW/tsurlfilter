@@ -15,7 +15,9 @@ import { RemoveParamModifier } from '../modifiers/remove-param-modifier';
 import { RemoveHeaderModifier } from '../modifiers/remove-header-modifier';
 import { AppModifier, IAppModifier } from '../modifiers/app-modifier';
 import { HTTPMethod, MethodModifier } from '../modifiers/method-modifier';
+import { HeaderModifier, type HttpHeadersItem, type HttpHeaderMatcher } from '../modifiers/header-modifier';
 import { ToModifier } from '../modifiers/to-modifier';
+import { PermissionsModifier } from '../modifiers/permissions-modifier';
 import { CompatibilityTypes, isCompatibleWith } from '../configuration';
 import {
     ESCAPE_CHARACTER,
@@ -73,41 +75,47 @@ export enum NetworkRuleOption {
     // Other modifiers
 
     /** $popup modifier */
-    Popup = 1 << 14,
+    Popup = 1 << 12,
     /** $csp modifier */
-    Csp = 1 << 15,
+    Csp = 1 << 13,
     /** $replace modifier */
-    Replace = 1 << 16,
+    Replace = 1 << 14,
     /** $cookie modifier */
-    Cookie = 1 << 17,
+    Cookie = 1 << 15,
     /** $redirect modifier */
-    Redirect = 1 << 18,
+    Redirect = 1 << 16,
     /** $badfilter modifier */
-    Badfilter = 1 << 19,
+    Badfilter = 1 << 17,
     /** $removeparam modifier */
-    RemoveParam = 1 << 20,
+    RemoveParam = 1 << 18,
     /** $removeheader modifier */
-    RemoveHeader = 1 << 21,
+    RemoveHeader = 1 << 19,
     /** $jsonprune modifier */
-    JsonPrune = 1 << 22,
+    JsonPrune = 1 << 20,
     /** $hls modifier */
-    Hls = 1 << 23,
+    Hls = 1 << 21,
 
     // Compatibility dependent
     /** $network modifier */
-    Network = 1 << 24,
+    Network = 1 << 22,
 
     /** dns modifiers */
-    Client = 1 << 25,
-    DnsRewrite = 1 << 26,
-    DnsType = 1 << 27,
-    Ctag = 1 << 28,
+    Client = 1 << 23,
+    DnsRewrite = 1 << 24,
+    DnsType = 1 << 25,
+    Ctag = 1 << 26,
 
-    // $method modifier
-    Method = 1 << 30,
+    /* $method modifier */
+    Method = 1 << 27,
 
-    // $to modifier
-    To = 1 << 31,
+    /* $to modifier */
+    To = 1 << 28,
+
+    /* $permissions modifier */
+    Permissions = 1 << 29,
+
+    /* $header modifier */
+    Header = 1 << 30,
 
     // Groups (for validation)
 
@@ -139,7 +147,21 @@ export enum NetworkRuleOption {
      * $removeheader rules are compatible only with content type modifiers ($subdocument, $script, $stylesheet, etc)
      * except $document (using by default) and this list of modifiers:
      */
-    RemoveHeaderCompatibleOptions = RemoveHeader | ThirdParty | Important | MatchCase | Badfilter,
+    RemoveHeaderCompatibleOptions = RemoveHeader | ThirdParty | Important | MatchCase | Header | Badfilter,
+
+    /**
+     * Permissions compatible modifiers
+     *
+     * $permissions is compatible with the limited list of modifiers: $domain, $important, and $subdocument
+     */
+    PermissionsCompatibleOptions = Permissions | Important | Badfilter,
+
+    /**
+     * Header compatible modifiers
+     *
+     * $header is compatible with the limited list of modifiers: $csp and $removeheader (on response headers).
+     */
+    HeaderCompatibleOptions = Header | Important | Csp | RemoveHeader | Badfilter,
 }
 
 /**
@@ -177,10 +199,6 @@ export class NetworkRule implements rule.IRule {
 
     private readonly pattern: Pattern;
 
-    private permittedDomains: string[] | null = null;
-
-    private restrictedDomains: string[] | null = null;
-
     /**
      * Domains in denyallow modifier providing exceptions for permitted domains
      * https://github.com/AdguardTeam/CoreLibs/issues/1304
@@ -213,6 +231,11 @@ export class NetworkRule implements rule.IRule {
     private advancedModifier: IAdvancedModifier | null = null;
 
     /**
+     * Rule Domain modifier
+     */
+    private domainModifier: DomainModifier | null = null;
+
+    /**
      * Rule App modifier
      */
     private appModifier: IAppModifier | null = null;
@@ -221,6 +244,11 @@ export class NetworkRule implements rule.IRule {
      * Rule Method modifier
      */
     private methodModifier: IValueListModifier<HTTPMethod> | null = null;
+
+    /**
+     * Rule header modifier
+     */
+    private headerModifier: HeaderModifier | null = null;
 
     /**
      * Rule To modifier
@@ -445,7 +473,21 @@ export class NetworkRule implements rule.IRule {
      * See https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#domain-modifier
      */
     getPermittedDomains(): string[] | null {
-        return this.permittedDomains;
+        if (this.domainModifier) {
+            return this.domainModifier.getPermittedDomains();
+        }
+        return null;
+    }
+
+    /**
+     * Gets list of restricted domains.
+     * See https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#domain-modifier
+     */
+    getRestrictedDomains(): string[] | null {
+        if (this.domainModifier) {
+            return this.domainModifier.getRestrictedDomains();
+        }
+        return null;
     }
 
     /**
@@ -454,14 +496,6 @@ export class NetworkRule implements rule.IRule {
      */
     getDenyAllowDomains(): string[] | null {
         return this.denyAllowDomains;
-    }
-
-    /**
-     * Gets list of restricted domains.
-     * See https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#domain-modifier
-     */
-    getRestrictedDomains(): string[] | null {
-        return this.restrictedDomains;
     }
 
     /**
@@ -561,6 +595,16 @@ export class NetworkRule implements rule.IRule {
     }
 
     /**
+     * Retrieves the header modifier value.
+     */
+    getHeaderModifierValue(): HttpHeaderMatcher | null {
+        if (!this.headerModifier) {
+            return null;
+        }
+        return this.headerModifier.getHeaderModifierValue();
+    }
+
+    /**
      * isRegexRule returns true if rule's pattern is a regular expression.
      * https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#regexp-support
      */
@@ -569,14 +613,6 @@ export class NetworkRule implements rule.IRule {
             this.getPattern().startsWith(SimpleRegex.MASK_REGEX_RULE)
             && this.getPattern().endsWith(SimpleRegex.MASK_REGEX_RULE)
         );
-    }
-
-    public matchesPermittedDomains(hostname: string): boolean {
-        if (this.hasPermittedDomains()
-            && DomainModifier.isDomainOrSubdomainOfAny(hostname, this.permittedDomains!)) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -651,30 +687,6 @@ export class NetworkRule implements rule.IRule {
     }
 
     /**
-     * matchDomain checks if the filtering rule is allowed on this domain.
-     * @param domain - domain to check.
-     */
-    private matchDomain(domain: string): boolean {
-        if (this.hasRestrictedDomains()) {
-            if (DomainModifier.isDomainOrSubdomainOfAny(domain, this.restrictedDomains!)) {
-                // Domain or host is restricted
-                // i.e. $domain=~example.org
-                return false;
-            }
-        }
-
-        if (this.hasPermittedDomains()) {
-            if (!DomainModifier.isDomainOrSubdomainOfAny(domain, this.permittedDomains!)) {
-                // Domain is not among permitted
-                // i.e. $domain=example.org and we're checking example.com
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Check if request matches domain modifier by request referrer (general case) or by request target
      *
      * In some cases the $domain modifier can match not only the referrer domain, but also the target domain.
@@ -690,29 +702,29 @@ export class NetworkRule implements rule.IRule {
      * @param request
      */
     matchDomainModifier(request: Request): boolean {
-        if (!this.permittedDomains && !this.restrictedDomains) {
+        if (!this.domainModifier) {
             return true;
         }
+
+        const { domainModifier } = this;
 
         const isDocumentType = request.requestType === RequestType.Document
             || request.requestType === RequestType.SubDocument;
 
-        const hasOnlyExcludedDomains = (!this.permittedDomains || this.permittedDomains.length === 0)
-            && this.restrictedDomains
-            && this.restrictedDomains.length > 0;
+        const hasOnlyExcludedDomains = !domainModifier.hasPermittedDomains()
+            && domainModifier.hasRestrictedDomains();
 
         const patternIsRegex = this.isRegexRule();
         const patternIsDomainSpecific = this.pattern.isPatternDomainSpecific();
-
         const matchesTargetByPatternCondition = !patternIsRegex && !patternIsDomainSpecific;
 
         if (isDocumentType && (hasOnlyExcludedDomains || matchesTargetByPatternCondition)) {
             // check if matches source hostname if exists or if matches target hostname
-            return (request.sourceHostname && this.matchDomain(request.sourceHostname))
-                || this.matchDomain(request.hostname);
+            return (request.sourceHostname && domainModifier.matchDomain(request.sourceHostname))
+                || domainModifier.matchDomain(request.hostname);
         }
 
-        return this.matchDomain(request.sourceHostname || '');
+        return domainModifier.matchDomain(request.sourceHostname || '');
     }
 
     /**
@@ -817,20 +829,6 @@ export class NetworkRule implements rule.IRule {
     }
 
     /**
-     * Checks if rule has permitted domains
-     */
-    private hasPermittedDomains(): boolean {
-        return this.permittedDomains != null && this.permittedDomains.length > 0;
-    }
-
-    /**
-     * Checks if rule has restricted domains
-     */
-    private hasRestrictedDomains(): boolean {
-        return this.restrictedDomains != null && this.restrictedDomains.length > 0;
-    }
-
-    /**
      * Checks if rule has permitted apps
      */
     private hasPermittedApps(): boolean {
@@ -902,6 +900,57 @@ export class NetworkRule implements rule.IRule {
     }
 
     /**
+     * Checks if request's response headers matches with
+     * the rule's $header modifier value
+     *
+     * @param responseHeadersItems request's response headers
+     * @returns true, if rule must be applied to the request
+     */
+    matchResponseHeaders(responseHeadersItems: HttpHeadersItem[] | undefined): boolean {
+        if (!responseHeadersItems || responseHeadersItems.length === 0) {
+            return false;
+        }
+
+        const ruleData = this.getHeaderModifierValue();
+
+        if (!ruleData) {
+            return false;
+        }
+
+        const {
+            header: ruleHeaderName,
+            value: ruleHeaderValue,
+        } = ruleData;
+
+        return responseHeadersItems.some((responseHeadersItem) => {
+            const {
+                name: responseHeaderName,
+                value: responseHeaderValue,
+            } = responseHeadersItem;
+
+            // Header name matching is case-insensitive
+            if (ruleHeaderName.toLowerCase() !== responseHeaderName.toLowerCase()) {
+                return false;
+            }
+
+            if (ruleHeaderValue === null) {
+                return true;
+            }
+
+            // Unlike header name, header value matching is case-sensitive
+            if (typeof ruleHeaderValue === 'string') {
+                return ruleHeaderValue === responseHeaderValue;
+            }
+
+            if (responseHeaderValue && ruleHeaderValue instanceof RegExp) {
+                return ruleHeaderValue.test(responseHeaderValue);
+            }
+
+            return false;
+        });
+    }
+
+    /**
      * Checks if pattern has spaces
      * Used in order to do not create network rules from host rules
      * @param pattern
@@ -950,7 +999,7 @@ export class NetworkRule implements rule.IRule {
             const isDnsCompatible = isCompatibleWith(CompatibilityTypes.Dns);
 
             if (!hasCookieModifier && !hasRemoveParamModifier && !isDnsCompatible) {
-                if (!(this.hasPermittedDomains() || this.hasPermittedApps())) {
+                if (!(this.domainModifier?.hasPermittedDomains() || this.hasPermittedApps())) {
                     // Rule matches too much and does not have any domain restriction
                     // We should not allow this kind of rules
                     // eslint-disable-next-line max-len
@@ -1052,7 +1101,7 @@ export class NetworkRule implements rule.IRule {
      * @return {boolean}
      */
     isGeneric(): boolean {
-        return !this.hasPermittedDomains();
+        return !this.domainModifier?.hasPermittedDomains();
     }
 
     /**
@@ -1088,11 +1137,11 @@ export class NetworkRule implements rule.IRule {
             return false;
         }
 
-        if (!stringArraysEquals(this.restrictedDomains, specifiedRule.restrictedDomains)) {
+        if (!stringArraysEquals(this.getRestrictedDomains(), specifiedRule.getRestrictedDomains())) {
             return false;
         }
 
-        if (!stringArraysHaveIntersection(this.permittedDomains, specifiedRule.permittedDomains)) {
+        if (!stringArraysHaveIntersection(this.getPermittedDomains(), specifiedRule.getPermittedDomains())) {
             return false;
         }
 
@@ -1103,7 +1152,7 @@ export class NetworkRule implements rule.IRule {
      * Checks if this rule can be used for hosts-level blocking
      */
     isHostLevelNetworkRule(): boolean {
-        if (this.hasPermittedDomains() || this.hasRestrictedDomains()) {
+        if (this.domainModifier?.hasPermittedDomains() || this.domainModifier?.hasRestrictedDomains()) {
             return false;
         }
 
@@ -1180,11 +1229,12 @@ export class NetworkRule implements rule.IRule {
             );
         }
 
-        if (domainModifier.permittedDomains
-            && domainModifier.permittedDomains.some((x) => x.includes(SimpleRegex.MASK_ANY_CHARACTER))) {
-            throw new SyntaxError(
-                'Invalid modifier: $denyallow domains wildcards are not supported',
-            );
+        if (domainModifier.permittedDomains) {
+            if (domainModifier.permittedDomains.some(DomainModifier.isWildcardOrRegexDomain)) {
+                throw new SyntaxError(
+                    'Invalid modifier: $denyallow does not support wildcards and regex domains',
+                );
+            }
         }
 
         this.denyAllowDomains = domainModifier.permittedDomains;
@@ -1239,10 +1289,7 @@ export class NetworkRule implements rule.IRule {
                 break;
             // $domain
             case OPTIONS.DOMAIN:
-                // eslint-disable-next-line no-case-declarations
-                const domainModifier = new DomainModifier(optionValue, PIPE_SEPARATOR);
-                this.permittedDomains = domainModifier.permittedDomains;
-                this.restrictedDomains = domainModifier.restrictedDomains;
+                this.domainModifier = new DomainModifier(optionValue, PIPE_SEPARATOR);
                 break;
             // $denyallow
             case OPTIONS.DENYALLOW:
@@ -1254,6 +1301,11 @@ export class NetworkRule implements rule.IRule {
                 this.methodModifier = new MethodModifier(optionValue);
                 break;
             }
+            // $header modifier
+            case OPTIONS.HEADER:
+                this.setOptionEnabled(NetworkRuleOption.Header, true);
+                this.headerModifier = new HeaderModifier(optionValue);
+                break;
             // $to modifier
             case OPTIONS.TO: {
                 this.setOptionEnabled(NetworkRuleOption.To, true);
@@ -1460,6 +1512,10 @@ export class NetworkRule implements rule.IRule {
                 this.setOptionEnabled(NetworkRuleOption.RemoveHeader, true);
                 this.advancedModifier = new RemoveHeaderModifier(optionValue, this.isAllowlist());
                 break;
+            case OPTIONS.PERMISSIONS:
+                this.setOptionEnabled(NetworkRuleOption.Permissions, true);
+                this.advancedModifier = new PermissionsModifier(optionValue, this.isAllowlist());
+                break;
             // $jsonprune
             // simple validation of jsonprune rules for compiler
             // https://github.com/AdguardTeam/FiltersCompiler/issues/168
@@ -1613,7 +1669,8 @@ export class NetworkRule implements rule.IRule {
             this.priorityWeight += 1;
         }
 
-        if (this.restrictedDomains && this.restrictedDomains.length > 0) {
+        const { domainModifier } = this;
+        if (domainModifier?.hasRestrictedDomains()) {
             this.priorityWeight += 1;
         }
 
@@ -1632,13 +1689,16 @@ export class NetworkRule implements rule.IRule {
         }
 
         /**
-         * Category 2: permitted request types and methods.
+         * Category 2: permitted request types, methods, headers, $popup.
          * Specified content-types add `50 + 50 / number_of_content_types`,
          * for example: `||example.com^$image,script` will add
          * `50 + 50 / 2 = 50 + 25 = 75` to the total weight of the rule.
          * The `$popup` also belongs to this category, because it implicitly
          * adds the modifier `$document`.
          * Similarly, specific exceptions add `$document,subdocument`.
+         *
+         * Learn more about it here:
+         * https://adguard.com/kb/general/ad-filtering/create-own-filters/#priority-category-2
          */
         if (this.permittedRequestTypes !== RequestType.NotSet) {
             const numberOfPermittedRequestTypes = getBitCount(this.permittedRequestTypes);
@@ -1653,6 +1713,11 @@ export class NetworkRule implements rule.IRule {
             this.priorityWeight += NetworkRule.CategoryTwoWeight + relativeWeight;
         }
 
+        if (this.headerModifier) {
+            // $header modifier in the rule adds 50
+            this.priorityWeight += NetworkRule.CategoryTwoWeight;
+        }
+
         /**
          * Category 3: permitted domains.
          * Specified domains through `$domain` and specified applications
@@ -1663,9 +1728,9 @@ export class NetworkRule implements rule.IRule {
          * `||example.com^$app=org.example.app1|org.example.app2`
          * will add `100 + 100 / 2 = 151`.
          */
-        if (this.permittedDomains && this.permittedDomains.length > 0) {
+        if (domainModifier?.hasPermittedDomains()) {
             // More permitted domains mean less priority weight.
-            const relativeWeight = NetworkRule.CategoryThreeWeight / this.permittedDomains.length;
+            const relativeWeight = NetworkRule.CategoryThreeWeight / domainModifier.getPermittedDomains()!.length;
             this.priorityWeight += NetworkRule.CategoryThreeWeight + relativeWeight;
         }
 
@@ -1702,10 +1767,45 @@ export class NetworkRule implements rule.IRule {
             this.validateRemoveParamRule();
         } else if (this.advancedModifier instanceof RemoveHeaderModifier) {
             this.validateRemoveHeaderRule();
+        } else if (this.advancedModifier instanceof PermissionsModifier) {
+            this.validatePermissionsRule();
+        } else if (this.headerModifier instanceof HeaderModifier) {
+            this.validateHeaderRule();
         } else if (this.toModifier !== null) {
             this.validateToRule();
         } else if (this.denyAllowDomains !== null) {
             this.validateDenyallowRule();
+        }
+    }
+
+    /**
+     * $header rules are not compatible with any other
+     * modifiers except for $important, $csp, $removeheader, $badfilter.
+     * The rules with any other modifiers are considered invalid and will be discarded.
+     */
+    private validateHeaderRule(): void {
+        if ((this.enabledOptions | NetworkRuleOption.HeaderCompatibleOptions)
+                        !== NetworkRuleOption.HeaderCompatibleOptions) {
+            throw new SyntaxError('$header rules are not compatible with some other modifiers');
+        }
+        if (this.advancedModifier && this.isOptionEnabled(NetworkRuleOption.RemoveHeader)) {
+            const removeHeaderValue = this.getAdvancedModifierValue();
+            if (!removeHeaderValue || removeHeaderValue.includes('request:')) {
+                const message = '$header rules are only compatible with response headers removal of $removeheader.';
+                throw new SyntaxError(message);
+            }
+        }
+    }
+
+    /**
+     * $permissions rules are not compatible with any other
+     * modifiers except $domain, $important, and $subdocument.
+     * The rules with any other modifiers are considered invalid and will be discarded.
+     */
+    private validatePermissionsRule(): void {
+        if ((this.enabledOptions | NetworkRuleOption.PermissionsCompatibleOptions)
+                !== NetworkRuleOption.PermissionsCompatibleOptions) {
+            throw new SyntaxError('$permissions rules are not compatible with some other modifiers');
         }
     }
 
@@ -1730,6 +1830,13 @@ export class NetworkRule implements rule.IRule {
         if ((this.enabledOptions | NetworkRuleOption.RemoveHeaderCompatibleOptions)
             !== NetworkRuleOption.RemoveHeaderCompatibleOptions) {
             throw new SyntaxError('$removeheader rules are not compatible with some other modifiers');
+        }
+        if (this.headerModifier && this.isOptionEnabled(NetworkRuleOption.Header)) {
+            const removeHeaderValue = this.getAdvancedModifierValue();
+            if (!removeHeaderValue || removeHeaderValue.includes('request:')) {
+                const message = 'Request headers removal of $removeheaders is not compatible with $header rules.';
+                throw new SyntaxError(message);
+            }
         }
     }
 

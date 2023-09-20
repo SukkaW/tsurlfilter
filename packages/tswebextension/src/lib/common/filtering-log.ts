@@ -12,6 +12,7 @@ export enum FilteringEventType {
     ApplyBasicRule = 'applyBasicRule',
     ApplyCosmeticRule = 'applyCosmeticRule',
     ApplyCspRule = 'applyCspRule',
+    ApplyPermissionsRule = 'applyPermissionsRule',
     ReceiveResponse = 'receiveResponse',
     Cookie = 'cookie',
     RemoveHeader = 'removeHeader',
@@ -41,9 +42,9 @@ export type SendRequestEventData = {
     tabId: number,
     eventId: string,
     requestUrl: string,
-    requestDomain: string,
+    requestDomain: string | null,
     frameUrl: string,
-    frameDomain: string,
+    frameDomain: string | null,
     requestType: ContentType,
     timestamp: number,
     requestThirdParty: boolean,
@@ -103,7 +104,7 @@ export type ApplyCspRuleEventData = {
     rule: NetworkRule,
     requestUrl: string,
     frameUrl: string,
-    frameDomain: string,
+    frameDomain: string | null,
     requestType: ContentType,
     timestamp: number,
 };
@@ -114,6 +115,13 @@ export type ApplyCspRuleEventData = {
 export type ApplyCspRuleEvent = {
     type: FilteringEventType.ApplyCspRule,
     data: ApplyCspRuleEventData,
+};
+
+export type ApplyPermissionsRuleEventData = ApplyCspRuleEventData;
+
+export type ApplyPermissionsRuleEvent = {
+    type: FilteringEventType.ApplyPermissionsRule,
+    data: ApplyPermissionsRuleEventData,
 };
 
 /**
@@ -173,8 +181,8 @@ export type CookieEventData = {
 };
 
 /**
- * Dispatched by CookieFiltering manifest v2 module on cookie filtering in onBeforeSendHeaders and onHeadersReceived
- * event handlers.
+ * Dispatched by CookieFiltering module on cookie filtering in
+ * onBeforeSendHeaders and onHeadersReceived event handlers.
  */
 export type CookieEvent = {
     type: FilteringEventType.Cookie;
@@ -198,7 +206,7 @@ export type RemoveHeaderEventData = {
 };
 
 /**
- * Dispatched by HeadersService manifest v2 module on request header removing in onBeforeSendHeaders and
+ * Dispatched by RemoveHeadersService manifest v2 module on request header removing in onBeforeSendHeaders and
  * onHeadersReceived event handlers.
  */
 export type RemoveHeaderEvent = {
@@ -356,6 +364,7 @@ export type FilteringLogEvent =
     | TabReloadEvent
     | ApplyBasicRuleEvent
     | ApplyCspRuleEvent
+    | ApplyPermissionsRuleEvent
     | ApplyCosmeticRuleEvent
     | ReceiveResponseEvent
     | JsInjectEvent

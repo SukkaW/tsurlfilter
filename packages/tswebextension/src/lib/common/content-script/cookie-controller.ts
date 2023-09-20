@@ -1,5 +1,3 @@
-import { CookieRule } from '../../common/content-script';
-
 interface OnRuleAppliedData {
     cookieName: string,
     cookieValue: string,
@@ -11,6 +9,14 @@ interface OnRuleAppliedData {
 
 interface OnRuleAppliedCallback {
     (data: OnRuleAppliedData): void;
+}
+
+export interface CookieRule {
+    ruleText: string;
+    match: string | null;
+    isThirdParty: boolean;
+    filterId: number;
+    isAllowlist: boolean;
 }
 
 /**

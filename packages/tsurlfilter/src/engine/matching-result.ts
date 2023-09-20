@@ -2,6 +2,7 @@ import { NetworkRule, NetworkRuleOption } from '../rules/network-rule';
 import { CookieModifier } from '../modifiers/cookie-modifier';
 import { CosmeticOption } from './cosmetic-option';
 import { RedirectModifier } from '../modifiers/redirect-modifier';
+import { HttpHeadersItem } from '../modifiers/header-modifier';
 
 /**
  * MatchingResult contains all the rules matching a web request, and provides methods
@@ -65,6 +66,17 @@ export class MatchingResult {
     public readonly removeHeaderRules: NetworkRule[] | null;
 
     /**
+     * Permissions rules - a set of rules modifying permissions policy
+     * See $permissions modifier
+     */
+    public readonly permissionsRules: NetworkRule[] | null;
+
+    /**
+     * Headers rules - a set of rules for blocking rules by headers.
+     */
+    public readonly headerRules: NetworkRule[] | null;
+
+    /**
      * StealthRule - this is a allowlist rule that negates stealth mode features
      * Note that the stealth rule can be be received from both rules and sourceRules
      * https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#stealth-modifier
@@ -88,6 +100,8 @@ export class MatchingResult {
         this.removeHeaderRules = null;
         this.redirectRules = null;
         this.stealthRule = null;
+        this.permissionsRules = null;
+        this.headerRules = null;
 
         // eslint-disable-next-line no-param-reassign
         rules = MatchingResult.removeBadfilterRules(rules);
@@ -159,6 +173,23 @@ export class MatchingResult {
                 continue;
             }
 
+            if (rule.isOptionEnabled(NetworkRuleOption.Permissions)) {
+                if (!this.permissionsRules) {
+                    this.permissionsRules = [];
+                }
+                this.permissionsRules.push(rule);
+                continue;
+            }
+
+            if (rule.isOptionEnabled(NetworkRuleOption.Header)) {
+                if (!this.headerRules) {
+                    this.headerRules = [];
+                }
+
+                this.headerRules.push(rule);
+                continue;
+            }
+
             // Check blocking rules against $genericblock / $urlblock
             if (!rule.isAllowlist() && this.documentRule?.isHigherPriority(rule)) {
                 if (!basicAllowed) {
@@ -225,6 +256,57 @@ export class MatchingResult {
         }
 
         return basic;
+    }
+
+    /**
+     * Returns a single rule with $header modifier,
+     * that should be applied to the web request, if any.
+     *
+     * Function is intended to be called on onHeadersReceived event as an alternative to getBasicResult,
+     * it returns only a blocking or allowlist rule without modifiers which could modify the request.
+     * Request modifying rules with $header modifier are handled in a corresponding service.
+     *
+     * TODO: filterAdvancedModifierRules may not be optimal for sorting rules with $header modifier,
+     * as $header is not an advanced modifier.
+     *
+     * @param responseHeaders response headers
+     * @returns header result rule or null
+     */
+    getResponseHeadersResult(responseHeaders: HttpHeadersItem[] | undefined): NetworkRule | null {
+        if (!responseHeaders || responseHeaders.length === 0) {
+            return null;
+        }
+
+        const { basicRule, documentRule } = this;
+        let { headerRules } = this;
+
+        if (!headerRules) {
+            return null;
+        }
+
+        if (!basicRule) {
+            if (documentRule && documentRule.isDocumentLevelAllowlistRule()) {
+                return null;
+            }
+        } else if (basicRule.isAllowlist()) {
+            return null;
+        }
+
+        headerRules = headerRules.filter((rule) => rule.matchResponseHeaders(responseHeaders));
+
+        // Handle allowlist rules with $header modifier,
+        // filtering out blocking rules which are allowlisted
+        const rules = MatchingResult.filterAdvancedModifierRules(
+            headerRules,
+            (bRule) => ((aRule): boolean => {
+                const bHeaderData = bRule.getHeaderModifierValue();
+                const aHeaderData = aRule.getHeaderModifierValue();
+                return bHeaderData?.header === aHeaderData?.header
+                    && bHeaderData?.value?.toString() === aHeaderData?.value?.toString();
+            }),
+        );
+
+        return MatchingResult.getHighestPriorityRule(rules);
     }
 
     /**
@@ -385,6 +467,33 @@ export class MatchingResult {
     }
 
     /**
+     * Returns an array of permission policy rules
+     */
+    getPermissionsPolicyRules(): NetworkRule[] {
+        if (!this.permissionsRules) {
+            return [];
+        }
+
+        const permissionsRules: NetworkRule[] = [];
+
+        for (const rule of this.permissionsRules) {
+            if (rule.isAllowlist()) {
+                /**
+                 * Allowlist with $permissions modifier disables
+                 * all the $permissions rules on all the pages matching the rule pattern.
+                 */
+                if (!rule.getAdvancedModifierValue()) {
+                    return [rule];
+                }
+            } else {
+                permissionsRules.push(rule);
+            }
+        }
+
+        return permissionsRules;
+    }
+
+    /**
      * Returns a redirect rule or null if redirect rules are empty.
      * $redirect-rule is only returned if there's a blocking rule also matching
      * this request.
@@ -416,13 +525,11 @@ export class MatchingResult {
         });
 
         if (allWeatherRedirectRules.length > 0) {
-            return allWeatherRedirectRules
-                .sort((a, b) => (b.isHigherPriority(a) ? 1 : -1))[0];
+            return MatchingResult.getHighestPriorityRule(allWeatherRedirectRules);
         }
 
         if (conditionalRedirectRules.length > 0 && this.basicRule && !this.basicRule.isAllowlist()) {
-            return conditionalRedirectRules
-                .sort((a, b) => (b.isHigherPriority(a) ? 1 : -1))[0];
+            return MatchingResult.getHighestPriorityRule(conditionalRedirectRules);
         }
 
         return null;
@@ -553,5 +660,18 @@ export class MatchingResult {
         }
 
         return rules;
+    }
+
+    /**
+     * Returns the highest priority rule from the given array.
+     *
+     * @param rules array of network rules
+     * @returns hightest priority rule or null if the array is empty
+     */
+    static getHighestPriorityRule(rules: NetworkRule[]): NetworkRule | null {
+        if (rules.length === 0) {
+            return null;
+        }
+        return rules.sort((a, b) => (b.isHigherPriority(a) ? 1 : -1))[0];
     }
 }

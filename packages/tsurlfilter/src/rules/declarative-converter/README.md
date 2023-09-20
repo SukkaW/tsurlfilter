@@ -524,14 +524,9 @@ example 5
 		},
 		"condition": {
 			"urlFilter": "||baddomain.com^",
-			"initiatorDomains": [
-				"/(^\\\\",
-				".+\\\\.)example\\\\.(com\\\\",
-				"org)\\\\$/"
-			],
 			"isUrlFilterCaseSensitive": false
 		},
-		"priority": 135
+		"priority": 201
 	}
 ]
 
@@ -553,18 +548,14 @@ example 6
 		},
 		"condition": {
 			"urlFilter": "||baddomain.com^",
-			"initiatorDomains": [
-				".+\\\\.)c\\\\.(com\\\\",
-				"org)\\\\$/"
-			],
 			"excludedInitiatorDomains": [
 				"a.com",
 				"b.*",
-				"/(^\\\\"
+				"/(^\\|.+\\\\.)c\\\\.(com\\|org)\\\\$/"
 			],
 			"isUrlFilterCaseSensitive": false
 		},
-		"priority": 152
+		"priority": 2
 	}
 ]
 
@@ -578,7 +569,49 @@ example 7
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "remove",
+					"header": "Set-Cookie"
+				}
+			],
+			"requestHeaders": [
+				{
+					"operation": "remove",
+					"header": "Cookie"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "*",
+			"initiatorDomains": [
+				"example.org",
+				"example.com"
+			],
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 151
+	}
+]
 
 ```
 example 8
@@ -702,7 +735,48 @@ example 12
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "remove",
+					"header": "Set-Cookie"
+				}
+			],
+			"requestHeaders": [
+				{
+					"operation": "remove",
+					"header": "Cookie"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "*page",
+			"initiatorDomains": [
+				"targetdomain.com"
+			],
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 201
+	}
+]
 
 ```
 example 13
@@ -781,7 +855,19 @@ example 1
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||example.com^",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 51
+	}
+]
 
 ```
 example 2
@@ -793,7 +879,19 @@ example 2
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "block"
+		},
+		"condition": {
+			"urlFilter": "||example.com^",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 51
+	}
+]
 
 ```
 example 3
@@ -805,7 +903,19 @@ example 3
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||example.com^",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 100051
+	}
+]
 
 ```
 example 4
@@ -817,7 +927,19 @@ example 4
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||example.com^",
+			"isUrlFilterCaseSensitive": false
+		},
+		"priority": 100051
+	}
+]
 
 ```
 <a name="basic_modifiers__$important"></a>
@@ -2357,9 +2479,6 @@ example 9
 		},
 		"condition": {
 			"urlFilter": "/some",
-			"initiatorDomains": [
-				"example.*"
-			],
 			"isUrlFilterCaseSensitive": false
 		},
 		"priority": 201
@@ -2424,7 +2543,45 @@ example 2
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "remove",
+					"header": "Set-Cookie"
+				}
+			],
+			"requestHeaders": [
+				{
+					"operation": "remove",
+					"header": "Cookie"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "||example.org^",
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 1
+	}
+]
 
 ```
 example 3
@@ -2724,7 +2881,40 @@ example 1
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "append",
+					"header": "Permissions-Policy",
+					"value": "sync-xhr=()"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "||example.org^",
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 1
+	}
+]
 
 ```
 example 2
@@ -2748,7 +2938,33 @@ example 3
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "allow"
+		},
+		"condition": {
+			"urlFilter": "||example.org/page/*",
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 100001
+	}
+]
 
 ```
 example 4
@@ -2760,7 +2976,43 @@ $domain=example.org|example.com,permissions=oversized-images=()\, sync-script=()
 ↓↓↓↓ converted to ↓↓↓↓
 
 ```json
-[]
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "append",
+					"header": "Permissions-Policy",
+					"value": "oversized-images=(), sync-script=(), unsized-media=()"
+				}
+			]
+		},
+		"condition": {
+			"initiatorDomains": [
+				"example.org",
+				"example.com"
+			],
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 151
+	}
+]
 
 ```
 example 5
@@ -2774,6 +3026,38 @@ example 5
 
 ```json
 [
+	{
+		"id": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "append",
+					"header": "Permissions-Policy",
+					"value": "sync-xhr=()"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "||example.org^",
+			"isUrlFilterCaseSensitive": false,
+			"resourceTypes": [
+				"main_frame",
+				"sub_frame",
+				"stylesheet",
+				"script",
+				"image",
+				"font",
+				"object",
+				"xmlhttprequest",
+				"ping",
+				"media",
+				"websocket",
+				"other"
+			]
+		},
+		"priority": 1
+	},
 	{
 		"id": 2,
 		"action": {

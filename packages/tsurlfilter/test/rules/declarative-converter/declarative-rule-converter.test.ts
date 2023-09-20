@@ -1,4 +1,5 @@
 import { CSP_HEADER_NAME } from '../../../src/modifiers/csp-modifier';
+import { PERMISSIONS_POLICY_HEADER_NAME } from '../../../src/modifiers/permissions-modifier';
 import { ResourceType } from '../../../src/rules/declarative-converter/declarative-rule';
 import {
     TooComplexRegexpError,
@@ -1046,12 +1047,12 @@ describe('DeclarativeRuleConverter', () => {
             const expectedErrors = [
                 new UnsupportedModifierError(
                     // eslint-disable-next-line max-len
-                    `Network rule with $removeheader modifier containing some of the unsupported headers is not supported: "${networkRules[0].getText()}"`,
+                    `Network rule with $removeheader modifier contains some of the unsupported headers: "${networkRules[0].getText()}"`,
                     networkRules[0],
                 ),
                 new UnsupportedModifierError(
                     // eslint-disable-next-line max-len
-                    `Network rule with $removeheader modifier containing some of the unsupported headers is not supported: "${networkRules[1].getText()}"`,
+                    `Network rule with $removeheader modifier contains some of the unsupported headers: "${networkRules[1].getText()}"`,
                     networkRules[1],
                 ),
             ];
@@ -1153,7 +1154,7 @@ describe('DeclarativeRuleConverter', () => {
             const networkRule = new NetworkRule(badRule, filterId);
             const err = new UnsupportedModifierError(
                 // eslint-disable-next-line max-len
-                `Network rule with $removeheader modifier containing some of the unsupported headers is not supported: "${networkRule.getText()}"`,
+                `Network rule with $removeheader modifier contains some of the unsupported headers: "${networkRule.getText()}"`,
                 networkRule,
             );
 
@@ -1321,6 +1322,94 @@ describe('DeclarativeRuleConverter', () => {
 
             expect(declarativeRules).toHaveLength(0);
             expect(errors).toHaveLength(0);
+        });
+    });
+
+    describe('check $cookie', () => {
+        it('converts $cookie rules without params', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['||example.com$cookie'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules.length).toBe(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 1,
+                action: {
+                    type: 'modifyHeaders',
+                    requestHeaders: [{
+                        header: 'Cookie',
+                        operation: 'remove',
+                    }],
+                    responseHeaders: [{
+                        header: 'Set-Cookie',
+                        operation: 'remove',
+                    }],
+                },
+                condition: {
+                    isUrlFilterCaseSensitive: false,
+                    urlFilter: '||example.com',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('decline conversion $cookie rules with parameters', () => {
+            const filterId = 0;
+            const rulesText = [
+                '||example.com$cookie=lang',
+                '||example.com$cookie=user;maxAge=3600',
+                '||example.com$cookie=utm;maxAge=3600;sameSite=lax',
+            ];
+            const rules = createRulesFromText(
+                filterId,
+                rulesText,
+            );
+
+            const {
+                declarativeRules,
+                errors,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(errors.length).toBe(3);
+
+            const networkRules = [
+                new NetworkRule(rulesText[0], filterId),
+                new NetworkRule(rulesText[1], filterId),
+                new NetworkRule(rulesText[2], filterId),
+            ];
+
+            const expectedErrors = [
+                new UnsupportedModifierError(
+                    // eslint-disable-next-line max-len
+                    `The use of additional parameters in $cookie (apart from $cookie itself) is not supported: "${networkRules[0].getText()}"`,
+                    networkRules[0],
+                ),
+                new UnsupportedModifierError(
+                    // eslint-disable-next-line max-len
+                    `The use of additional parameters in $cookie (apart from $cookie itself) is not supported: "${networkRules[1].getText()}"`,
+                    networkRules[1],
+                ),
+                new UnsupportedModifierError(
+                    // eslint-disable-next-line max-len
+                    `The use of additional parameters in $cookie (apart from $cookie itself) is not supported: "${networkRules[2].getText()}"`,
+                    networkRules[2],
+                ),
+            ];
+
+            expect(declarativeRules).toHaveLength(0);
+            expect(errors).toHaveLength(3);
+            expect(errors[0]).toStrictEqual(expectedErrors[0]);
+            expect(errors[1]).toStrictEqual(expectedErrors[1]);
+            expect(errors[2]).toStrictEqual(expectedErrors[2]);
         });
     });
 
@@ -1552,6 +1641,75 @@ describe('DeclarativeRuleConverter', () => {
                 networkRule,
             );
             expect(errors[0]).toStrictEqual(err);
+        });
+    });
+
+    describe('check $permissions', () => {
+        it('converts $permissions rule', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                ['||example.org^$permissions=autoplay=()'],
+            );
+
+            const {
+                declarativeRules,
+            } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toEqual({
+                id: 1,
+                priority: 1,
+                action: {
+                    type: 'modifyHeaders',
+                    responseHeaders: [{
+                        header: PERMISSIONS_POLICY_HEADER_NAME,
+                        operation: 'append',
+                        value: 'autoplay=()',
+                    }],
+                },
+                condition: {
+                    isUrlFilterCaseSensitive: false,
+                    urlFilter: '||example.org^',
+                    resourceTypes: allResourcesTypes,
+                },
+            });
+        });
+
+        it('converts several $permissions directives', () => {
+            const filterId = 0;
+            const rules = createRulesFromText(
+                filterId,
+                [
+                    '$domain=example.org|example.com,permissions=storage-access=()\\, сamera=()',
+                ],
+            );
+
+            const { declarativeRules } = DeclarativeRulesConverter.convert(
+                [[filterId, rules]],
+            );
+            expect(declarativeRules).toHaveLength(1);
+            expect(declarativeRules[0]).toStrictEqual({
+                id: 1,
+                priority: 151,
+                action: {
+                    type: 'modifyHeaders',
+                    responseHeaders: [{
+                        header: PERMISSIONS_POLICY_HEADER_NAME,
+                        operation: 'append',
+                        value: 'storage-access=(), сamera=()',
+                    }],
+                },
+                condition: {
+                    initiatorDomains: [
+                        'example.org',
+                        'example.com',
+                    ],
+                    resourceTypes: allResourcesTypes,
+                    isUrlFilterCaseSensitive: false,
+                },
+            });
         });
     });
 });

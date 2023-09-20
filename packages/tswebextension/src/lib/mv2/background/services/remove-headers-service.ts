@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { WebRequest } from 'webextension-polyfill';
-import { NetworkRule, RemoveHeaderModifier } from '@adguard/tsurlfilter';
+import { NetworkRule, NetworkRuleOption, RemoveHeaderModifier } from '@adguard/tsurlfilter';
 
 import {
     defaultFilteringLog,
@@ -14,7 +14,7 @@ import { RequestContext, requestContextStorage } from '../request';
 /**
  * Headers filtering service module.
  */
-export class HeadersService {
+export class RemoveHeadersService {
     private filteringLog: FilteringLogInterface;
 
     /**
@@ -55,8 +55,9 @@ export class HeadersService {
         }
 
         let isModified = false;
+
         rules.forEach((rule) => {
-            isModified = HeadersService.applyRule(requestHeaders, rule, true);
+            isModified = RemoveHeadersService.applyRule(requestHeaders, rule, true);
             if (isModified || rule.isAllowlist()) {
                 this.filteringLog.publishEvent({
                     type: FilteringEventType.RemoveHeader,
@@ -112,8 +113,14 @@ export class HeadersService {
 
         let isModified = false;
 
-        rules.forEach((rule) => {
-            if (HeadersService.applyRule(responseHeaders, rule, false)) {
+        rules.forEach((rule: NetworkRule) => {
+            if (rule.isOptionEnabled(NetworkRuleOption.Header)) {
+                const responseHeaderMatch = rule.matchResponseHeaders(responseHeaders);
+                if (!responseHeaderMatch || rule.isAllowlist()) {
+                    return;
+                }
+            }
+            if (RemoveHeadersService.applyRule(responseHeaders, rule, false)) {
                 isModified = true;
                 this.filteringLog.publishEvent({
                     type: FilteringEventType.RemoveHeader,
@@ -168,4 +175,4 @@ export class HeadersService {
     }
 }
 
-export const headersService = new HeadersService(defaultFilteringLog);
+export const removeHeadersService = new RemoveHeadersService(defaultFilteringLog);

@@ -8,12 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- TODO: manually add compare links for version to the end of the file -->
 <!-- e.g. [1.0.77]: https://github.com/AdguardTeam/tsurlfilter/compare/tsurlfilter-v1.0.76...tsurlfilter-v1.0.77 -->
 
+## [Unreleased]
 
-## Unreleased
+## Added
+- Support for regexp values in $domain modifier of network and cosmetic rules [#41](https://github.com/AdguardTeam/tsurlfilter/issues/41).
+- New `$permissions` modifier to set Permissions-Policy response header.
+- New `$header` modifier to match requests by response headers.
+- Support conversion to DNR for `$permissions` modifier.
+- Support conversion to DNR for `$cookie` modifier.
+- `$url` modifier support for non-basic rules.
 
 ### Fixed
 - Scriptlets not being logged when filtering log is open [#2442](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2481)
-- Filtering log clearing on `$removeparam` rule application [#2442](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2442)
+- Filtering log clearing on `$removeparam` rule application [#2442](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2442).
 
 
 ## [2.1.11] - 2023-08-25

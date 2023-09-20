@@ -1,4 +1,5 @@
 import { CosmeticRuleParser } from '../../src/rules/cosmetic-rule-parser';
+import { DomainModifier, COMMA_SEPARATOR, PIPE_SEPARATOR } from '../../src/modifiers/domain-modifier';
 
 describe('CosmeticRuleParser', () => {
     it('parse rule text by marker', () => {
@@ -70,7 +71,15 @@ describe('CosmeticRuleParser', () => {
             domain: 'exa\\,mple.com',
         });
 
+        expect(CosmeticRuleParser.parseRuleModifiers('url=/example[0-6].com/')).toEqual({
+            url: '/example[0-6].com/',
+        });
+
         expect(CosmeticRuleParser.parseRuleModifiers('')).toEqual(null);
+
+        expect(() => {
+            CosmeticRuleParser.parseRuleModifiers('path=/page*.html,url=example.com/category/5/item.html');
+        }).toThrow(new SyntaxError('The $url modifier can\'t be used with other modifiers'));
 
         expect(() => {
             CosmeticRuleParser.parseRuleModifiers('domain,path=/page*.html');
@@ -82,30 +91,37 @@ describe('CosmeticRuleParser', () => {
     });
 
     it('parse and extracts the permitted/restricted domains and the unescaped path modifier value', () => {
-        expect(CosmeticRuleParser.parseRulePattern('example.org')).toEqual({
-            permittedDomains: ['example.org'],
+        let rulePattern: string;
+
+        rulePattern = 'example.org';
+        expect(CosmeticRuleParser.parseRulePattern(rulePattern)).toEqual({
+            domainModifier: new DomainModifier(rulePattern, COMMA_SEPARATOR),
         });
 
-        expect(CosmeticRuleParser.parseRulePattern('example.org,another.com')).toEqual({
-            permittedDomains: ['example.org', 'another.com'],
+        rulePattern = 'example.org,another.com';
+        expect(CosmeticRuleParser.parseRulePattern(rulePattern)).toEqual({
+            domainModifier: new DomainModifier(rulePattern, COMMA_SEPARATOR),
         });
 
         expect(CosmeticRuleParser.parseRulePattern('*')).toEqual({});
 
-        expect(CosmeticRuleParser.parseRulePattern('example.org,~another.com')).toEqual({
-            permittedDomains: ['example.org'],
-            restrictedDomains: ['another.com'],
+        rulePattern = 'example.org,~another.com';
+        expect(CosmeticRuleParser.parseRulePattern(rulePattern)).toEqual({
+            domainModifier: new DomainModifier(rulePattern, COMMA_SEPARATOR),
+        });
+
+        rulePattern = 'example.com/category/5';
+        expect(CosmeticRuleParser.parseRulePattern(`[$url=${rulePattern}]`)).toEqual({
+            url: rulePattern,
         });
 
         expect(CosmeticRuleParser.parseRulePattern('[$path=/page]example.org,~another.com')).toEqual({
-            permittedDomains: ['example.org'],
-            restrictedDomains: ['another.com'],
+            domainModifier: new DomainModifier('example.org,~another.com', COMMA_SEPARATOR),
             path: '/page',
         });
 
         expect(CosmeticRuleParser.parseRulePattern('[$path=/page,domain=example.org|~another.com]')).toEqual({
-            permittedDomains: ['example.org'],
-            restrictedDomains: ['another.com'],
+            domainModifier: new DomainModifier('example.org|~another.com', PIPE_SEPARATOR),
             path: '/page',
         });
 
@@ -116,5 +132,9 @@ describe('CosmeticRuleParser', () => {
         expect(() => {
             CosmeticRuleParser.parseRulePattern('[$path=/page,domain=example.org]~another.com');
         }).toThrow(new SyntaxError('The $domain modifier is not allowed in a domain-specific rule'));
+
+        expect(() => {
+            CosmeticRuleParser.parseRulePattern('[$url=example.com/gallery]~another.com');
+        }).toThrow(new SyntaxError('The $url modifier is not allowed in a domain-specific rule'));
     });
 });

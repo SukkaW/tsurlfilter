@@ -10,6 +10,13 @@ export type CosmeticRuleModifiersCollection = {
     [P in CosmeticRuleModifiers]?: string;
 };
 
+type UrlPatternResult = { url: string };
+type PathDomainPatternResult = { path?: string, domainModifier?: DomainModifier };
+
+export const isUrlPatternResult = (
+    result: UrlPatternResult | PathDomainPatternResult,
+): result is UrlPatternResult => 'url' in result;
+
 /**
  * Helper class for parsing text of cosmetic rules
  * used by CosmeticRule and [Filter compiler](https://github.com/AdguardTeam/FiltersCompiler)
@@ -140,7 +147,7 @@ export class CosmeticRuleParser {
             const modifierText = modifiersTextArray[i];
             const assignerIndex = modifierText.indexOf(Assigner);
 
-            if (modifierText === 'path') {
+            if (modifierText === CosmeticRuleModifiers.Path) {
                 // Empty path modifier without assigner and value will match only main page
                 modifiers[modifierText] = '';
                 continue;
@@ -151,6 +158,10 @@ export class CosmeticRuleParser {
             }
 
             const modifierKey = modifierText.substring(0, assignerIndex);
+
+            if (modifierKey === CosmeticRuleModifiers.Url && modifiersTextArray.length > 1) {
+                throw new SyntaxError('The $url modifier can\'t be used with other modifiers');
+            }
 
             if (cosmeticRuleModifiersList.includes(modifierKey)) {
                 const modifierValue = modifierText.substring(assignerIndex + 1);
@@ -169,13 +180,10 @@ export class CosmeticRuleParser {
      * If domains are declared through $domain modifier and pattern domain list, this method throws a SyntaxError.
      * @param rulePattern - rule pattern text
      *
-     * @returns Object with permitted/restricted domains list and the path modifier string value
+     * @returns Object with permitted/restricted domains list and/or the path modifier string value,
+     * or url modifier string value
      */
-    static parseRulePattern(rulePattern: string): {
-        path?: string;
-        permittedDomains?: string[];
-        restrictedDomains?: string[];
-    } {
+    static parseRulePattern(rulePattern: string): UrlPatternResult | PathDomainPatternResult {
         const {
             domainsText,
             modifiersText,
@@ -187,6 +195,15 @@ export class CosmeticRuleParser {
         const modifiers = CosmeticRuleParser.parseRuleModifiers(modifiersText);
 
         if (modifiers) {
+            if (modifiers.url) {
+                if (domains) {
+                    throw new SyntaxError('The $url modifier is not allowed in a domain-specific rule');
+                } else {
+                    const { url } = modifiers;
+                    return { url };
+                }
+            }
+
             if (modifiers.path || modifiers.path === '') {
                 path = modifiers.path;
 
@@ -207,27 +224,17 @@ export class CosmeticRuleParser {
             }
         }
 
-        let permittedDomains;
-        let restrictedDomains;
+        let domainModifier;
 
         // Skip wildcard domain
         if (domains && domains !== SimpleRegex.MASK_ANY_CHARACTER) {
             const separator = modifiers?.domain ? PIPE_SEPARATOR : COMMA_SEPARATOR;
-            const domainModifier = new DomainModifier(domains, separator);
-
-            if (domainModifier.permittedDomains) {
-                permittedDomains = domainModifier.permittedDomains;
-            }
-
-            if (domainModifier.restrictedDomains) {
-                restrictedDomains = domainModifier.restrictedDomains;
-            }
+            domainModifier = new DomainModifier(domains, separator);
         }
 
         return {
             path,
-            permittedDomains,
-            restrictedDomains,
+            domainModifier,
         };
     }
 }

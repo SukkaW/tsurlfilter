@@ -154,6 +154,26 @@ export class RequestBlockingApi {
     }
 
     /**
+     * Processes rule applying for request and compute response for {@link WebRequestApi.onHeadersReceived} listener.
+     *
+     * @param responseHeaders Response headers.
+     * @param data Data for request processing.
+     *
+     * @returns Response for {@link WebRequestApi.onHeadersReceived} listener.
+     */
+    public static getResponseOnHeadersReceived(
+        responseHeaders: WebRequest.HttpHeaders | undefined,
+        data: GetBlockingResponseParams,
+    ): WebRequest.BlockingResponse | undefined {
+        if (!data.rule || !responseHeaders) {
+            return undefined;
+        }
+
+        RequestBlockingApi.logRuleApplying(data);
+        return data.rule.isAllowlist() ? undefined : { cancel: true };
+    }
+
+    /**
      * Creates {@link FilteringLog} event of rule applying for processed request.
      *
      * @param data Data for request processing.

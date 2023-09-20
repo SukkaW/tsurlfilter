@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- e.g. [0.1.2]: https://github.com/AdguardTeam/tsurlfilter/compare/tswebextension-v0.1.1...tswebextension-v0.1.2 -->
 
 
+## Unreleased
+
+### Fixed
+- Applying $cookie rules on the content-script side.
+- `$csp`, `$removeparam` and `$removeheader` allowlist rules not being published as filtering log events.
+
+## Added
+- Support for `$cookie` modifier in MV3 via browser.cookies API and content-script.
+
+
 ## [0.3.20] - 2023-09-19
 
 ### Added
@@ -28,8 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.18] - 2023-09-13
 
 ### Fixed
-- Do not block a tab loading by `$popup` modifier rule on direct url navigation
-  [#2449](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2449).
+- Do not block a tab loading by `$popup` modifier rule on direct url navigation [#2449](https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2449).
+
 
 
 ## [0.3.17] - 2023-09-13
@@ -86,9 +96,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated `@adguard/tsurlfilter` to `v2.1.10`.
 - Updated `@adguard/scriptlets` to `v1.9.70`.
-
-### Fixed
-- Applying $cookie rules on the content-script side.
 
 
 ## [0.3.10] - 2023-08-18

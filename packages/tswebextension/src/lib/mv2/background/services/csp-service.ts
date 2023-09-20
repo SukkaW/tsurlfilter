@@ -1,21 +1,26 @@
 import { getDomain } from 'tldts';
 import { nanoid } from 'nanoid';
+import { NetworkRuleOption, CSP_HEADER_NAME } from '@adguard/tsurlfilter';
 
 import { ContentType } from '../../../common/request-type';
-import { defaultFilteringLog, FilteringEventType } from '../../../common/filtering-log';
-import { FilteringLogInterface } from '../../../common';
+import {
+    defaultFilteringLog,
+    FilteringEventType,
+    type FilteringLogInterface,
+} from '../../../common';
 import {
     type RequestContext,
     requestContextStorage,
 } from '../request/request-context-storage';
 import { RequestBlockingApi } from '../request/request-blocking-api';
 
-const CSP_HEADER_NAME = 'Content-Security-Policy';
-
 /**
  * Content Security Policy Headers filtering service module.
  */
 export class CspService {
+    /**
+     * Filtering log.
+     */
     private filteringLog: FilteringLogInterface;
 
     /**
@@ -54,6 +59,12 @@ export class CspService {
 
         for (let i = 0; i < cspRules.length; i += 1) {
             const rule = cspRules[i];
+            if (rule.isOptionEnabled(NetworkRuleOption.Header)) {
+                const responseHeaderMatch = rule.matchResponseHeaders(responseHeaders);
+                if (!responseHeaderMatch || rule.isAllowlist()) {
+                    continue;
+                }
+            }
 
             // Don't forget: getCspRules returns all $csp rules, we must directly check that the rule is blocking.
             if (RequestBlockingApi.isRequestBlockedByRule(rule)) {

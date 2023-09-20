@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this,jsdoc/require-description-complete-sentence */
 import { nanoid } from 'nanoid';
 import { NetworkRule, CookieModifier } from '@adguard/tsurlfilter';
 import { getDomain } from 'tldts';
@@ -9,11 +8,11 @@ import {
     FilteringLogInterface,
     logger,
 } from '../../../../common';
-import CookieRulesFinder from './cookie-rules-finder';
-import ParsedCookie from './parsed-cookie';
+import { ParsedCookie } from '../../../../common/cookie-filtering/parsed-cookie';
+import { findHeaderByName } from '../../../../common/utils/find-header-by-name';
+import CookieRulesFinder from '../../../../common/cookie-filtering/cookie-rules-finder';
+import { BrowserCookieApi } from '../../../../common/cookie-filtering/browser-cookie-api';
 import CookieUtils from './utils';
-import BrowserCookieApi from './browser-cookie/browser-cookie-api';
-import { findHeaderByName } from '../../utils/headers';
 import { RequestContext, requestContextStorage } from '../../request';
 import { tabsApi } from '../../api';
 
@@ -24,21 +23,23 @@ import { tabsApi } from '../../api';
  * repo for an example.
  *
  * Logic introduction:
- *  onBeforeSendHeaders:
+ *  CookieFiltering.onBeforeSendHeaders:
  *  - get all cookies for request url;
  *  - store cookies (first-party);
+ *  - apply rules via modifying or removing them from headers
+ *    and modifying or removing them with browser.cookies api;
  *
- *  onHeadersReceived:
+ *  CookieFiltering.onHeadersReceived:
  *  - parse set-cookie header, only to detect if the cookie in header will be set from third-party request;
  *  - save third-party flag for this cookie cookie.thirdParty=request.thirdParty;
- *  - apply rules via removing them from headers and removing them with browser.cookies api;
- *  TODO Rewrite/split method for extensions on MV3, because we wont have possibility to remove rules via headers.
+ *  - apply rules via modifying or removing them from headers
+ *    and modifying or removing them with browser.cookies api;
  *
- *  onCompleted
+ *  CookieFiltering.onCompleted:
  *  - apply rules via content script
  *  In content-scripts (check /src/content-script/cookie-controller.ts):
- *  - get matching cookie rules
- *  - apply
+ *  - get matching cookie rules;
+ *  - apply.
  */
 export class CookieFiltering {
     private filteringLog: FilteringLogInterface;
@@ -267,10 +268,13 @@ export class CookieFiltering {
             requestId,
         } = context;
 
-        if (responseHeaders
-            && requestUrl
-            && typeof thirdParty === 'boolean'
-        ) {
+        /**
+         * Full context can be created in onBeforeRequest, partial context can
+         * be created on every requestContextStorage.update method call and
+         * because of that case - we explicitly checks fields in object.
+         * TODO: Improve in AG-24428.
+         */
+        if (responseHeaders && requestUrl && typeof thirdParty !== 'undefined') {
             const cookies = CookieUtils.parseSetCookieHeaders(responseHeaders, requestUrl);
             const newCookies = cookies.filter((c) => !context.cookies?.includes(c));
             for (const cookie of newCookies) {
@@ -301,7 +305,7 @@ export class CookieFiltering {
 
     /**
      * TODO: Return engine startup status data to content script
-     * to delay execution of cookie rules until the engine is ready
+     * to delay execution of cookie rules until the engine is ready.
      *
      * Looks up blocking rules for content-script in frame context.
      *
@@ -309,7 +313,7 @@ export class CookieFiltering {
      * @param frameId Frame id.
      * @returns List of blocking rules.
      */
-    public getBlockingRules(tabId: number, frameId: number): NetworkRule[] {
+    public static getBlockingRules(tabId: number, frameId: number): NetworkRule[] {
         const frame = tabsApi.getTabFrame(tabId, frameId);
 
         if (!frame || !frame.matchingResult) {

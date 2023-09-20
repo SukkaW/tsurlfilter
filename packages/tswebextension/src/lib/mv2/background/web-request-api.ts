@@ -174,18 +174,20 @@ import { RequestType } from '@adguard/tsurlfilter/es/request-type';
 
 import { tabsApi, engineApi } from './api';
 import { Frame, MAIN_FRAME_ID } from './tabs/frame';
-import { findHeaderByName } from './utils/headers';
+import { findHeaderByName } from '../../common/utils/find-header-by-name';
 import { isHttpOrWsRequest, getDomain } from '../../common/utils/url';
 import { logger } from '../../common/utils/logger';
 import { defaultFilteringLog, FilteringEventType } from '../../common/filtering-log';
 
+import { removeHeadersService } from './services/remove-headers-service';
 import { CosmeticApi } from './cosmetic-api';
-import { headersService } from './services/headers-service';
 import { paramsService } from './services/params-service';
 import { cookieFiltering } from './services/cookie-filtering/cookie-filtering';
 import { ContentFiltering } from './services/content-filtering/content-filtering';
 import { cspService } from './services/csp-service';
+import { permissionsPolicyService } from './services/permissions-policy-service';
 import { TrustedTypesService } from './services/trusted-types-service';
+
 import {
     hideRequestInitiatorElement,
     RequestEvents,
@@ -303,9 +305,9 @@ export class WebRequestApi {
                 tabId,
                 eventId,
                 requestUrl,
-                requestDomain: getDomain(requestUrl) as string,
+                requestDomain: getDomain(requestUrl),
                 frameUrl: referrerUrl,
-                frameDomain: getDomain(referrerUrl) as string,
+                frameDomain: getDomain(referrerUrl),
                 requestType: contentType,
                 timestamp,
                 requestThirdParty: thirdParty,
@@ -427,7 +429,7 @@ export class WebRequestApi {
                 requestHeadersModified = true;
             }
 
-            if (headersService.onBeforeSendHeaders(context)) {
+            if (removeHeadersService.onBeforeSendHeaders(context)) {
                 requestHeadersModified = true;
             }
         }
@@ -471,9 +473,44 @@ export class WebRequestApi {
         const {
             requestId,
             requestUrl,
+            referrerUrl,
             requestType,
+            contentType,
             responseHeaders,
+            matchingResult,
+            requestFrameId,
+            thirdParty,
+            tabId,
         } = context;
+
+        const headerResult = matchingResult.getResponseHeadersResult(responseHeaders);
+
+        const response = RequestBlockingApi.getResponseOnHeadersReceived(responseHeaders, {
+            tabId,
+            eventId: context.eventId,
+            rule: headerResult,
+            referrerUrl,
+            requestUrl,
+            requestType,
+            contentType,
+        });
+
+        if (response?.cancel) {
+            tabsApi.incrementTabBlockedRequestCount(tabId);
+
+            const mainFrameUrl = tabsApi.getTabMainFrame(tabId)?.url;
+
+            hideRequestInitiatorElement(
+                tabId,
+                requestFrameId,
+                requestUrl,
+                mainFrameUrl || referrerUrl,
+                requestType,
+                thirdParty,
+            );
+
+            return response;
+        }
 
         const contentTypeHeader = findHeaderByName(responseHeaders!, 'content-type')?.value;
 
@@ -487,6 +524,9 @@ export class WebRequestApi {
             if (cspService.onHeadersReceived(context)) {
                 responseHeadersModified = true;
             }
+            if (permissionsPolicyService.onHeadersReceived(context)) {
+                responseHeadersModified = true;
+            }
             if (TrustedTypesService.onHeadersReceived(context)) {
                 responseHeadersModified = true;
             }
@@ -496,7 +536,7 @@ export class WebRequestApi {
             responseHeadersModified = true;
         }
 
-        if (headersService.onHeadersReceived(context)) {
+        if (removeHeadersService.onHeadersReceived(context)) {
             responseHeadersModified = true;
         }
 
