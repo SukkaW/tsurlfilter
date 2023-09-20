@@ -644,7 +644,7 @@ describe('DeclarativeConverter', () => {
             const declarativeRules = await ruleSet.getDeclarativeRules();
 
             // eslint-disable-next-line max-len
-            const err = new Error('Error during creating indexed rule with hash from filter "0" and line "0": "Unknown modifier: webrtc" in the rule: "@@$webrtc,domain=example.com"');
+            const err = new Error('Error during creating indexed rule with hash: Cannot create IRule from filter "0" and line "0": "Unknown modifier: webrtc" in the rule: "@@$webrtc,domain=example.com"');
             expect(declarativeRules).toHaveLength(0);
             expect(errors).toHaveLength(1);
             expect(errors[0]).toStrictEqual(err);
@@ -677,7 +677,7 @@ describe('DeclarativeConverter', () => {
             const declarativeRules = await ruleSet.getDeclarativeRules();
 
             // eslint-disable-next-line max-len
-            const err = new Error('Error during creating indexed rule with hash from filter "0" and line "0": "modifier $to is not compatible with $denyallow modifier" in the rule: "/ads$to=good.org,denyallow=good.com"');
+            const err = new Error('Error during creating indexed rule with hash: Cannot create IRule from filter "0" and line "0": "modifier $to is not compatible with $denyallow modifier" in the rule: "/ads$to=good.org,denyallow=good.com"');
 
             expect(declarativeRules).toHaveLength(0);
             expect(errors).toHaveLength(1);
