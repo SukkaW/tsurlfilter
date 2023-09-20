@@ -103,7 +103,8 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
         }
 
         if (!(networkRule instanceof NetworkRule)) {
-            throw new Error(`Cannot use not network rule: ${networkRule}`);
+            // eslint-disable-next-line max-len
+            throw new Error(`Rule from filter "${filterId}" and line "${lineIndex}" is not network rule: ${networkRule}`);
         }
 
         const hash = IndexedNetworkRuleWithHash.createRuleHash(networkRule);
@@ -166,7 +167,7 @@ export class IndexedNetworkRuleWithHash extends IndexedRule {
                 }
             } catch (e: unknown) {
                 // eslint-disable-next-line max-len
-                throw new Error(`Error during creating indexed rule with hash from filter "${filterId}" and line "${lineIndex}": ${getErrorMessage(e)}`);
+                throw new Error(`Error during creating indexed rule with hash: ${getErrorMessage(e)}`);
             }
         }
 
