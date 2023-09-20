@@ -1326,17 +1326,16 @@ describe('DeclarativeRuleConverter', () => {
     });
 
     describe('check $cookie', () => {
-        it('converts $cookie rules without params', () => {
+        it('converts $cookie rules without params', async () => {
             const filterId = 0;
-            const rules = createRulesFromText(
-                filterId,
-                ['||example.com$cookie'],
-            );
+            const rules = ['||example.com$cookie'];
+
+            const filter = await createFilter(filterId, rules);
 
             const {
                 declarativeRules,
             } = DeclarativeRulesConverter.convert(
-                [[filterId, rules]],
+                [filter],
             );
             expect(declarativeRules.length).toBe(1);
             expect(declarativeRules[0]).toEqual({
@@ -1361,30 +1360,27 @@ describe('DeclarativeRuleConverter', () => {
             });
         });
 
-        it('decline conversion $cookie rules with parameters', () => {
+        it('decline conversion $cookie rules with parameters', async () => {
             const filterId = 0;
-            const rulesText = [
+            const rules = [
                 '||example.com$cookie=lang',
                 '||example.com$cookie=user;maxAge=3600',
                 '||example.com$cookie=utm;maxAge=3600;sameSite=lax',
             ];
-            const rules = createRulesFromText(
-                filterId,
-                rulesText,
-            );
+            const filter = await createFilter(filterId, rules);
 
             const {
                 declarativeRules,
                 errors,
             } = DeclarativeRulesConverter.convert(
-                [[filterId, rules]],
+                [filter],
             );
             expect(errors.length).toBe(3);
 
             const networkRules = [
-                new NetworkRule(rulesText[0], filterId),
-                new NetworkRule(rulesText[1], filterId),
-                new NetworkRule(rulesText[2], filterId),
+                new NetworkRule(rules[0], filterId),
+                new NetworkRule(rules[1], filterId),
+                new NetworkRule(rules[2], filterId),
             ];
 
             const expectedErrors = [
@@ -1645,17 +1641,16 @@ describe('DeclarativeRuleConverter', () => {
     });
 
     describe('check $permissions', () => {
-        it('converts $permissions rule', () => {
+        it('converts $permissions rule', async () => {
             const filterId = 0;
-            const rules = createRulesFromText(
-                filterId,
-                ['||example.org^$permissions=autoplay=()'],
-            );
+            const rules = ['||example.org^$permissions=autoplay=()'];
+
+            const filter = await createFilter(filterId, rules);
 
             const {
                 declarativeRules,
             } = DeclarativeRulesConverter.convert(
-                [[filterId, rules]],
+                [filter],
             );
             expect(declarativeRules).toHaveLength(1);
             expect(declarativeRules[0]).toEqual({
@@ -1677,17 +1672,16 @@ describe('DeclarativeRuleConverter', () => {
             });
         });
 
-        it('converts several $permissions directives', () => {
+        it('converts several $permissions directives', async () => {
             const filterId = 0;
-            const rules = createRulesFromText(
-                filterId,
-                [
-                    '$domain=example.org|example.com,permissions=storage-access=()\\, сamera=()',
-                ],
-            );
+            const rules = [
+                '$domain=example.org|example.com,permissions=storage-access=()\\, сamera=()',
+            ];
+
+            const filter = await createFilter(filterId, rules);
 
             const { declarativeRules } = DeclarativeRulesConverter.convert(
-                [[filterId, rules]],
+                [filter],
             );
             expect(declarativeRules).toHaveLength(1);
             expect(declarativeRules[0]).toStrictEqual({
