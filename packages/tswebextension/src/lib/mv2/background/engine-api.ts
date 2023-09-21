@@ -105,9 +105,11 @@ export class EngineApi {
             lists.push(allowlistRulesList);
         }
 
-        const stealthModeList = this.stealthApi.getStealthModeRuleList();
-        if (stealthModeList) {
-            lists.push(stealthModeList);
+        if (this.appContext.configuration?.settings.stealthModeEnabled) {
+            const stealthModeList = this.stealthApi.getStealthModeRuleList();
+            if (stealthModeList) {
+                lists.push(stealthModeList);
+            }
         }
 
         const ruleStorage = new RuleStorage(lists);
