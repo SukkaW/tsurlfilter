@@ -72,7 +72,7 @@ export default class FiltersApi {
      * @param id Filter id.
      * @param filtersPath Path to filters directory.
      *
-     * @returns Filter's content as list of strings.
+     * @returns Promise resolved file content as a list of strings.
      */
     private static async loadFilterContent(id: number, filtersPath: string): Promise<string[]> {
         const filterName = getFilterName(id);

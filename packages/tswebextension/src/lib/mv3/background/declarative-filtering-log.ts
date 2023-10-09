@@ -98,7 +98,7 @@ class DeclarativeFilteringLog implements IDeclarativeFilteringLog {
     /**
      * Adds a new record extending it with information about the original rule.
      *
-     * @param record Item of {@link chrome.declarativeNetRequest.MatchedRuleInfoDebug}.
+     * @param record Request details {@link chrome.declarativeNetRequest.MatchedRuleInfoDebug}.
      */
     private addNewRecord = async (record: chrome.declarativeNetRequest.MatchedRuleInfoDebug): Promise<void> => {
         const { request, rule } = record;
