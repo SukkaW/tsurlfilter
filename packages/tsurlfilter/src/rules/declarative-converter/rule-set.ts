@@ -122,7 +122,6 @@ export type RuleSetContentProvider = {
 const serializedRuleSetLazyDataValidator = zod.strictObject({
     sourceMapRaw: zod.string(),
     filterIds: zod.number().array(),
-    declarativeRules: DeclarativeRuleValidator.array(),
 });
 
 type SerializedRuleSetLazyData = zod.infer<typeof serializedRuleSetLazyDataValidator>;
@@ -430,6 +429,8 @@ export class RuleSet implements IRuleSet {
      * loading ruleset data to find and display source rules when declarative
      * filtering log is enabled. It includes a map of sources for all rules,
      * a list of declarative rules, and a list of source filter IDs.
+     * @param loadDeclarativeRules Loader for ruleset's declarative rules from
+     * raw file as a string.
      * @param filterList List of {@link IFilter}.
      *
      * @returns Deserialized rule set.
@@ -441,6 +442,7 @@ export class RuleSet implements IRuleSet {
         id: string,
         rawData: string,
         loadLazyData: () => Promise<string>,
+        loadDeclarativeRules: () => Promise<string>,
         filterList: IFilter[],
     ): Promise<DeserializedRuleSet> {
         let data: SerializedRuleSetData | undefined;
@@ -499,7 +501,13 @@ export class RuleSet implements IRuleSet {
                     return filterList.filter((filter) => filterIds.includes(filter.getId()));
                 },
                 loadDeclarativeRules: async () => {
-                    const { declarativeRules } = await getLazyData();
+                    const rawFileContent = await loadDeclarativeRules();
+
+                    const objectFromString = JSON.parse(rawFileContent);
+
+                    const declarativeRules = DeclarativeRuleValidator
+                        .array()
+                        .parse(objectFromString);
 
                     return declarativeRules;
                 },
@@ -527,7 +535,6 @@ export class RuleSet implements IRuleSet {
         };
 
         const lazyData: SerializedRuleSetLazyData = {
-            declarativeRules: this.declarativeRules,
             sourceMapRaw: this.sourceMap?.serialize() || '',
             filterIds: Array.from(this.filterList.keys()),
         };

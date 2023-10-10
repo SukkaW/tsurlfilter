@@ -121,6 +121,8 @@ describe('RuleSet', () => {
             lazyData,
         } = await ruleSet.serialize();
 
+        const declarativeRules = await ruleSet.getDeclarativeRules();
+
         const {
             data: {
                 regexpRulesCount,
@@ -133,6 +135,7 @@ describe('RuleSet', () => {
             id,
             data,
             async () => lazyData,
+            async () => JSON.stringify(declarativeRules),
             [originalFilter],
         );
 
@@ -162,5 +165,12 @@ describe('RuleSet', () => {
 
         // check counters
         expect(deserializedRuleSet.getRulesCount()).toStrictEqual(ruleSet.getRulesCount());
+
+        // check source map works
+        const [dRuleId] = await deserializedRuleSet.getDeclarativeRulesIdsBySourceRuleIndex({
+            sourceRuleIndex: 2,
+            filterId,
+        });
+        expect(d2.find((d) => d.id === dRuleId)).toStrictEqual(d1[1]);
     });
 });
