@@ -52,6 +52,9 @@ export default class RuleSetsLoaderApi {
         const loadLazyData = (): Promise<string> => loadFileText(
             chrome.runtime.getURL(`${this.ruleSetsPath}/${ruleSetId}/${LAZY_METADATA_FILENAME}`),
         );
+        const loadDeclarativeRules = (): Promise<string> => loadFileText(
+            chrome.runtime.getURL(`${this.ruleSetsPath}/${ruleSetId}/${ruleSetId}.json`),
+        );
 
         const {
             data: {
@@ -65,6 +68,7 @@ export default class RuleSetsLoaderApi {
             ruleSetId,
             rawData,
             loadLazyData,
+            loadDeclarativeRules,
             filterList,
         );
 
