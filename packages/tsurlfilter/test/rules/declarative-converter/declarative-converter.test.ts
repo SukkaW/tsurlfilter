@@ -63,10 +63,8 @@ describe('DeclarativeConverter', () => {
 
     it('converts simple blocking regexp rule with ? quantifier', async () => {
         const filter = createFilter(['/aaa?/']);
-        const { ruleSets: [ruleSet] } = await converter.convert(
-            [filter],
-        );
-        const { declarativeRules } = await ruleSet.serialize();
+        const { ruleSet } = await converter.convertStaticRuleSet(filter);
+        const declarativeRules = await ruleSet.getDeclarativeRules();
 
         const ruleId = 1;
 
