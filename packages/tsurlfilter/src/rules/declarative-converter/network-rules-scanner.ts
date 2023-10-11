@@ -30,7 +30,7 @@ type ScannedFiltersWithErrors = {
  */
 export class NetworkRulesScanner {
     /**
-     * Asynchronous scans the list of filters for rules.
+     * Asynchronous scans the list of filters for network rules.
      *
      * @param filterList List of {@link IFilter}.
      * @param filterFn If this function is specified, it will be applied to each

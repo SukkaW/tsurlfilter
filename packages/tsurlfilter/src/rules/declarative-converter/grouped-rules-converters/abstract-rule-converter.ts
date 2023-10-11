@@ -4,7 +4,7 @@
  * @file Describes how to convert one {@link NetworkRule} into one or many
  * {@link DeclarativeRule|declarative rules}.
  *
- *      Heir classes                                           DeclarativeConverter
+ *      Heir classes                                        DeclarativeRuleConverter
  *
  *                            │                                         │
  *    *override layer*        │              *protected layer*          │              *private layer*
@@ -94,7 +94,8 @@
  *                            │   used by all derived classes.          │
  *                            │                                         │
  */
-/* eslint-enable */
+/* eslint-enable jsdoc/require-description-complete-sentence */
+/* eslint-enable jsdoc/no-multi-asterisks */
 
 import punycode from 'punycode/';
 import { redirects } from '@adguard/scriptlets';
