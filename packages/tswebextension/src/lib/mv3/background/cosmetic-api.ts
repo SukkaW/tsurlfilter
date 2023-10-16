@@ -7,7 +7,7 @@ import { CosmeticRule } from '@adguard/tsurlfilter';
 export class CosmeticApi {
     private static readonly LINE_BREAK = '\r\n';
 
-    /*
+    /**
      * Number of selectors in grouped selector list.
      */
     private static readonly CSS_SELECTORS_PER_LINE = 50;
