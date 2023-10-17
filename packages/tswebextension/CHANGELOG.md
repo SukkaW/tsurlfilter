@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.2] - 2023-10-16
 
 ### Fixed
-- Removed grouping rules with `\r\n` for extended css which cause its error in MV3.
+- Removed grouping rules with `\r\n` for extended css rules which cause its
+  error in MV3.
 
 
 ## [0.4.1] - 2023-10-13

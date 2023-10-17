@@ -1,38 +1,38 @@
 import { CosmeticRule } from '@adguard/tsurlfilter';
 
-// TODO: Move to common
 /**
- * CosmeticApi contains logic about building css for hiding elements.
+ * CosmeticApiCommon contains common logic about building css for hiding elements.
  */
-export class CosmeticApi {
-    private static readonly LINE_BREAK = '\r\n';
+export class CosmeticApiCommon {
+    protected static readonly LINE_BREAK = '\r\n';
 
     /**
      * Number of selectors in grouped selector list.
      */
-    private static readonly CSS_SELECTORS_PER_LINE = 50;
+    protected static readonly CSS_SELECTORS_PER_LINE = 50;
 
     /**
-     * Builds stylesheet from rules.
+     * Builds stylesheets from rules.
+     * If `groupElemhideSelectors` is set,
+     * element hiding selector are to be combined into selector lists of {@link CosmeticApi.CSS_SELECTORS_PER_LINE}.
      *
-     * @param elemhideRules List of cosmetic hiding rules.
-     * @param injectRules List of cosmetic inject rules.
-     * @param groupElemhideSelectors Whether Elemhide selector grouping
-     * is necessary.
+     * @param elemhideRules List of elemhide rules.
+     * @param injectRules List of inject css rules.
+     * @param groupElemhideSelectors Flag for elemhide selectors grouping.
      *
-     * @returns List of string rules.
+     * @returns List of stylesheet expressions.
      */
-    public static buildStyleSheet(
+    public static buildStyleSheets(
         elemhideRules: CosmeticRule[],
         injectRules: CosmeticRule[],
         groupElemhideSelectors: boolean,
     ): string[] {
         const styles = [];
 
-        const elemHideStyles = CosmeticApi.buildElemhideStyles(elemhideRules, groupElemhideSelectors);
+        const elemHideStyles = CosmeticApiCommon.buildElemhideStyles(elemhideRules, groupElemhideSelectors);
         if (elemHideStyles.length > 0) {
             if (groupElemhideSelectors) {
-                styles.push(elemHideStyles.join(CosmeticApi.LINE_BREAK));
+                styles.push(elemHideStyles.join(CosmeticApiCommon.LINE_BREAK));
             } else {
                 styles.push(...elemHideStyles);
             }
@@ -41,7 +41,7 @@ export class CosmeticApi {
         const cssStyles = injectRules.map((x: CosmeticRule) => x.getContent());
         if (cssStyles.length > 0) {
             if (groupElemhideSelectors) {
-                styles.push(cssStyles.join(CosmeticApi.LINE_BREAK));
+                styles.push(cssStyles.join(CosmeticApiCommon.LINE_BREAK));
             } else {
                 styles.push(...cssStyles);
             }
@@ -83,9 +83,9 @@ export class CosmeticApi {
 
         // otherwise selectors should be grouped into selector lists
         const elemhideStyles = [];
-        for (let i = 0; i < elemhideSelectors.length; i += CosmeticApi.CSS_SELECTORS_PER_LINE) {
+        for (let i = 0; i < elemhideSelectors.length; i += CosmeticApiCommon.CSS_SELECTORS_PER_LINE) {
             const selectorList = elemhideSelectors
-                .slice(i, i + CosmeticApi.CSS_SELECTORS_PER_LINE)
+                .slice(i, i + CosmeticApiCommon.CSS_SELECTORS_PER_LINE)
                 .join(', ');
             elemhideStyles.push(`${selectorList}${ELEMHIDE_CSS_STYLE}`);
         }
