@@ -140,6 +140,13 @@ export class Engine {
      */
     matchFrame(frameUrl: string): NetworkRule | null {
         const sourceRequest = new Request(frameUrl, '', RequestType.Document);
+
+        // Internal URLs like `view-source:resource://...` won't have a domain.
+        // https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2549
+        if (sourceRequest.isInternalResourceRequest) {
+            return null;
+        }
+
         let sourceRules = this.networkEngine.matchAll(sourceRequest);
 
         sourceRules = MatchingResult.removeBadfilterRules(sourceRules);

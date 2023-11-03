@@ -90,6 +90,11 @@ export class Request {
     public isHostnameRequest = false;
 
     /**
+     * The request is for an internal resource (e.g. `view-source:resource:`, `view-source:webpack-internal` etc).
+     */
+    public isInternalResourceRequest = false;
+
+    /**
      * List of subdomains parsed from hostname
      */
     public subdomains: string[];
@@ -165,6 +170,8 @@ export class Request {
         } else {
             this.thirdParty = null;
         }
+
+        this.isInternalResourceRequest = !this.domain && !this.hostname && !this.method;
     }
 
     /**
