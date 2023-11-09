@@ -1,7 +1,7 @@
 import browser, { Tabs } from 'webextension-polyfill';
 import { RequestType } from '@adguard/tsurlfilter/es/request-type';
 
-import { isHttpOrWsRequest, isHttpRequest } from '../../../common/utils/url';
+import { isHttpOrWsRequest, isHttpRequestUrl } from '../../../common/utils/url';
 import { logger } from '../../../common/utils/logger';
 import { ContentType } from '../../../common/request-type';
 import { CosmeticApi } from '../cosmetic-api';
@@ -60,7 +60,7 @@ export class TabsCosmeticInjector {
 
         const { url } = tab;
 
-        if (url && !isHttpRequest(url)) {
+        if (!isHttpRequestUrl(url)) {
             return;
         }
 
