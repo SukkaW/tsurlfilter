@@ -130,7 +130,7 @@ export class Request {
      * @throws
      */
     constructor(url: string, sourceUrl: string | null, requestType: RequestType, method?: HTTPMethod) {
-        if (typeof url !== 'string' || url.indexOf('view-source:') > -1) {
+        if (typeof url !== 'string' || url.indexOf('view-source:') === 0) {
             throw new TypeError(`Invalid request url: ${url}`);
         }
 
