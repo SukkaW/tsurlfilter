@@ -140,7 +140,6 @@ export class Engine {
      */
     matchFrame(frameUrl: string): NetworkRule | null {
         const sourceRequest = new Request(frameUrl, '', RequestType.Document);
-
         let sourceRules = this.networkEngine.matchAll(sourceRequest);
 
         sourceRules = MatchingResult.removeBadfilterRules(sourceRules);
