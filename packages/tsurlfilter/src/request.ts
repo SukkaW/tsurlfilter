@@ -90,11 +90,6 @@ export class Request {
     public isHostnameRequest = false;
 
     /**
-     * The request is for an internal resource (e.g. `view-source:resource:`, `view-source:webpack-internal` etc).
-     */
-    public isInternalResourceRequest = false;
-
-    /**
      * List of subdomains parsed from hostname
      */
     public subdomains: string[];
@@ -135,7 +130,7 @@ export class Request {
      * @throws
      */
     constructor(url: string, sourceUrl: string | null, requestType: RequestType, method?: HTTPMethod) {
-        if (typeof url !== 'string') {
+        if (typeof url !== 'string' || url.indexOf('view-source:') > -1) {
             throw new TypeError(`Invalid request url: ${url}`);
         }
 
@@ -170,8 +165,6 @@ export class Request {
         } else {
             this.thirdParty = null;
         }
-
-        this.isInternalResourceRequest = !this.domain && !this.hostname && !this.method;
     }
 
     /**

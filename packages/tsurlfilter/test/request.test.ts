@@ -90,12 +90,20 @@ describe('Creating request', () => {
         expect(request.sourceSubdomains.sort()).toEqual(['localhost.test', 'test'].sort());
     });
 
-    it('handles empty hostname', () => {
+    it('handles urls', () => {
         let f = () => new Request('', 'example.com', RequestType.Other);
         expect(f).not.toThrow();
 
         // @ts-ignore
         f = () => new Request(undefined, 'example.com', RequestType.Other);
+        expect(f).toThrow(TypeError);
+        expect(f).toThrow(/Invalid request url:/);
+
+        f = () => new Request(
+            'view-source:resource://devtools/shared/ThreadSafeDevToolsUtils.js',
+            'example.com',
+            RequestType.Document,
+        );
         expect(f).toThrow(TypeError);
         expect(f).toThrow(/Invalid request url:/);
     });
