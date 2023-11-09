@@ -4,7 +4,7 @@ import type { HTTPMethod } from '@adguard/tsurlfilter';
 
 import { requestContextStorage, RequestContextState } from '../request-context-storage';
 import { RequestEvent, type RequestData } from './request-event';
-import { isThirdPartyRequest, getRequestType, isHttpRequestUrl } from '../../../../common';
+import { isThirdPartyRequest, getRequestType, isHttpRequest } from '../../../../common';
 import { MAIN_FRAME_ID, type TabFrameRequestContext } from '../../tabs';
 import { tabsApi } from '../../api';
 
@@ -183,7 +183,7 @@ export class RequestEvents {
          * Although this is expected, as the Upgrade request is indeed an HTTP request,
          * we use a chromium based approach in this case.
          */
-        if (type === 'websocket' && isHttpRequestUrl(url)) {
+        if (type === 'websocket' && isHttpRequest(url)) {
             url = url.replace(/^http(s)?:/, 'ws$1:');
         }
 

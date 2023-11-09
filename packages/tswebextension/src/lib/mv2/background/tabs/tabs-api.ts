@@ -5,7 +5,7 @@ import { EventChannel } from '../../../common/utils/channels';
 import type { DocumentApi } from '../document-api';
 import { FrameRequestContext, TabContext } from './tab-context';
 import { type Frame, MAIN_FRAME_ID } from './frame';
-import { isHttpRequestUrl } from '../../../common';
+import { isHttpRequest } from '../../../common';
 
 /**
  * Request context data related to the tab's frame.
@@ -341,7 +341,7 @@ export class TabsApi {
         // TODO: we can ignore some events (favicon url update etc.)
         const tabContext = this.context.get(tabId);
         if (tabContext && TabContext.isBrowserTab(tabInfo)) {
-            if (changeInfo.url && !isHttpRequestUrl(changeInfo.url)) {
+            if (changeInfo.url && !isHttpRequest(changeInfo.url)) {
                 return;
             }
             tabContext.updateTabInfo(changeInfo, tabInfo);

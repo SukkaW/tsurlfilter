@@ -7,7 +7,7 @@ import browser from 'webextension-polyfill';
  * @param url Request url.
  * @returns True if url starts with http{s?}.
  */
-export function isHttpRequestUrl(url: unknown): boolean {
+export function isHttpRequest(url: unknown): boolean {
     return typeof url === 'string' && !!url && url.indexOf('http') === 0;
 }
 

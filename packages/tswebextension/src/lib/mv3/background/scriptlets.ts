@@ -1,6 +1,6 @@
 import { CosmeticOption, ScriptletData } from '@adguard/tsurlfilter';
 
-import { isHttpRequestUrl } from '../../common/utils';
+import { isHttpRequest } from '../../common/utils';
 import { logger } from '../utils/logger';
 
 import { engineApi } from './engine-api';
@@ -124,11 +124,11 @@ export const getAndExecuteScripts = async (
     /**
      * In the case when the frame does not have a source, we use the url of the main frame.
      */
-    if (!isHttpRequestUrl(url)) {
+    if (!isHttpRequest(url)) {
         url = tabsApi.getMainFrameUrl(tabId) || '';
     }
 
-    if (isHttpRequestUrl(url) && !url.includes(NEW_TAB_PAGE)) {
+    if (isHttpRequest(url) && !url.includes(NEW_TAB_PAGE)) {
         const response = await getScripts(url);
         await executeScript(response, tabId);
 
