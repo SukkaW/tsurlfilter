@@ -131,7 +131,7 @@ export class Request {
      * @throws
      */
     constructor(url: string, sourceUrl: string | null, requestType: RequestType, method?: HTTPMethod) {
-        if (typeof url !== 'string' || !isHttpOrWsRequest(url)) {
+        if (typeof url !== 'string' || (url !== '' && !isHttpOrWsRequest(url))) {
             throw new TypeError(`Invalid request url: ${url}`);
         }
 
