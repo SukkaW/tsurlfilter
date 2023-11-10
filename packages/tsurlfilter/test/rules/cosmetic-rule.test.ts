@@ -243,7 +243,7 @@ describe('CosmeticRule match', () => {
         expect(rule.match(createRequest('https://example.org'))).toEqual(true);
         expect(rule.match(createRequest('https://test.com'))).toEqual(true);
     });
- 
+
     it('works if it matches rule with path modifier pattern', () => {
         let rule = new CosmeticRule('[$path=page.html]##.textad', 0);
 
