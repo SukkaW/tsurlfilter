@@ -92,7 +92,8 @@ describe('Creating request', () => {
 
     it('handles urls', () => {
         let f = () => new Request('', 'example.com', RequestType.Other);
-        expect(f).not.toThrow();
+        expect(f).toThrow(TypeError);
+        expect(f).toThrow(/Invalid request url:/);
 
         // @ts-ignore
         f = () => new Request(undefined, 'example.com', RequestType.Other);
