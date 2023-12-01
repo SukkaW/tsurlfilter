@@ -121,9 +121,12 @@ export class RequestBlockingApi {
                     browser.tabs.remove(tabId);
                     return { cancel: true };
                 }
-                // do not block the tab loading on direct url navigation
-                // https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2449
-                return undefined;
+
+                if (!rule.isOptionEnabled(NetworkRuleOption.Document)) {
+                    // do not block the tab loading on direct url navigation
+                    // https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2449
+                    return undefined;
+                }
             }
 
             // For all other blocking rules, we return our dummy page with the

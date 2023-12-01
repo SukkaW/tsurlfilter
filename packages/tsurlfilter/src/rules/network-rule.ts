@@ -112,6 +112,9 @@ export enum NetworkRuleOption {
     /* $permissions modifier */
     Permissions = 1 << 29,
 
+    /* $document modifier */
+    Document = 1 << 30,
+
     // Groups (for validation)
 
     /** Allowlist-only modifiers */
@@ -1309,6 +1312,7 @@ export class NetworkRule implements rule.IRule {
             // $document, $doc
             case OPTIONS.DOCUMENT:
             case OPTIONS.DOC:
+                this.setOptionEnabled(NetworkRuleOption.Content, true);
                 this.setRequestType(RequestType.Document, true);
                 // In the case of allowlist rules $document implicitly includes
                 // all these modifiers: `$content`, `$elemhide`, `$jsinject`,
