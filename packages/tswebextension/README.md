@@ -10,6 +10,8 @@ Table of content:
   - [CLI](#cli)
   - [API](#api)
     - [configuration](#configuration)
+      - [TSWEBEXTENSION_VERSION](#tswebextension-version)
+      - [EXTENDED_CSS_VERSION](#extended_css_version)
       - [filters (MV2 only)](#filters-mv2-only)
         - [filterId](#filterid)
         - [content](#content)
@@ -24,7 +26,8 @@ Table of content:
       - [allowlist](#allowlist)
       - [trustedDomains](#trusteddomains)
       - [userrules](#userrules)
-      - [verbose (deprecated)](#verbose)
+      - [ verbose (deprecated)](#-verbose-deprecated)
+      - [logLevel](#loglevel)
       - [settings](#settings)
         - [allowlistInverted](#allowlistinverted)
         - [allowlistEnabled](#allowlistenabled)
@@ -50,6 +53,7 @@ Table of content:
         - [onFilteringLogEvent](#onfilteringlogevent)
         - [isStarted](#isstarted)
       - [Methods](#methods)
+        - [initStorage()](#initstorage)
         - [start()](#start)
         - [configure()](#configure)
         - [stop()](#stop)
@@ -169,6 +173,18 @@ MV2 submodule also provides a set of methods for [filtering log management](#fil
 type: `Configuration`
 
 Configuration object.
+
+#### TSWEBEXTENSION_VERSION
+
+type: `string`
+
+Version of the library.
+
+#### EXTENDED_CSS_VERSION
+
+type: `string`
+
+Version of the extended css module, used in current library version.
 
 #### filters (MV2 only)
 
@@ -409,6 +425,12 @@ type: `boolean`
 Is app started.
 
 #### Methods
+
+##### initStorage()
+
+type: `() => Promise<void>`
+
+Initialize app persistent data. This method called as soon as possible and allows access to the actual context before the app is started.
 
 ##### start()
 
