@@ -608,12 +608,12 @@ describe('NetworkRule constructor', () => {
         let rule = new NetworkRule('||example.org^$popup', -1);
         expect(rule).toBeTruthy();
         expect(rule.isOptionEnabled(NetworkRuleOption.Popup));
-        expect(rule.getPermittedRequestTypes()).toEqual(RequestType.Document);
+        expect(rule.getPermittedRequestTypes()).toEqual(RequestType.NotSet);
 
         rule = new NetworkRule('||example.org^$script,image,popup', -1);
         expect(rule).toBeTruthy();
         expect(rule.isOptionEnabled(NetworkRuleOption.Popup));
-        expect(rule.getPermittedRequestTypes()).toEqual(RequestType.Script | RequestType.Image | RequestType.Document);
+        expect(rule.getPermittedRequestTypes()).toEqual(RequestType.Script | RequestType.Image);
     });
 });
 
