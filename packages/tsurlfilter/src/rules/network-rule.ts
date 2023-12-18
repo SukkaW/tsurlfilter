@@ -36,7 +36,7 @@ import { countEnabledBits, getBitCount } from '../utils/bit-utils';
 /**
  * NetworkRuleOption is the enumeration of various rule options.
  * In order to save memory, we store some options as a flag.
- * https://kb.adguard.com/en/general/how-to-create-your-own-ad-filters#modifiers
+ * https://adguard.com/kb/general/ad-filtering/create-own-filters/#basic-rule-modifiers
  */
 export enum NetworkRuleOption {
     /** No value is set. Syntax sugar to simplify code. */
