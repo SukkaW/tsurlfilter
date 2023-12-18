@@ -615,6 +615,13 @@ describe('NetworkRule constructor', () => {
         expect(rule.isOptionEnabled(NetworkRuleOption.Popup));
         expect(rule.getPermittedRequestTypes()).toEqual(RequestType.Script | RequestType.Image);
     });
+
+    it('all modifier considered as popup and document', () => {
+        const rule = new NetworkRule('||example.org^$all', -1);
+        expect(rule).toBeTruthy();
+        expect(rule.isOptionEnabled(NetworkRuleOption.Popup));
+        expect(rule.getPermittedRequestTypes()).toEqual(RequestType.Document);
+    });
 });
 
 describe('NetworkRule.match', () => {
