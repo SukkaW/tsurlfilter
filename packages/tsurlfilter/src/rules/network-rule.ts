@@ -249,6 +249,7 @@ export class NetworkRule implements rule.IRule {
      */
     private static readonly CATEGORY_1_OPTIONS_MASK = NetworkRuleOption.ThirdParty
         | NetworkRuleOption.MatchCase
+        | NetworkRuleOption.Popup
         | NetworkRuleOption.DnsRewrite;
 
     /**
