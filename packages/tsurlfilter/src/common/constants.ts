@@ -7,3 +7,5 @@ export enum ErrorStatusCodes {
 }
 
 export const SEPARATOR = '|';
+export const SPACE = ' ';
+export const EMPTY_STRING = '';
