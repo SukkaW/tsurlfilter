@@ -86,6 +86,7 @@
     ]
   },
   "dependencies": {
+    "@adguard/agtree": "file:../agtree/adguard-agtree-v1.1.7.tgz",
     "@adguard/scriptlets": "^1.9.101",
     "cidr-tools": "^6.4.1",
     "commander": "9.4.1",
