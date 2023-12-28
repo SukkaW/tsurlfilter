@@ -170,12 +170,12 @@ export class SimpleRegex {
             return '';
         }
 
-        if (reText.indexOf('?') >= 0) {
-            // Do not mess with complex expressions which use lookahead
-            // And with those using ? special character
-            // https://github.com/AdguardTeam/AdguardBrowserExtension/issues/978
-            return '';
-        }
+        // if (reText.indexOf('?') >= 0) {
+        //     // Do not mess with complex expressions which use lookahead
+        //     // And with those using ? special character
+        //     // https://github.com/AdguardTeam/AdguardBrowserExtension/issues/978
+        //     return '';
+        // }
 
         const specialCharacter = '$$$';
 
