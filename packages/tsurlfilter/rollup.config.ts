@@ -44,6 +44,9 @@ const commonConfig = {
 };
 
 const commonExternal = [
+    '@adguard/css-tokenizer',
+    '@adguard/ecss-tree',
+    '@adguard/agtree',
     '@adguard/scriptlets',
     'is-ip',
     'punycode/',
