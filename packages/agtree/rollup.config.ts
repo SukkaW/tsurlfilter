@@ -70,7 +70,7 @@ const commonPlugins = [
 ];
 
 // Plugins for Node.js builds
-const nodePlugins = [
+const nodePlugins = (esm = false) => [
     ...commonPlugins,
     alias({
         // Add ".js" extension to all imports of the "semver" package, eg "semver/functions/..."
@@ -85,6 +85,19 @@ const nodePlugins = [
         ],
     }),
     externals(),
+    // Provide better browser compatibility with Babel
+    getBabelOutputPlugin({
+        presets: [
+            [
+                '@babel/preset-env',
+                {
+                    modules: esm ? false : 'auto',
+                },
+            ],
+        ],
+        allowAllFormats: true,
+        compact: false,
+    }),
 ];
 
 // Plugins for browser builds
@@ -145,7 +158,7 @@ const cjs = {
             banner,
         },
     ],
-    plugins: nodePlugins,
+    plugins: nodePlugins(),
 };
 
 // ECMAScript build configuration
@@ -159,7 +172,7 @@ const esm = {
             banner,
         },
     ],
-    plugins: nodePlugins,
+    plugins: nodePlugins(),
 };
 
 // Browser-friendly UMD build configuration
