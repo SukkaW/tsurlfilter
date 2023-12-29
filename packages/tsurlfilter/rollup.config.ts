@@ -99,7 +99,6 @@ const esmDeclarativeConverterConfig = {
  *
  * TODO: should be removed. AG-21466
  */
-
 const umdConfig = {
     input: 'src/index.ts',
     output: [
