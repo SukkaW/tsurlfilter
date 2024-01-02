@@ -30,11 +30,16 @@ export const validateSelectorList = (selectorList: string): CssValidationResult 
     };
 
     try {
+        let prevIsDoubleColon = false;
         let prevToken: TokenType | undefined;
         let prevNonWhitespaceToken: TokenType | undefined;
 
         tokenizeExtended(selectorList, (token, start, end) => {
-            if ((token === TokenType.Function || token === TokenType.Ident) && prevToken === TokenType.Colon) {
+            if (
+                (token === TokenType.Function || token === TokenType.Ident)
+                && prevToken === TokenType.Colon
+                && !prevIsDoubleColon
+            ) {
                 // whitespace is NOT allowed between the ':' and the pseudo-class name, like ': active('
                 const name = selectorList.slice(
                     start,
@@ -64,6 +69,10 @@ export const validateSelectorList = (selectorList: string): CssValidationResult 
             }
 
             // memorize tokens, we need them later
+            if (token === TokenType.Colon) {
+                prevIsDoubleColon = prevToken === TokenType.Colon;
+            }
+
             prevToken = token;
 
             if (token !== TokenType.Whitespace) {

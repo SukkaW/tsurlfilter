@@ -49,6 +49,10 @@ describe('Selector list validator', () => {
             ['.target:not(a)', false],
             ['.target:where(a)', false],
 
+            // do not confuse pseudo-elements with pseudo-classes
+            ['.target::after', false],
+            ['.target::yay', false],
+
             // Tricky case: seems like an Extended CSS selector, but it's not
             ['[attr=":contains(a)"]', false],
 
