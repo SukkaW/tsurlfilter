@@ -124,6 +124,10 @@ describe('Selector list validator', () => {
             // the Extended CSS selector is reached
             ['div:foo(a):bar, [-ext-foo="bar"]', false, "Unsupported pseudo-class: ':foo'"],
             ['[-ext-foo="bar"], div:foo(a):bar', true, "Unsupported Extended CSS attribute selector: '-ext-foo'"],
+
+            ['foo /* bar */', false, 'Comments are not allowed in selector lists'],
+            ['foo /* bar */ baz', false, 'Comments are not allowed in selector lists'],
+            ['body { background: red!important; }', false, 'Curly brackets are not allowed in selector lists'],
         ])("should validate '%s' correctly", (selectorList, isExtendedCss, errorMessage) => {
             expect(validateSelectorList(selectorList)).toEqual({
                 isValid: false,

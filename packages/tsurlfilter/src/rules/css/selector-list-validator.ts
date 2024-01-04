@@ -66,6 +66,10 @@ export const validateSelectorList = (selectorList: string): CssValidationResult 
                         throw new Error(`Unsupported Extended CSS attribute selector: '${attributeName}'`);
                     }
                 }
+            } else if (token === TokenType.OpenCurlyBracket || token === TokenType.CloseCurlyBracket) {
+                throw new Error('Curly brackets are not allowed in selector lists');
+            } else if (token === TokenType.Comment) {
+                throw new Error('Comments are not allowed in selector lists');
             }
 
             // memorize tokens, we need them later

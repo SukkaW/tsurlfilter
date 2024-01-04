@@ -21,10 +21,14 @@ import { Request } from '../request';
 import { Pattern } from './pattern';
 import { ScriptletParser } from '../engine/cosmetic-engine/scriptlet-parser';
 import { config } from '../configuration';
-import { EMPTY_STRING, WILDCARD } from '../common/constants';
+import { EMPTY_STRING, SPACE, WILDCARD } from '../common/constants';
 import { validateSelectorList } from './css/selector-list-validator';
 import { validateDeclarationList } from './css/declaration-list-validator';
 import { getErrorMessage } from '../common/error';
+import { hasUnquotedSubstring } from '../utils/string-utils';
+
+const MULTILINE_COMMENT_MARKER = '/*';
+const SINGLELINE_COMMENT_MARKER = '//';
 
 /**
  * Init script params
@@ -500,6 +504,8 @@ export class CosmeticRule implements rule.IRule {
                 }
             }
 
+            const { bodyText } = CosmeticRule.getRuleRaws(ruleNode);
+
             // Type-specific validation
             switch (ruleType) {
                 case CosmeticRuleType.ElementHidingRule:
@@ -553,15 +559,23 @@ export class CosmeticRule implements rule.IRule {
                     break;
 
                 case CosmeticRuleType.HtmlFilteringRule:
-                    // FIXME: Should we validate the HTML filtering rule now?
+                    // TODO: Validate HTML filtering rules
                     break;
 
                 case CosmeticRuleType.JsInjectionRule:
-                    // Just ignore it for now, but we need this case to avoid throwing an error
+                    // TODO: Validate JS injection rules
                     break;
 
                 default:
                     break;
+            }
+
+            if (
+                (!result.isExtendedCss && hasUnquotedSubstring(bodyText, MULTILINE_COMMENT_MARKER))
+                || hasUnquotedSubstring(bodyText, SPACE + MULTILINE_COMMENT_MARKER)
+                || hasUnquotedSubstring(bodyText, SPACE + SINGLELINE_COMMENT_MARKER)
+            ) {
+                throw new SyntaxError('Cosmetic rule should not contain comments');
             }
         } catch (error: unknown) {
             result.isValid = false;

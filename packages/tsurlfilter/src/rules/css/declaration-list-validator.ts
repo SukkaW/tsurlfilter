@@ -61,6 +61,8 @@ export const validateDeclarationList = (declarationList: string): CssValidationR
                         }
                     }
                     break;
+                case TokenType.Comment:
+                    throw new Error('Comments are not allowed in declaration lists');
                 default:
                     break;
             }

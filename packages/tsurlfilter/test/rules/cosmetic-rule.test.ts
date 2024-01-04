@@ -55,10 +55,9 @@ describe('Element hiding rules constructor', () => {
             new CosmeticRule('example.org## ', 0);
         }).toThrow(new SyntaxError('Empty rule body'));
 
-        // FIXME: Validate this
-        // expect(() => {
-        //     new CosmeticRule('example.org##body { background: red!important; }', 0);
-        // }).toThrow(new SyntaxError('Invalid cosmetic rule, wrong brackets'));
+        expect(() => {
+            new CosmeticRule('example.org##body { background: red!important; }', 0);
+        }).toThrow(new SyntaxError('Curly brackets are not allowed in selector lists'));
     });
 
     it('checks elemhide rules validation', () => {
@@ -83,19 +82,18 @@ describe('Element hiding rules constructor', () => {
         checkRuleIsValid('example.org##:contains(@color-profile)');
         checkRuleIsValid(String.raw`[$domain=/example\.org/|~/good/]##.banner`);
 
-        // FIXME: Validate these
-        // checkRuleIsInvalid('example.org##img[title|={]');
-        // checkRuleIsInvalid('example.org##body { background: red!important; }');
-        // checkRuleIsInvalid('example.org#@#body { background: red!important; }');
-        // checkRuleIsInvalid('example.org##a[title="\\""]{background:url()}');
-        // checkRuleIsInvalid('example.org##body\\{\\}, body { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; }');
-        // checkRuleIsInvalid('example.org##body /*({})*/ { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; }');
-        // checkRuleIsInvalid('example.org##body /*({*/ { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; }');
-        // checkRuleIsInvalid('example.org##\\\\/*[*/, body { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; } ,\\/*]');
-        // checkRuleIsInvalid('example.org##body:not(blabla/*[*/) { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; } /*]*\\/');
-        // checkRuleIsInvalid('example.org##.generic1 /*comment*/');
-        // checkRuleIsInvalid('example.org##a //');
-        // checkRuleIsInvalid('example.org##input,input/*');
+        checkRuleIsInvalid('example.org##img[title|={]');
+        checkRuleIsInvalid('example.org##body { background: red!important; }');
+        checkRuleIsInvalid('example.org#@#body { background: red!important; }');
+        checkRuleIsInvalid('example.org##a[title="\\""]{background:url()}');
+        checkRuleIsInvalid('example.org##body\\{\\}, body { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; }');
+        checkRuleIsInvalid('example.org##body /*({})*/ { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; }');
+        checkRuleIsInvalid('example.org##body /*({*/ { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; }');
+        checkRuleIsInvalid('example.org##\\\\/*[*/, body { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; } ,\\/*]');
+        checkRuleIsInvalid('example.org##body:not(blabla/*[*/) { background: lightblue url("https://www.w3schools.com/cssref/img_tree.gif") no-repeat fixed center!important; } /*]*\\/');
+        checkRuleIsInvalid('example.org##.generic1 /*comment*/');
+        checkRuleIsInvalid('example.org##a //');
+        checkRuleIsInvalid('example.org##input,input/*');
         checkRuleIsInvalid('example.org#$#@import \'https://evil.org/nefarious.css\'; {}');
         checkRuleIsInvalid('example.org#$#@font-face \'https://evil.org/nefarious.ttf\'; {}');
         checkRuleIsInvalid('example.org#$#@color-profile \'https://evil.org/nefarious.icc\'; {}');
@@ -633,14 +631,14 @@ describe('CosmeticRule.CSS', () => {
         const backslashInCssRulesSelector2 = new CosmeticRule('example.org#$?##p:has-text(/[\\w\\W]{337}/):has-text(/Dołącz \\./) { font-size: 0 !important; }', 0);
         expect(backslashInCssRulesSelector2).toBeDefined();
 
-        // FIXME
-        // const checkRuleIsInvalid = (ruleText: string): void => {
-        //     expect(() => {
-        //         new CosmeticRule(ruleText, 0);
-        //     }).toThrow(new SyntaxError("CSS injection rule with '\\' was omitted"));
-        // };
+        const checkRuleIsInvalid = (ruleText: string): void => {
+            expect(() => {
+                new CosmeticRule(ruleText, 0);
+            }).toThrow(new SyntaxError("Using 'url()' is not allowed"));
+        };
 
-        // checkRuleIsInvalid('example.com#$#body { background: \\75 rl(http://example.org/empty.gif) }');
+        checkRuleIsInvalid('example.com#$#body { background: \\75 rl(http://example.org/empty.gif) }');
+        // FIXME
         // checkRuleIsInvalid('example.org#$#body { background:\\x75rl("http://example.org/image.png"); }');
         // checkRuleIsInvalid('example.org#$#body { background:u\\114\\0154("http://example.org/image.png"); }');
     });

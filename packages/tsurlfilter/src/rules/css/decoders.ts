@@ -99,10 +99,8 @@ export const decodeCSSIdentifier = (identifier: string): string => {
 
                 // according to the spec, if the next code point after the escape sequence is whitespace,
                 // it should be consumed too
-                const nextCodePoint = identifier.charCodeAt(i + 1);
-                if (isWhitespace(nextCodePoint)) {
-                    // consume 2 code points for CRLF sequence and 1 code point for any other whitespace character
-                    i += nextCodePoint === CARRIAGE_RETURN && identifier.charCodeAt(i + 2) === LINE_FEED ? 2 : 1;
+                while (isWhitespace(identifier.charCodeAt(i + 1))) {
+                    i += 1;
                 }
             }
 

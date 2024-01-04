@@ -168,6 +168,18 @@ describe('CSS decoder', () => {
                 actual: '\\69\\64\\65\\6e\\74\r\n\\ ident',
                 expected: 'ident ident',
             },
+            {
+                actual: '\\75 rl(foo)',
+                expected: 'url(foo)',
+            },
+            {
+                actual: '\\75  rl(foo)',
+                expected: 'url(foo)',
+            },
+            {
+                actual: '\\x75rl(foo)',
+                expected: 'x75rl(foo)',
+            },
         ])("should decode '$actual' to '$expected'", ({ actual, expected }) => {
             expect(decodeCSSIdentifier(actual)).toEqual(expected);
         });
