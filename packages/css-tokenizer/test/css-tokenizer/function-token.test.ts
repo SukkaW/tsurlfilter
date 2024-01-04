@@ -17,7 +17,7 @@ describe('function-token', () => {
         'func_1_1(',
         String.raw`\\66unc(`, // Escaped characters
         String.raw`\\66 unc(`, // Extra whitespace
-        String.raw`\\0066   unc(`, // Extra leading zeros and extra whitespace
+        String.raw`\\0066 unc(`, // Extra leading zeros and extra whitespace
     ])(`should tokenize '%s' as ${getFormattedTokenName(TokenType.Function)}`, (actual) => {
         const tokens: TokenData[] = [];
         tokenize(actual, (...args) => tokens.push(args));

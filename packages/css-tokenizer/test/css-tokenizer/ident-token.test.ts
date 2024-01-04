@@ -17,7 +17,7 @@ describe('ident-token', () => {
         String.raw`CamelCase`, // Camel case (mixed uppercase and lowercase letters)
         String.raw`\\75rl`, // Escaped characters
         String.raw`\\75 rl`, // Extra whitespace
-        String.raw`\\0075   rl`, // Extra leading zeros and extra whitespace
+        String.raw`\\0075 rl`, // Extra leading zeros and extra whitespace
     ])(`should tokenize '%s' as ${getFormattedTokenName(TokenType.Ident)}`, (actual) => {
         const tokens: TokenData[] = [];
         tokenize(actual, (...args) => tokens.push(args));

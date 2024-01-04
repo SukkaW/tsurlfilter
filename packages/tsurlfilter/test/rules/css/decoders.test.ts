@@ -173,7 +173,11 @@ describe('CSS decoder', () => {
                 expected: 'url(foo)',
             },
             {
-                actual: '\\75  rl(foo)',
+                actual: '\\75 \\72 \\6C(foo)',
+                expected: 'url(foo)',
+            },
+            {
+                actual: '\\75 \\72\\6C(foo)',
                 expected: 'url(foo)',
             },
             {
