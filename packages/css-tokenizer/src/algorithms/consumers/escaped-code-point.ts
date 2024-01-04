@@ -32,6 +32,9 @@ export const consumeEscapedCodePoint: TokenizerContextFunction = (context: Token
             consumedHexDigits += 1;
         }
 
+        // If the next input code point is whitespace, consume it as well.
+        context.consumeWhitespace();
+
         // If this number is zero, or is for a surrogate, or is greater than the maximum allowed code point,
         // return U+FFFD REPLACEMENT CHARACTER (�).
         // Otherwise, return the code point with that value.
