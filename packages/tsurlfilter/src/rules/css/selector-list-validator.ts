@@ -2,7 +2,7 @@
  * @file Selector list validator.
  */
 
-import { tokenizeExtended, TokenType } from '@adguard/css-tokenizer';
+import { decodeIdent, tokenizeExtended, TokenType } from '@adguard/css-tokenizer';
 import {
     EXT_CSS_ATTRIBUTE_SELECTOR_PREFIX,
     SUPPORTED_CSS_PSEUDO_CLASSES,
@@ -11,7 +11,6 @@ import {
 } from './known-elements';
 import { getErrorMessage } from '../../common/error';
 import { CssValidationResult } from './css-validation-result';
-import { decodeCSSIdentifier } from './decoders';
 
 /**
  * Does a basic validation of a selector list.
@@ -48,7 +47,7 @@ export const validateSelectorList = (selectorList: string): CssValidationResult 
                 );
 
                 // function name may contain escaped characters, like '\75' instead of 'u', so we need to decode it
-                const decodedName = decodeCSSIdentifier(name);
+                const decodedName = decodeIdent(name);
 
                 if (SUPPORTED_EXT_CSS_PSEUDO_CLASSES.has(decodedName)) {
                     result.isExtendedCss = true;

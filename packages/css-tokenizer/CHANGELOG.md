@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog][keepachangelog], and this project adhe
 
 ## Unreleased
 
+### Added
+
+- Identifier decoder utility.
+
 ### Fixed
 
 - Consuming whitespace after escape sequences.
