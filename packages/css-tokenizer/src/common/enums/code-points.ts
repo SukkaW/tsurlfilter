@@ -309,10 +309,20 @@ export const enum CodePoint {
     /**
      * U+D800 <surrogate> Start of a surrogate pair
      */
-    HighSurrogateStart = 0xD800,
+    LeadingSurrogateStart = 0xD800,
 
     /**
      * U+DBFF <surrogate> End of a surrogate pair
      */
-    HighSurrogateEnd = 0xDFFF,
+    LeadingSurrogateEnd = 0xDBFF,
+
+    /**
+     * U+DC00 <surrogate> Start of a surrogate pair
+     */
+    TrailingSurrogateStart = 0xDC00,
+
+    /**
+     * U+DFFF <surrogate> End of a surrogate pair
+     */
+    TrailingSurrogateEnd = 0xDFFF,
 }
