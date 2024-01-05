@@ -45,6 +45,7 @@ export const validateDeclarationList = (declarationList: string): CssValidationR
             switch (token) {
                 // Special case: according to CSS specs, sometimes url() is handled as a separate token type
                 case TokenType.Url:
+                case TokenType.BadUrl:
                     throw new Error("Using 'url()' is not allowed");
                 case TokenType.Function:
                     // we need -1 to exclude closing bracket, because function tokens look like 'func('
