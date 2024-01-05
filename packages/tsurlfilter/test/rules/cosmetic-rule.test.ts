@@ -439,10 +439,9 @@ describe('CosmeticRule match', () => {
 
 describe('CosmeticRule.CSS', () => {
     it('correctly detects Cosmetic.CSS allowlist and blacklist rules', () => {
-        // FIXME: AGTree does not handle NL at the end of the rule
-        // const rule = new CosmeticRule('example.org#$#.textad { visibility: hidden; }\n', 0);
-        // expect(rule.isAllowlist()).toBeFalsy();
-        // expect(rule.getType()).toBe(CosmeticRuleType.CssInjectionRule);
+        const rule = new CosmeticRule('example.org#$#.textad { visibility: hidden; }\n', 0);
+        expect(rule.isAllowlist()).toBeFalsy();
+        expect(rule.getType()).toBe(CosmeticRuleType.CssInjectionRule);
 
         const allowlistRule = new CosmeticRule('example.org#@$#.textad { visibility: hidden; }', 0);
         expect(allowlistRule.isAllowlist()).toBeTruthy();
