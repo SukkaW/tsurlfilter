@@ -540,7 +540,11 @@ export class CosmeticRule implements rule.IRule {
                             throw new Error(declarationListValidationResult.errorMessage);
                         }
 
-                        result.isExtendedCss = declarationListValidationResult.isExtendedCss;
+                        // If the selector list is not ExtendedCss, then we should set this flag based on the
+                        // declaration list validation result
+                        if (!result.isExtendedCss) {
+                            result.isExtendedCss = declarationListValidationResult.isExtendedCss;
+                        }
                     }
                     break;
 
@@ -616,7 +620,7 @@ export class CosmeticRule implements rule.IRule {
      */
     constructor(ruleText: string, filterListId: number) {
         // Parse the rule and get the raws
-        const { ruleNode, ruleRaws } = CosmeticRule.getRuleNodeAndRaws(ruleText);
+        const { ruleNode, ruleRaws } = CosmeticRule.getRuleNodeAndRaws(ruleText.trim());
 
         this.filterListId = filterListId;
 
