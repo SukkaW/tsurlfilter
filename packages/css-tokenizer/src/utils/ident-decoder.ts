@@ -32,12 +32,12 @@ export const decodeIdent = (ident: string): string => {
             if (isHexDigit(ident.charCodeAt(i + 1))) {
                 // Consume as many hex digits as possible, but no more than 5.
                 // Note that this means 1-6 hex digits have been consumed in total.
-                let hex = 0;
+                let n = 0;
                 let j = 0; // consumed hex digits
 
                 while (j < MAX_HEX_DIGITS && isHexDigit(ident.charCodeAt(i + j + 1))) {
                     // Interpret the hex digits as a hexadecimal number.
-                    hex = hex * 16 + parseInt(ident[i + j + 1], 16);
+                    n = n * 16 + parseInt(ident[i + j + 1], 16);
                     j += 1;
                 }
 
@@ -46,9 +46,9 @@ export const decodeIdent = (ident: string): string => {
                     // point, return U+FFFD REPLACEMENT CHARACTER (�).
                     // Otherwise, return the code point with that value.
                     String.fromCodePoint(
-                        hex === 0 || isSurrogate(hex) || isGreaterThanMaxAllowedCodePoint(hex)
+                        n === 0 || isSurrogate(n) || isGreaterThanMaxAllowedCodePoint(n)
                             ? CodePoint.ReplacementCharacter
-                            : hex,
+                            : n,
                     ),
                 );
 
@@ -57,12 +57,13 @@ export const decodeIdent = (ident: string): string => {
                 // If the next input code point is whitespace, consume it as well.
                 const nextCodePoint = ident.charCodeAt(i + 1);
                 if (isWhitespace(nextCodePoint)) {
-                    // Special case: consume 2 code points for CRLF sequence,
-                    // but 1 code point for any other whitespace character
-                    i += nextCodePoint === CodePoint.CarriageReturn
-                        && ident.charCodeAt(i + 2) === CodePoint.LineFeed
-                        ? 2
-                        : 1;
+                    // Consume whitespace character
+                    i += 1;
+
+                    // Special case: consume +1 character if the sequence is CR LF
+                    if (nextCodePoint === CodePoint.CarriageReturn && ident.charCodeAt(i + 1) === CodePoint.LineFeed) {
+                        i += 1;
+                    }
                 }
             }
 
