@@ -1,6 +1,5 @@
 import scriptlets, { IConfiguration } from '@adguard/scriptlets';
 import {
-    ADG_SCRIPTLET_MASK,
     AnyCosmeticRule,
     COMMA_DOMAIN_LIST_SEPARATOR,
     CosmeticRuleParser,
@@ -19,7 +18,6 @@ import { getRelativeUrl } from '../utils/url';
 import { SimpleRegex } from './simple-regex';
 import { Request } from '../request';
 import { Pattern } from './pattern';
-import { ScriptletParser } from '../engine/cosmetic-engine/scriptlet-parser';
 import { config } from '../configuration';
 import { EMPTY_STRING, SPACE, WILDCARD } from '../common/constants';
 import { validateSelectorList } from './css/selector-list-validator';
@@ -746,17 +744,26 @@ export class CosmeticRule implements rule.IRule {
             return;
         }
 
-        const scriptletContent = ruleContent.substring(ADG_SCRIPTLET_MASK.length);
-        const scriptletParams = ScriptletParser.parseRule(scriptletContent);
+        // Check params before preparing just in case
+        // Please note that the AST returned by the parser and converter cannot be invalid this way
+        /* istanbul ignore if  */
+        if (!this.scriptletParams) {
+            throw new Error('Scriptlet params are not set');
+        }
+
+        /* istanbul ignore if  */
+        if (this.scriptletParams.length < 1) {
+            throw new Error('Scriptlet params are empty');
+        }
 
         const params: scriptlets.IConfiguration = {
-            args: scriptletParams.args,
-            engine: config.engine || '',
-            name: scriptletParams.name,
+            args: this.scriptletParams.slice(1),
+            engine: config.engine || EMPTY_STRING,
+            name: this.scriptletParams[0],
             ruleText: this.getText(),
             verbose: debug,
             domainName: frameUrl,
-            version: config.version || '',
+            version: config.version || EMPTY_STRING,
         };
 
         this.scriptData = {
