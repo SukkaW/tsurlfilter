@@ -4,6 +4,7 @@ import { DomainList, DomainListParser } from '@adguard/agtree';
 import { logger } from '../utils/logger';
 import { SimpleRegex } from '../rules/simple-regex';
 import { isString, unescapeChar } from '../utils/string-utils';
+import { WILDCARD } from '../common/constants';
 
 /**
  * Comma separator
@@ -67,6 +68,10 @@ export class DomainModifier {
         for (const { exception, value: domain } of domains) {
             const domainLowerCased = domain.toLowerCase();
 
+            if (!SimpleRegex.isRegexPattern(domain) && domain.includes(WILDCARD) && !domain.endsWith(WILDCARD)) {
+                throw new SyntaxError(`Wildcards are only supported for top-level domains: "${domain}"`);
+            }
+
             if (exception) {
                 result.restrictedDomains.push(domainLowerCased);
             } else {
@@ -89,13 +94,12 @@ export class DomainModifier {
         let processed: ProcessedDomainList;
 
         if (isString(domains)) {
-            const domainsTrimmed = domains.trim();
+            const node = DomainListParser.parse(domains.trim(), { separator, isLocIncluded: false });
 
-            if (!domainsTrimmed) {
-                throw new SyntaxError("Modifier '$domain' cannot be empty");
+            if (node.children.length === 0) {
+                throw new SyntaxError('At least one domain must be specified');
             }
 
-            const node = DomainListParser.parse(domainsTrimmed, { separator, isLocIncluded: false });
             processed = DomainModifier.processDomainList(node);
         } else {
             // domain list node stores the separator
@@ -107,7 +111,6 @@ export class DomainModifier {
         }
 
         // Unescape separator character in domains
-        // FIXME: Move this to AGTree?
         processed.permittedDomains = processed.permittedDomains.map((domain) => unescapeChar(domain, separator));
         processed.restrictedDomains = processed.restrictedDomains.map((domain) => unescapeChar(domain, separator));
 
