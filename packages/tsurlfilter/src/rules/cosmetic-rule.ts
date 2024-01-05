@@ -744,16 +744,8 @@ export class CosmeticRule implements rule.IRule {
             return;
         }
 
-        // Check params before preparing just in case
-        // Please note that the AST returned by the parser and converter cannot be invalid this way
-        /* istanbul ignore if  */
-        if (!this.scriptletParams) {
-            throw new Error('Scriptlet params are not set');
-        }
-
-        /* istanbul ignore if  */
-        if (this.scriptletParams.length < 1) {
-            throw new Error('Scriptlet params are empty');
+        if (!this.scriptletParams || this.scriptletParams.length < 1) {
+            throw new Error('At least the scriptlet name should be specified');
         }
 
         const params: scriptlets.IConfiguration = {
